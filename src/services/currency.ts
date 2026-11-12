@@ -35,6 +35,7 @@ export const UNIT_TO_KG: Record<UnitCode, number> = {
   lb: 0.45359237,
 };
 
+const rateMetadata = new Map<string, { date: number; origin: string }>();
 let liveRateCache: Map<string, number> | null = null;
 let liveRateOrigin = "";
 let liveRateTimestamp = 0;
@@ -48,9 +49,19 @@ export function getRate(
   if (liveRateCache) {
     const key = `${base}-${quote}`;
     const cached = liveRateCache.get(key);
-    if (cached !== undefined) return cached;
+    if (
+      cached !== undefined &&
+      Date.now() - (rateMetadata.get(key)?.date ?? 0) <= 4 * 86400000
+    )
+      return cached;
     const reverse = liveRateCache.get(`${quote}-${base}`);
-    if (reverse !== undefined && reverse !== 0) return 1 / reverse;
+    if (
+      reverse !== undefined &&
+      reverse !== 0 &&
+      Date.now() - (rateMetadata.get(`${quote}-${base}`)?.date ?? 0) <=
+        4 * 86400000
+    )
+      return 1 / reverse;
   }
   return null;
 }
@@ -69,6 +80,7 @@ export function getRateTimestamp(): number {
 
 export async function loadLiveRates(): Promise<void> {
   liveRateCache = null;
+  rateMetadata.clear();
   liveRateStatus = "unavailable";
   if (!supabase) return;
   try {
@@ -105,6 +117,10 @@ export async function loadLiveRates(): Promise<void> {
         continue;
       if (cache.has(`${base}-${quote}`)) continue;
       cache.set(`${base}-${quote}`, rate);
+      rateMetadata.set(`${base}-${quote}`, {
+        date: rowDate,
+        origin: String(row.origin),
+      });
       if (rowDate > latestDate) {
         latestDate = rowDate;
         origin = row.origin as string;
@@ -158,4 +174,12 @@ export function getExchangeRates(): ExchangeRate[] {
     });
   }
   return rates;
+}
+
+export function getPairMetadata(base: CurrencyCode, quote: CurrencyCode) {
+  return (
+    rateMetadata.get(`${base}-${quote}`) ??
+    rateMetadata.get(`${quote}-${base}`) ??
+    null
+  );
 }

@@ -5,9 +5,8 @@ import {
   CURRENCY_LABELS,
   UNIT_LABELS,
   convertPrice,
-  getRateStatus,
-  getRateOrigin,
-  getRateTimestamp,
+  getRate,
+  getPairMetadata,
 } from "@/services/currency";
 import { formatDateTime, formatIndex } from "@/lib/format";
 import type { CurrencyCode, UnitCode } from "@/types/market";
@@ -41,9 +40,12 @@ export default function PriceConverter({
           fromUnit,
           targetUnit,
         );
-  const rateStatus = getRateStatus();
-  const rateOrigin = getRateOrigin();
-  const rateTs = getRateTimestamp();
+  const sameCurrency = currency === targetCurrency;
+  const rateStatus =
+    getRate(currency, targetCurrency) === null ? "unavailable" : "live";
+  const metadata = getPairMetadata(currency, targetCurrency);
+  const rateOrigin = metadata?.origin ?? "Курс недоступен";
+  const rateTs = metadata?.date ?? 0;
 
   return (
     <div className="rounded-xl border border-ink-800 bg-ink-950/60 p-4">
@@ -51,9 +53,13 @@ export default function PriceConverter({
         <h3 className="text-sm font-medium text-ink-200">
           Пересчёт валюты и единиц
         </h3>
-        <DataStatusBadge
-          status={rateStatus === "live" ? "live" : "unavailable"}
-        />
+        {sameCurrency ? (
+          <span className="text-xs text-ink-400">Курс не требуется</span>
+        ) : (
+          <DataStatusBadge
+            status={rateStatus === "live" ? "live" : "unavailable"}
+          />
+        )}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="space-y-1.5">
@@ -92,9 +98,11 @@ export default function PriceConverter({
         {UNIT_LABELS[targetUnit]}
       </p>
       <p className="mt-1 text-xs leading-relaxed text-ink-400">
-        {rateStatus === "live"
-          ? `Курсы валют: ${rateOrigin}${rateTs > 0 ? `, обновлено ${formatDateTime(rateTs)}` : ""}.`
-          : "Подтверждённый курс недоступен. Пересчёт между валютами не выполняется."}
+        {sameCurrency
+          ? "Пересчёт массы в одной валюте не требует валютного курса."
+          : rateStatus === "live"
+            ? `Курсы валют: ${rateOrigin}${rateTs > 0 ? `, обновлено ${formatDateTime(rateTs)}` : ""}.`
+            : "Подтверждённый курс недоступен. Пересчёт между валютами не выполняется."}
       </p>
     </div>
   );

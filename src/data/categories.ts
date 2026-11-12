@@ -1,6 +1,7 @@
+import { METALS } from "./metals";
 import type { MetalCategory } from "@/types/market";
 
-export const CATEGORIES: MetalCategory[] = [
+const ALL_CATEGORIES: MetalCategory[] = [
   {
     id: "solders-babbitts",
     name: "Припои и баббиты",
@@ -62,6 +63,9 @@ export const CATEGORIES: MetalCategory[] = [
   },
 ];
 
+export const CATEGORIES = ALL_CATEGORIES.filter((c) =>
+  METALS.some((m) => m.categoryId === c.id),
+);
 export const CATEGORY_MAP: Record<string, MetalCategory> = Object.fromEntries(
   CATEGORIES.map((cat) => [cat.id, cat]),
 );

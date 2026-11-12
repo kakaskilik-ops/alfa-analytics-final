@@ -9,3 +9,11 @@ entrypoint = "./functions/ai-analyze/index.ts"
 [functions.ingest-quotes]
 verify_jwt = false
 entrypoint = "./functions/ingest-quotes/index.ts"
+
+[functions.collect-news]
+verify_jwt = false
+entrypoint = "./functions/collect-news/index.ts"
+
+[functions.ingest-regional-history]
+verify_jwt = false
+entrypoint = "./functions/ingest-regional-history/index.ts"

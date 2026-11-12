@@ -77,7 +77,7 @@ export default function MetalCard({
         <div>
           <div className="flex items-center gap-2">
             <p className="text-2xl font-semibold tabular-nums text-ink-100">
-              {formatPrice(quote.price)}
+              {formatPrice(quote.price, quote.metal.currency)}
             </p>
             <DataStatusBadge status={quote.dataStatus} />
           </div>

@@ -15,7 +15,7 @@ export function headers(req: Request): Record<string, string> {
 export function json(req: Request, body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: headers(req) });
 }
-export function guard(req: Request): Response | null {
+export function guard(req: Request, maxBytes = 8192): Response | null {
   if (req.method === "OPTIONS")
     return new Response(null, { status: 204, headers: headers(req) });
   if (req.method !== "POST")
@@ -23,7 +23,7 @@ export function guard(req: Request): Response | null {
   const origin = req.headers.get("origin");
   if (origin && origin !== Deno.env.get("ALLOWED_ORIGIN"))
     return json(req, { error: "Доступ запрещён" }, 403);
-  if (Number(req.headers.get("content-length") ?? 0) > 8192)
+  if (Number(req.headers.get("content-length") ?? 0) > maxBytes)
     return json(req, { error: "Слишком большой запрос" }, 413);
   return null;
 }

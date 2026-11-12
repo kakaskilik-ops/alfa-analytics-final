@@ -22,15 +22,18 @@ const AXIS_OPTIONS: Record<PeriodKey, Intl.DateTimeFormatOptions> = {
   "5Y": { month: "short", year: "2-digit" },
 };
 
-export function formatPrice(value: number | null): string {
+export function formatPrice(value: number | null, currency = "USD"): string {
   if (value === null || !Number.isFinite(value)) return "—";
-  return `$${numberFormat.format(value)}`;
+  return `${numberFormat.format(value)} ${currency}`;
 }
 
-export function formatPriceChange(value: number | null): string {
+export function formatPriceChange(
+  value: number | null,
+  currency = "USD",
+): string {
   if (value === null || !Number.isFinite(value)) return "—";
   const sign = value > 0 ? "+" : value < 0 ? "-" : "";
-  return `${sign}$${numberFormat.format(Math.abs(value))}`;
+  return `${sign}${numberFormat.format(Math.abs(value))} ${currency}`;
 }
 
 export function formatPercent(value: number | null): string {

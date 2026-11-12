@@ -3,13 +3,14 @@ import Logo from "@/components/brand/Logo";
 
 import { cn } from "@/lib/cn";
 
-export type Section = "market" | "metals" | "sources" | "ai" | "analytics";
+export type Section =
+  "market" | "metals" | "sources" | "ai" | "analytics" | "news";
 
 const NAV_ITEMS: { id: Section; label: string; icon: LucideIcon }[] = [
-  { id: "market", label: "Рынок", icon: TrendingUp },
-  { id: "analytics", label: "Аналитика", icon: TrendingUp },
+  { id: "market", label: "Главная", icon: TrendingUp },
   { id: "metals", label: "Металлы", icon: Gem },
-  { id: "sources", label: "Источники", icon: Activity },
+  { id: "analytics", label: "Аналитика", icon: TrendingUp },
+  { id: "news", label: "Новости", icon: Activity },
   { id: "ai", label: "ИИ-аналитик", icon: Bot },
 ];
 

@@ -1,3 +1,4 @@
+import { isRegion } from "../../supabase/functions/_shared/universe";
 import { METALS, METAL_MAP } from "@/data/metals";
 import { buildQuote } from "@/services/market";
 import type { Metal, MetalQuote, PeriodKey, DataStatus } from "@/types/market";
@@ -22,9 +23,16 @@ export interface LiveQuoteData {
   timestamp: number;
   dataStatus: DataStatus;
   history: { date: number; price: number }[];
+  region?: string;
+  specificationKey?: string;
+  country?: string | null;
 }
 export interface LiveMarketData {
   quotes: Map<string, LiveQuoteData>;
+  regionalQuotes?: LiveQuoteData[];
+  selectedRegion?: string;
+  displayCurrency?: import("@/types/market").CurrencyCode;
+  displayUnit?: import("@/types/market").UnitCode;
   loaded: boolean;
   updatedAt: number;
   error: string | null;
@@ -39,19 +47,20 @@ export async function loadLiveMarketData(
     await loadLiveRates();
     const records = await fetchAllLiveQuotations();
     const valid = records.filter(
-      (q) => !quoteIssues(q).length && q.currency === "USD" && q.unit === "kg",
+      (q) =>
+        !quoteIssues(q).length &&
+        q.currency === "USD" &&
+        q.unit === "kg" &&
+        isRegion(q.region) &&
+        (q.region !== "Азия" || Boolean(q.country)),
     );
     const selected = new Map<string, (typeof valid)[number]>();
-    // Only display a headline when there is a single market specification for the material.
     for (const q of valid) {
       if (!METAL_MAP[q.metalId]) continue;
-      if (
-        new Set(valid.filter((r) => r.metalId === q.metalId).map(comparisonKey))
-          .size !== 1
-      )
-        continue;
-      if (!selected.has(q.metalId)) selected.set(q.metalId, q);
+      const key = comparisonKey(q);
+      if (!selected.has(key)) selected.set(key, q);
     }
+    const regionalQuotes: LiveQuoteData[] = [];
     const quotes = new Map<string, LiveQuoteData>();
     await Promise.all(
       [...selected.values()].map(async (q) => {
@@ -71,14 +80,17 @@ export async function loadLiveMarketData(
         } catch {
           /* A quote may be valid while history is unavailable. */
         }
-        quotes.set(q.metalId, {
+        regionalQuotes.push({
+          region: q.region,
+          specificationKey: comparisonKey(q),
+          country: q.country,
           metalId: q.metalId,
           livePrice: q.price,
           originalCurrency: q.currency,
           originalUnit: q.unit,
           sourceName: q.sourceName,
           sourceUrl: q.sourceUrl,
-          marketLabel: `${q.region} · ${MARKET_TYPE_LABELS[q.marketType]} · ${q.grade} · ${q.productForm}`,
+          marketLabel: `${q.region} · ${MARKET_TYPE_LABELS[q.marketType]} · ${q.grade} · ${q.productForm} · ${q.purity ?? q.elementContent}% · ${q.deliveryTerms}`,
           exchangeName: q.exchangeName,
           timestamp: q.timestamp,
           dataStatus: q.dataStatus,
@@ -87,6 +99,7 @@ export async function loadLiveMarketData(
       }),
     );
     cachedData = {
+      regionalQuotes,
       quotes,
       loaded: true,
       updatedAt: Math.max(0, ...[...quotes.values()].map((q) => q.timestamp)),
@@ -159,10 +172,66 @@ export function buildHybridQuotes(
   data: LiveMarketData | null,
 ): MetalQuote[] {
   return metals.map((m) =>
-    buildHybridQuote(m, period, at, data?.quotes.get(m.id) ?? null),
+    displayQuote(
+      buildHybridQuote(m, period, at, data?.quotes.get(m.id) ?? null),
+      data,
+    ),
   );
 }
 export function getLiveMetalIds(data: LiveMarketData | null): Set<string> {
   return new Set(data?.quotes.keys());
 }
 export { METALS };
+
+import { convertPrice } from "./currency";
+export function displayQuote(
+  q: MetalQuote,
+  data: LiveMarketData | null,
+): MetalQuote {
+  const currency = data?.displayCurrency ?? "USD",
+    unit = data?.displayUnit ?? "kg";
+  const conv = (v: number | null) =>
+    v === null ? null : convertPrice(v, "USD", currency, "kg", unit);
+  const factor = convertPrice(1, "USD", currency, "kg", unit);
+  return {
+    ...q,
+    metal: { ...q.metal, currency, unit },
+    price: conv(q.price),
+    change: q.change === null || factor === null ? null : q.change * factor,
+    changePct: factor === null ? null : q.changePct,
+    high: conv(q.high),
+    low: conv(q.low),
+    average: conv(q.average),
+    series:
+      factor === null
+        ? []
+        : q.series.map((p) => ({ ...p, price: p.price * factor })),
+    dataStatus: factor === null ? "unavailable" : q.dataStatus,
+  };
+}
+export function regionalView(
+  data: LiveMarketData | null,
+  region: string,
+  choices: Record<string, string>,
+  currency: import("@/types/market").CurrencyCode,
+  unit: import("@/types/market").UnitCode,
+): LiveMarketData | null {
+  if (!data) return null;
+  const quotes = new Map<string, LiveQuoteData>();
+  for (const m of METALS) {
+    const options = (data.regionalQuotes ?? []).filter(
+      (q) => q.metalId === m.id && q.region === region,
+    );
+    const choice = options.find((q) => q.specificationKey === choices[m.id]);
+    if (choice) quotes.set(m.id, choice);
+    else if (options.length === 1) quotes.set(m.id, options[0]);
+  }
+  return {
+    ...data,
+    quotes,
+    selectedRegion: region,
+    displayCurrency: currency,
+    displayUnit: unit,
+    updatedAt: Math.max(0, ...[...quotes.values()].map((q) => q.timestamp)),
+  };
+}

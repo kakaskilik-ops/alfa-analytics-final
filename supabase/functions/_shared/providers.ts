@@ -1,3 +1,4 @@
+import { isMetal, isRegion } from "./universe.ts";
 /** Contract for licensed/public source adapters. Values are never inferred from metal names. */
 export interface ProviderQuote {
   metalId: string;
@@ -6,6 +7,10 @@ export interface ProviderQuote {
   currency: "USD";
   unit: "kg" | "ton" | "g" | "ozt" | "lb";
   region: string;
+  country: string | null;
+  purity: number | null;
+  elementContent: number | null;
+  deliveryTerms: string;
   marketType:
     "exchange" | "spot" | "wholesale" | "regional" | "scrap" | "raw" | "alloy";
   grade: string;
@@ -31,6 +36,7 @@ const units: Record<string, number> = {
 export function parseProviderQuote(
   input: unknown,
   now = Date.now(),
+  maxAgeMs = 4 * 86400000,
 ): ProviderQuote {
   if (!input || typeof input !== "object" || Array.isArray(input))
     throw new Error("invalid_record");
@@ -87,11 +93,40 @@ export function parseProviderQuote(
     !Number.isFinite(published) ||
     !Number.isFinite(retrieved) ||
     published > now + 300000 ||
-    now - published > 4 * 86400000 ||
+    now - published > maxAgeMs ||
     retrieved < published - 300000 ||
     retrieved > now + 300000
   )
     throw new Error("invalid_timestamp");
+  if (!isMetal(r.metalId) || !isRegion(r.region))
+    throw new Error("unsupported_metal_or_region");
+  if (
+    r.region === "Азия" &&
+    (typeof r.country !== "string" || !r.country.trim())
+  )
+    throw new Error("missing_country");
+  if (
+    r.country !== null &&
+    (typeof r.country !== "string" || r.country.length > 100)
+  )
+    throw new Error("invalid_country");
+  if (
+    typeof r.deliveryTerms !== "string" ||
+    !r.deliveryTerms.trim() ||
+    r.deliveryTerms.length > 300
+  )
+    throw new Error("missing_delivery_terms");
+  for (const k of ["purity", "elementContent"])
+    if (
+      r[k] !== null &&
+      (typeof r[k] !== "number" ||
+        !Number.isFinite(r[k]) ||
+        r[k] <= 0 ||
+        r[k] > 100)
+    )
+      throw new Error("invalid_content");
+  if (r.purity === null && r.elementContent === null)
+    throw new Error("missing_composition");
   const url = new URL(r.sourceUrl as string);
   if (url.protocol !== "https:" || url.username || url.password)
     throw new Error("invalid_source_url");
@@ -108,6 +143,10 @@ export function normalizeProviderQuote(q: ProviderQuote, quality: number) {
     normalized_currency: "USD",
     normalized_unit: "kg",
     region: q.region,
+    country: q.country,
+    purity: q.purity,
+    element_content: q.elementContent,
+    delivery_terms: q.deliveryTerms,
     market_type: q.marketType,
     grade: q.grade,
     product_form: q.productForm,

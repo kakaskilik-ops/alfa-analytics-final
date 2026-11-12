@@ -8,12 +8,11 @@ import { cn } from "@/lib/cn";
 import { sendAiRequest } from "@/services/ai";
 
 const SUGGESTIONS = [
-  "Сравни неодим и празеодим",
-  "Покажи динамику диспрозия за месяц",
-  "Что известно об изменении цены тербия?",
-  "Проанализируй историю иттрия",
+  "Почему растёт молибден?",
+  "Сравни стоимость вольфрама в Европе и Азии",
+  "Какие новости за неделю могут повлиять на кобальт?",
+  "Покажи металлы с максимальным ростом за месяц",
 ];
-
 const GREETING: ChatMessage = {
   id: "greeting",
   role: "assistant",
@@ -36,7 +35,16 @@ export default function AiAnalystPage({ updatedAt }: AiAnalystPageProps) {
     if (!pendingQuestion) return;
     let cancelled = false;
     const timer = setTimeout(() => {
-      sendAiRequest({ question: pendingQuestion }, updatedAt)
+      sendAiRequest(
+        {
+          question: pendingQuestion,
+          messages: messages
+            .filter((m) => m.id !== "greeting")
+            .slice(-5, -1)
+            .map((m) => ({ role: m.role, content: m.text.slice(0, 2000) })),
+        },
+        updatedAt,
+      )
         .then((reply) => {
           if (cancelled) return;
           setMessages((current) => [
@@ -71,7 +79,9 @@ export default function AiAnalystPage({ updatedAt }: AiAnalystPageProps) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [pendingQuestion, updatedAt]);
+    // The question captures conversation at submission; response updates must not trigger a second request.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingQuestion]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -203,7 +213,7 @@ export default function AiAnalystPage({ updatedAt }: AiAnalystPageProps) {
             maxLength={2000}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="Например: сравни диспрозий и тербий"
+            placeholder="Например: сравни вольфрам в Европе и Азии"
             aria-label="Вопрос ИИ-аналитику"
             className="h-11 min-w-0 flex-1 rounded-lg border border-ink-700 bg-ink-950 px-4 text-sm text-ink-100 placeholder:text-ink-500 outline-none transition-colors duration-200 focus:border-brand-500/60 focus:ring-2 focus:ring-brand-500/15"
           />

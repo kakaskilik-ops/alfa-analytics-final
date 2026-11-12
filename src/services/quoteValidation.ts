@@ -1,3 +1,4 @@
+import { isRegion, isMetal } from "../../supabase/functions/_shared/universe";
 import type { PriceQuoteRecord } from "@/types/market";
 export const MAX_QUOTE_AGE_MS = 4 * 86400000;
 export const UNIT_TO_KG: Record<string, number> = {
@@ -28,10 +29,24 @@ export function comparisonKey(r: PriceQuoteRecord): string {
     r.productForm,
     r.composition ?? null,
     r.priceType ?? "unknown",
+    r.country ?? null,
+    r.purity ?? null,
+    r.elementContent ?? null,
+    r.deliveryTerms ?? null,
   ]);
 }
 export function quoteIssues(r: PriceQuoteRecord, now = Date.now()): string[] {
   const issues: string[] = [];
+  if (!isMetal(r.metalId) || !isRegion(r.region))
+    issues.push("Материал или регион вне каталога");
+  if (r.region === "Азия" && !r.country?.trim())
+    issues.push("Не указана страна");
+  if (!r.deliveryTerms?.trim()) issues.push("Не указаны условия поставки");
+  if (r.purity == null && r.elementContent == null)
+    issues.push("Не подтверждены чистота или содержание элемента");
+  for (const value of [r.purity, r.elementContent])
+    if (value != null && (!Number.isFinite(value) || value <= 0 || value > 100))
+      issues.push("Неверное содержание элемента");
   if (!Number.isFinite(r.price) || r.price <= 0)
     issues.push("Цена должна быть положительной");
   if (!Object.prototype.hasOwnProperty.call(UNIT_TO_KG, r.unit))
