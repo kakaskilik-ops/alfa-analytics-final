@@ -1,0 +1,462 @@
+[
+  {
+    "path": "project/.env",
+    "bytes": 291,
+    "sha256": "ea190b8da4a2648f1f42e4d2c1557c14b6f10b54fd4f6911ef0018a207a61a21"
+  },
+  {
+    "path": "project/.gitignore",
+    "bytes": 411,
+    "sha256": "897c908fc6440f947e55c05d1f6c0a413e97570445a3b279873e9ac06d1729a5"
+  },
+  {
+    "path": "project/package-lock.json",
+    "bytes": 86,
+    "sha256": "f5d7563d425a234095d894c946a2a24c7523bbc4620c432f6b45c8f4648c4e83"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/package-lock.json",
+    "bytes": 86,
+    "sha256": "f5d7563d425a234095d894c946a2a24c7523bbc4620c432f6b45c8f4648c4e83"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/package-lock.json",
+    "bytes": 86,
+    "sha256": "f5d7563d425a234095d894c946a2a24c7523bbc4620c432f6b45c8f4648c4e83"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/package-lock.json",
+    "bytes": 86,
+    "sha256": "f5d7563d425a234095d894c946a2a24c7523bbc4620c432f6b45c8f4648c4e83"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/package-lock.json",
+    "bytes": 86,
+    "sha256": "f5d7563d425a234095d894c946a2a24c7523bbc4620c432f6b45c8f4648c4e83"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/dist/assets/index-B79GFomA.js",
+    "bytes": 813403,
+    "sha256": "a59b54d7f0d3993c0859fe0cc7b3eefed190200e791bdeb2b09d0f48eb428d70"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/dist/assets/index-Cc_CPT40.css",
+    "bytes": 23204,
+    "sha256": "26337cb78506c830dacd8467dba59a1fda25499fbb12e2c2b8ce6d36757ede1f"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/dist/index.html",
+    "bytes": 1228,
+    "sha256": "690dddc151081a2f6b408290a25882a52e88a9febfa65e5734e1cb3e58df7ce2"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/eslint.config.js",
+    "bytes": 739,
+    "sha256": "fa3cc12579fb0ef678a3153b31ec396d81ef2fec284a1a5ecb779c0ff336cfe0"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/index.html",
+    "bytes": 1130,
+    "sha256": "4f46e6879b5b5b54918e5768f50822134670369ed36bf39a4c1f6a58e4c2a17a"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/package-lock.json",
+    "bytes": 168248,
+    "sha256": "7262a0ce932d3d78a9dfc11261d90c448358859efb1d1aced7f840b54c06dae6"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/package.json",
+    "bytes": 931,
+    "sha256": "75fb25cde3e5fb5519857224d49d28a054129f9878afb387c7b6b825b8843384"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/postcss.config.js",
+    "bytes": 81,
+    "sha256": "e32657baf631d7c5f4dc67b4b2ee0ec8e7d5b3c41860e09cddce7c0377cd80bc"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/App.tsx",
+    "bytes": 1487,
+    "sha256": "04e4b4ee000b97b419f2f0829d99c46a011aa27495fa54b372e3543ad09af05c"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/ai/ChatBubble.tsx",
+    "bytes": 1874,
+    "sha256": "3c1d49e72b266384907944d81688ac70c103728b6cf2d3952dd01ab642bfe7c7"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/brand/Logo.tsx",
+    "bytes": 1085,
+    "sha256": "4851809681893715c7fb90e90878fcfcf13195d74158969f2cde63a2292df7b7"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/charts/PriceChart.tsx",
+    "bytes": 3189,
+    "sha256": "73ee8f3fab93de47bf492f262bac135c087a7d08a9d5b37a210c6e0575495afb"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/common/DataStatusBadge.tsx",
+    "bytes": 796,
+    "sha256": "bdaf419586849d14e5878bf225f2c8f857ff8611c2b339a8ca361f5f4de11819"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/common/Delta.tsx",
+    "bytes": 636,
+    "sha256": "6df0fd2db0466e031bf6ac971a7458dae2b39af63a0d70e0a35d1fa4cc717d0a"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/common/DemoBadge.tsx",
+    "bytes": 405,
+    "sha256": "1e65e4f12cbe19291eee5a1de7015bbfefd21108cb28de84eddf09c6ba26d3a0"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/common/LastUpdated.tsx",
+    "bytes": 665,
+    "sha256": "dd14ae6824491907b0d6fafb99c5e70b8a56869bdd54500285329e549d8f21b5"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/common/Panel.tsx",
+    "bytes": 434,
+    "sha256": "6780b0b38de31cbe7303fc1a2c6b7da72970bbf2fd42ad49a052160750923f56"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/common/PeriodSwitcher.tsx",
+    "bytes": 1101,
+    "sha256": "88c137c813c873dee4b087b41303012e044b4eb23cd7a15f6d7fff971f6da246"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/common/SearchInput.tsx",
+    "bytes": 976,
+    "sha256": "16740ac86e85acb29b699d7de47da014755a2dd740fcbd095afefb91a02de77d"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/layout/PageHeader.tsx",
+    "bytes": 754,
+    "sha256": "93f52927c95e930fef7b2ff43991ea9e355ce8ab417c1c64c9c6d675f869f37a"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/layout/Sidebar.tsx",
+    "bytes": 2615,
+    "sha256": "bebdcd02e10699078571a7029be12f7c59ae89dea29025599c9fd31dc1619c5d"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/market/MarketStatCard.tsx",
+    "bytes": 631,
+    "sha256": "c42352125eb20c4346efb240dc6a1ff2b904b5aec964ce7ed6b770958a0ffc4a"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/market/MoversList.tsx",
+    "bytes": 1784,
+    "sha256": "71c67bda619314c38b0795338d6065b82056800d7056af32eb9170d078604e3c"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/market/QuotesTable.tsx",
+    "bytes": 4002,
+    "sha256": "22c44af4e6fd3de6817fb548682a5eca85ff06c9a22f01f7023dd0f86be514d6"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/metals/MetalCard.tsx",
+    "bytes": 3220,
+    "sha256": "8371abedf069cb4153cf50dbb950c9b59f6ec1ff2906f701eb0e7b1893e07079"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/metals/MetalDetailDialog.tsx",
+    "bytes": 8773,
+    "sha256": "168172d9a86c035cbbc8a73006b3029bb513c9819f35f15c07d550bf8930fa49"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/metals/PriceConverter.tsx",
+    "bytes": 3261,
+    "sha256": "61a41ea90f49b9199db61bff5f2ad439a4aadacf64f5aae59be0f0426ff51be5"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/components/metals/PriceSummaryPanel.tsx",
+    "bytes": 5406,
+    "sha256": "73b0cf1634864e9f0ee795ee95617a0b3b1eac3de75bab751b2981e8b428c030"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/data/categories.ts",
+    "bytes": 2221,
+    "sha256": "900955917110afbadbd7b173bb36a511557f1ea47112f258788e6304737fdb3e"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/data/metals.ts",
+    "bytes": 73001,
+    "sha256": "53b196609c262242adc26005f06a63794c60b4f72cb95c34f1f87901595c0e5b"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/data/periods.ts",
+    "bytes": 773,
+    "sha256": "670741401defe6828d0f848b3f38195c9879f6a997a56f0e94b140049e6ad24d"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/data/sources.ts",
+    "bytes": 4505,
+    "sha256": "2147f054c2065e2cd03f1fa26138431e45efd4fcba7bbdbf562a92239dc0481f"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/hooks/useAsyncData.ts",
+    "bytes": 1219,
+    "sha256": "fbbbba4c0729af0d6a26354b035b18131ccae0741c6e1d095543cf2144cd1481"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/hooks/useFavorites.ts",
+    "bytes": 1138,
+    "sha256": "a3692dd4fc4d29a19cd63656a11679d2a6af7ec705f289d92b50ab02409eeeeb"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/index.css",
+    "bytes": 255,
+    "sha256": "e3510467a2dc2b72c7c7c57a0e2c0b0de2ddbc92ea4b7ff008065903507da71d"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/lib/cn.ts",
+    "bytes": 126,
+    "sha256": "d856cadcdf6b45f027dabf974a2150e95b61a4ab43fb55701b261f4f6884ec50"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/lib/format.ts",
+    "bytes": 1681,
+    "sha256": "e3aa32b98a0573fee6923b4a87678d4d555569a6ee18052f79f1c35a638bb003"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/lib/supabase.ts",
+    "bytes": 461,
+    "sha256": "8ffcfa2c1faf879f962dbba948ecb4a2c87a230ad0074f80cd1f0f89fa0ed0ec"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/main.tsx",
+    "bytes": 234,
+    "sha256": "832842269af94b055b2cd42fd27a0f212773b36d20083b631b863cbb5f0fd09e"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/pages/AiAnalystPage.tsx",
+    "bytes": 6943,
+    "sha256": "c6909578c3d3a66ae253c17056568829f8cc4b53691cd0ecd577b1e01982adaf"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/pages/MarketPage.tsx",
+    "bytes": 8644,
+    "sha256": "1ea05a76c6dd7e88cd1bd92b7c75ef4b9d028839625d584bdf97c2c87cb58f3e"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/pages/MetalsPage.tsx",
+    "bytes": 5864,
+    "sha256": "4bf28bd8106e9b9998e58b696859e5925df6d0140f9fdea13d116a681c32859e"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/pages/SourcesPage.tsx",
+    "bytes": 14472,
+    "sha256": "6aebe629fdc02f20ce11f44a7a7ad50b8904b4d8daf9e3621a9879403fae8c6c"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/ai.ts",
+    "bytes": 2264,
+    "sha256": "37562b8cb409f341e82355439896701fa42042a9382a0ed347a34854130a287d"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/averagePrice.ts",
+    "bytes": 4026,
+    "sha256": "bcfdfe56893874dcd1f0ca22749b20a6149f8e8c636677ea87ff832205b14920"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/currency.ts",
+    "bytes": 4272,
+    "sha256": "94b07ac5fa4247b1878f3533e64a4cf3665db65ee30eb784bbc1af16c9ddca07"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/database.ts",
+    "bytes": 9516,
+    "sha256": "bafff476d9651cc409e9d92f54f17747a4d42ba5fa168218c71f4409f9c6e3c9"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/export.ts",
+    "bytes": 4263,
+    "sha256": "80d1c7eae1947069c30059e9509843e13e20e20c0bd65a7e47088a34d94e84cb"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/liveData.ts",
+    "bytes": 5722,
+    "sha256": "f5c23f1478db951f93c20f1427416f4ad66b33c578f718425825bde914f7b59b"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/market.ts",
+    "bytes": 4914,
+    "sha256": "ea2ae76fc2aa73b6fa6de4f3287aa5d01009b4b98b88a957924af162d0a49b20"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/services/sources.ts",
+    "bytes": 1765,
+    "sha256": "3caa4ebffd78326f256f226b9a1d83bafa22787becde56d4043fdb477472536f"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/types/market.ts",
+    "bytes": 3420,
+    "sha256": "4e4063aae3551474c1cdc424e1fb254bf6de5b390eff17ce1b543ccacfb6dcc1"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/src/vite-env.d.ts",
+    "bytes": 38,
+    "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/tailwind.config.js",
+    "bytes": 1179,
+    "sha256": "bf469ca7874383c58e3e4153c905a35438406287ca930cd016be405be98830d5"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/tsconfig.app.json",
+    "bytes": 711,
+    "sha256": "9750ea1ad666ba467781ab8e047a2337b7692b774de0865a98dbd189ca3fd87e"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/tsconfig.json",
+    "bytes": 119,
+    "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/tsconfig.node.json",
+    "bytes": 481,
+    "sha256": "a96b9ba5e40d95b92adf56431fdf9cbe25b5c2557621f0666615bff6889dfc50"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/project-bolt-github-rbfdphrn/project/project-bolt-sb1-vka3bss6/project/vite.config.ts",
+    "bytes": 366,
+    "sha256": "15e39e0c9e4539c1a425babec469b76b8170a83638ed1413ceeea0133d8dc1ab"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/supabase/config.toml",
+    "bytes": 107,
+    "sha256": "eb529393e2d58080a5c19d4d7a4f63714cf2e5c376bfa31c928c6d7b6759bedb"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/supabase/functions/collect-market-data/index.ts",
+    "bytes": 12474,
+    "sha256": "18f4d4380a5dd59b9c1898d3008ddb9b060296d40cf7edd4b54ac310f61c7be5"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/supabase/migrations/20261109123213_create_metals_analytics_schema.sql",
+    "bytes": 9804,
+    "sha256": "36e91ef221f36012bbd4a76d95a51b739158c42ca8c2c8b7666073da3050e737"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/project-bolt-github-ed4umzh1/project/supabase/migrations/20261109123237_seed_categories_and_data_sources.sql",
+    "bytes": 3911,
+    "sha256": "c719733a317389e492c3aca59a341d3ee5cf419efbfc51f87de9a54fb3d1ff41"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/supabase/config.toml",
+    "bytes": 107,
+    "sha256": "eb529393e2d58080a5c19d4d7a4f63714cf2e5c376bfa31c928c6d7b6759bedb"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/supabase/functions/collect-market-data/index.ts",
+    "bytes": 12474,
+    "sha256": "18f4d4380a5dd59b9c1898d3008ddb9b060296d40cf7edd4b54ac310f61c7be5"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/supabase/functions-deploy-state.json",
+    "bytes": 195,
+    "sha256": "ed1c895a619e7f9991c6867f860074a6b6f9a00a2c9aa56a9d8b398a1d0f259e"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/supabase/migrations/20261109123213_create_metals_analytics_schema.sql",
+    "bytes": 9804,
+    "sha256": "36e91ef221f36012bbd4a76d95a51b739158c42ca8c2c8b7666073da3050e737"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/supabase/migrations/20261109123237_seed_categories_and_data_sources.sql",
+    "bytes": 3911,
+    "sha256": "c719733a317389e492c3aca59a341d3ee5cf419efbfc51f87de9a54fb3d1ff41"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/supabase/migrations/20261109130221_create_metals_analytics_schema.sql",
+    "bytes": 11991,
+    "sha256": "4ce35128b6fa6bbf0e4d5a011df72dc709adc0147152917c4c382b84cbb2964f"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/project-bolt-github-gx4fzgbf/project/supabase/migrations/20261109130251_seed_metals_sources_coverage.sql",
+    "bytes": 11679,
+    "sha256": "2a4975e6d0f9161656e45eb7e1c813e4d1c084854f739820773483e9e41d595d"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/config.toml",
+    "bytes": 107,
+    "sha256": "eb529393e2d58080a5c19d4d7a4f63714cf2e5c376bfa31c928c6d7b6759bedb"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/functions/collect-market-data/index.ts",
+    "bytes": 13294,
+    "sha256": "ea02e1f5f730002c1a1dd7339da573a0b713b7ac824694940fee73785c53f063"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/functions-deploy-state.json",
+    "bytes": 195,
+    "sha256": "53d2bbdac047a34dff0d5bd95d751d36c643818b7d2c2d385468e493c67be7f9"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/migrations/20261109133119_create_metals_analytics_schema.sql",
+    "bytes": 9990,
+    "sha256": "281a985348bd6c7932368901512b5ebe8e3e828c765d234531db58d8e08906de"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/migrations/20261109133143_seed_metals_sources_coverage.sql",
+    "bytes": 11055,
+    "sha256": "8469b8bcccf60fe5ae4d2d7bbf18e64e79135059c583c5f0ae4e0fbbae5b1d28"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/migrations/20261109133949_secure_collector_and_schedule.sql",
+    "bytes": 3146,
+    "sha256": "f8298ebeb5552b71eccff4cbb509d359bf7ab3d74698a2e120650d63a6548d1f"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/migrations/20261109134851_20261109150000_full_metals_catalog_without_demo_prices.sql.sql",
+    "bytes": 25023,
+    "sha256": "fc6aa06f915a3529434fe98abafef8c3761ede1fa877b2c01694cadbb7a07ae7"
+  },
+  {
+    "path": "project/project-bolt-github-6u2dqa6c/project/supabase/migrations/20261109134920_20261109150500_clear_metal_demo_parameter_defaults.sql.sql",
+    "bytes": 871,
+    "sha256": "13e8810312565ded5a3522b7c17c964564d82653701c42210ece111ce98fbe96"
+  },
+  {
+    "path": "project/supabase/config.toml",
+    "bytes": 107,
+    "sha256": "eb529393e2d58080a5c19d4d7a4f63714cf2e5c376bfa31c928c6d7b6759bedb"
+  },
+  {
+    "path": "project/supabase/functions/collect-market-data/index.ts",
+    "bytes": 13294,
+    "sha256": "ea02e1f5f730002c1a1dd7339da573a0b713b7ac824694940fee73785c53f063"
+  },
+  {
+    "path": "project/supabase/functions-deploy-state.json",
+    "bytes": 195,
+    "sha256": "336180b593e68e3e404d42d1163f6b41f74d26f5ce3eb7dd27121951ec05f4d5"
+  },
+  {
+    "path": "project/supabase/migrations/20261109141643_create_metals_analytics_schema.sql",
+    "bytes": 9295,
+    "sha256": "32eb68909849d3d78d16f0a439809e8c3bc975024d39feb0356daea8bf6af15a"
+  },
+  {
+    "path": "project/supabase/migrations/20261109141704_seed_metals_sources_coverage.sql",
+    "bytes": 10490,
+    "sha256": "250d2b75a50564408bf5f9bc64eb6a332972a03c88274beebda78d29650a56f7"
+  },
+  {
+    "path": "project/supabase/migrations/20261109141716_secure_collector_and_schedule.sql",
+    "bytes": 1941,
+    "sha256": "153e9d6a2bb43a4970f9af5414e6bdd33570e26772608631de8a0061476ed226"
+  },
+  {
+    "path": "project/supabase/migrations/20261109141751_full_metals_catalog_without_demo_prices.sql",
+    "bytes": 24335,
+    "sha256": "987f384879caa174a7c8d79f7603f4fdd9ea67444453a5b64be9394fbdb2e1ce"
+  },
+  {
+    "path": "project/supabase/migrations/20261109141810_clear_metal_demo_parameter_defaults.sql",
+    "bytes": 313,
+    "sha256": "8693c917d3dd004c3ce17d3409eb7b4b991933ec7a065faeb9cce76309075e5c"
+  }
+]

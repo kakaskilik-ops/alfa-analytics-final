@@ -1,0 +1,62 @@
+unit-final.log
+
+> alfa-analytics@1.0.0 test
+> vitest run
+
+
+ RUN  v5.1.0 /workspace/work/alfa
+
+
+ Test Files  1 passed (1)
+      Tests  47 passed (47)
+   Start at  14:19:09
+   Duration  464ms (import 49%, transform 37%, tests 10%, worker 4%)
+
+
+
+deno-tests-final.log
+running 11 tests from ./work/alfa/supabase/functions/_shared/providers_test.ts
+provider: canonical mass normalization ... ok (800µs)
+provider rejects {"price":0} ... ok (277µs)
+provider rejects {"currency":"RUB"} ... ok (35µs)
+provider rejects {"unit":"short-ton"} ... ok (70µs)
+provider rejects {"unit":"constructor"} ... ok (88µs)
+provider rejects {"publishedAt":"bad"} ... ok (56µs)
+provider rejects {"sourceUrl":"javascript:alert(1)"} ... ok (178µs)
+provider rejects {"grade":""} ... ok (46µs)
+provider rejects {"priceType":"unknown"} ... ok (58µs)
+provider rejects {"composition":42} ... ok (59µs)
+http: only POST and configured Origin ... ok (13ms)
+
+ok | 11 passed | 0 failed (19ms)
+
+
+
+db-results.txt
+PASS 20261109141643_create_metals_analytics_schema.sql
+PASS 20261109141704_seed_metals_sources_coverage.sql
+PASS 20261109141716_secure_collector_and_schedule.sql
+PASS 20261109141751_full_metals_catalog_without_demo_prices.sql
+PASS 20261109141810_clear_metal_demo_parameter_defaults.sql
+PASS 20261112090000_quality_and_analytics.sql
+PASS 20261112090100_catalog_sync.sql
+PASS atomic quota: 10 accepted, 2 denied
+PASS anonymous read catalogue; write and internal details denied
+PASS RLS excludes demonstration records
+
+
+browser-results.txt
+PASS market missing-data state: no fake prices/NaN
+PASS catalogue search, details, favorites, Escape
+PASS analytics and CSV download
+PASS source registry, methodology and offline state
+PASS AI unavailable response without fabricated analysis
+PASS all 5 pages at mobile width 390px
+PASS no browser page errors
+
+
+browser-data-results.txt
+PASS test fixtures: real-data path, index, 2 price charts, source median 11 USD/kg, period filtering, mobile catalogue; no page errors
+
+
+npm audit: {"info": 0, "low": 0, "moderate": 0, "high": 0, "critical": 0, "total": 0}
