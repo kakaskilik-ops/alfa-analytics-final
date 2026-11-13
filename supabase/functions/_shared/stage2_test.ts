@@ -164,6 +164,8 @@ async function withEnv(
   }
 }
 const base = {
+  AI_PROVIDER: "openai",
+  ALLOW_PAID_AI: "true",
   SUPABASE_URL: "http://127.0.0.1:54321",
   SUPABASE_SERVICE_ROLE_KEY: "test-only",
   OPENAI_API_KEY: undefined,

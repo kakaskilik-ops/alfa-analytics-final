@@ -20,6 +20,8 @@ interface PriceChartProps {
   positive: boolean;
   valueFormatter: (value: number) => string;
   height?: number;
+  animate?: boolean;
+  axisFormatter?: (timestamp: number) => string;
   events?: { date: number; title: string; url: string }[];
 }
 
@@ -50,6 +52,8 @@ export default function PriceChart({
   valueFormatter,
   height = 280,
   events = [],
+  axisFormatter,
+  animate = true,
 }: PriceChartProps) {
   const gradientId = `price-fill-${useId().replace(/:/g, "")}`;
   const color = positive ? "#00C781" : "#F04452";
@@ -91,7 +95,11 @@ export default function PriceChart({
             type="number"
             domain={["dataMin", "dataMax"]}
             ticks={ticks}
-            tickFormatter={(value: number) => formatAxisLabel(value, period)}
+            tickFormatter={(value: number) =>
+              axisFormatter
+                ? axisFormatter(value)
+                : formatAxisLabel(value, period)
+            }
             tick={axisTick}
             axisLine={false}
             tickLine={false}
@@ -132,6 +140,7 @@ export default function PriceChart({
             fill={`url(#${gradientId})`}
             dot={false}
             activeDot={{ r: 4, fill: color, stroke: "#090B0E", strokeWidth: 2 }}
+            isAnimationActive={animate}
             animationDuration={700}
           />
         </AreaChart>

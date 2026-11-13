@@ -29,7 +29,7 @@ export async function fetchNews(
   let query = supabase
     .from("news_articles")
     .select(
-      "id,source_id,canonical_url,original_title,title_ru,summary_ru,excerpt,translation_status,metal_ids,regions,categories,published_at,retrieved_at,news_sources(name)",
+      "id,scope,source_id,canonical_url,original_title,title_ru,summary_ru,excerpt,translation_status,metal_ids,regions,categories,published_at,retrieved_at,news_sources(name)",
     )
     .eq("is_public", true)
     .lte("published_at", new Date().toISOString())
@@ -60,7 +60,7 @@ export async function fetchNews(
       url.username ||
       url.password ||
       !Array.isArray(r.metal_ids) ||
-      !r.metal_ids.length ||
+      (!r.metal_ids.length && r.scope !== "sector") ||
       !r.metal_ids.every(isMetal) ||
       !Number.isFinite(date) ||
       !Number.isFinite(received)

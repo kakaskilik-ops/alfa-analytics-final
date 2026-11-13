@@ -1,0 +1,8 @@
+-- Sector-wide critical-material news must not be falsely tagged as a particular metal.
+ALTER TABLE public.news_articles ADD COLUMN scope text NOT NULL DEFAULT 'metal' CHECK(scope IN('metal','sector'));
+ALTER TABLE public.news_articles DROP CONSTRAINT news_articles_metal_ids_check;
+ALTER TABLE public.news_articles ADD CONSTRAINT news_article_material_scope CHECK((scope='metal' AND cardinality(metal_ids)>0) OR (scope='sector' AND cardinality(metal_ids)=0));
+INSERT INTO public.news_sources(id,name,feed_url,home_url,license_url,license_note,allowed_hosts,enabled,approved_at,min_interval_seconds,status)
+VALUES('usgs-national','USGS — National News','https://www.usgs.gov/news/national-news-release/feed','https://www.usgs.gov/news/news-releases/national-news-releases','https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits','U.S. Geological Survey. Собственные государственные материалы; только метаданные RSS и ссылки, без сторонних изображений. Из Edge RSS блокируется HTTP 202; первоначальный проверенный снимок может быть импортирован доверенным оператором.',ARRAY['www.usgs.gov'],true,now(),3500,'error') ON CONFLICT(id) DO NOTHING;
+INSERT INTO public.data_sources(id,name,url,api_endpoint,market_type,region,quality_score,status,attribution,license,free_tier_limit,independence_id)
+VALUES('usgs-national','USGS — National News','https://www.usgs.gov/news/news-releases/national-news-releases','https://www.usgs.gov/news/national-news-release/feed','spot','Глобальный',0.9,'pending','U.S. Geological Survey','https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits','RSS metadata only; не чаще раза в час','usgs-national') ON CONFLICT(id) DO NOTHING;

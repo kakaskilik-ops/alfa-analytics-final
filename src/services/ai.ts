@@ -1,3 +1,4 @@
+import type { VerifiedReport } from "../../shared/aiReport";
 import { supabase, invokeAnalysis } from "@/lib/supabase";
 import type { MetalQuote } from "@/types/market";
 export interface AiRequest {
@@ -13,6 +14,8 @@ export interface AiRequest {
 export interface AiResponse {
   text: string;
   quotes: MetalQuote[];
+  report?: VerifiedReport;
+  cached?: boolean;
 }
 export const AI_STATUS = {
   enabled: Boolean(supabase),
@@ -46,5 +49,10 @@ export async function sendAiRequest(
     typeof data.text !== "string"
   )
     throw new Error("Некорректный ответ ИИ.");
-  return { text: data.text, quotes: [] };
+  return {
+    text: data.text,
+    quotes: [],
+    ...("report" in data ? { report: data.report as VerifiedReport } : {}),
+    ...("cached" in data ? { cached: Boolean(data.cached) } : {}),
+  };
 }

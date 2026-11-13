@@ -1,3 +1,4 @@
+import MetalDataPanel from "@/components/market/MetalDataPanel";
 import MetalNews from "@/components/metals/MetalNews";
 import RegionalComparison from "@/components/market/RegionalComparison";
 import { createPortal } from "react-dom";
@@ -271,6 +272,7 @@ export default function MetalDetailDialog({
             period={period}
             at={updatedAt}
           />
+          <MetalDataPanel metalId={metal.id} />
           <MetalNews metalId={metal.id} />
           <PriceConverter
             pricePerKg={quote.price}

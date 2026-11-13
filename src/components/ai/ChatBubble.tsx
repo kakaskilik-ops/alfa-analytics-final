@@ -8,6 +8,8 @@ export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
   quotes?: MetalQuote[];
+  error?: boolean;
+  sources?: { name: string; url: string }[];
 }
 
 interface ChatBubbleProps {
@@ -38,8 +40,32 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
               : "rounded-bl-md border border-ink-800 bg-ink-950 text-ink-200",
           )}
         >
+          {message.error && (
+            <p className="mb-2 text-xs text-loss-400">
+              Сообщение сервиса — не ответ модели
+            </p>
+          )}
           {message.text}
         </div>
+
+        {message.sources && (
+          <div className="mt-2 flex flex-wrap gap-3 text-xs text-brand-400">
+            {message.sources
+              .filter((s) => {
+                try {
+                  const u = new URL(s.url);
+                  return u.protocol === "https:" && !u.username && !u.password;
+                } catch {
+                  return false;
+                }
+              })
+              .map((s) => (
+                <a key={s.url} href={s.url} target="_blank" rel="noreferrer">
+                  {s.name} ↗
+                </a>
+              ))}
+          </div>
+        )}
 
         {message.quotes && message.quotes.length > 0 && (
           <ul className="mt-3 divide-y divide-ink-800 overflow-hidden rounded-xl border border-ink-800 bg-ink-950">

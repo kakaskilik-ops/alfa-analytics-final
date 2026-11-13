@@ -196,8 +196,8 @@ export function getExchangeRates(): ExchangeRate[] {
       base,
       quote,
       rate,
-      updatedAt: liveRateTimestamp,
-      origin: liveRateOrigin,
+      updatedAt: rateMetadata.get(key)?.date ?? liveRateTimestamp,
+      origin: rateMetadata.get(key)?.origin ?? liveRateOrigin,
       dataStatus: liveRateStatus,
     });
   }

@@ -170,5 +170,96 @@ for (const rate of ["NaN", "Infinity", "-1", "0"]) {
 results.push(
   "PASS automation lease/cooldown, FX invoker view, private provenance/benchmarks and finite positive rates",
 );
+await db.exec("SET ROLE service_role");
+await db.exec(
+  `INSERT INTO reference_import_payloads(source_id,source_url,content_sha256,raw_base64) VALUES('world-bank-pink-sheet','https://example.com/workbook',repeat('a',64),'VEVTVA==')`,
+);
+await db.exec(
+  `INSERT INTO reference_price_observations(metal_id,source_id,period_start,price,currency,unit,region,specification,source_url,payload_id) SELECT 'copper','world-bank-pink-sheet',date_trunc('month',now())::date-interval '1 month',100,'USD','ton','Мировой ориентир (LME)','TEST','https://example.com/workbook',id FROM reference_import_payloads`,
+);
+await db.exec(
+  `INSERT INTO reference_price_observations(metal_id,source_id,period_start,price,currency,unit,region,specification,source_url,payload_id) SELECT 'copper','world-bank-pink-sheet',date_trunc('month',now())::date,200,'USD','ton','Мировой ориентир (LME)','TEST','https://example.com/workbook',id FROM reference_import_payloads`,
+);
+await db.exec("SET ROLE anon");
+assert.equal(
+  (await db.query("SELECT count(*)::int n FROM reference_price_observations"))
+    .rows[0].n,
+  1,
+);
+for (const sql of [
+  "SELECT * FROM reference_import_payloads",
+  "INSERT INTO reference_price_observations DEFAULT VALUES",
+]) {
+  let denied = false;
+  try {
+    await db.exec(sql);
+  } catch {
+    denied = true;
+  }
+  assert.ok(denied, sql);
+}
+await db.exec("RESET ROLE");
+results.push(
+  "PASS public monthly references exclude incomplete months; raw workbooks and writes remain private",
+);
+// Global quota and work lease must be atomic and inaccessible to browser roles.
+await db.exec("SET ROLE service_role");
+assert.equal(
+  (await db.query("SELECT reserve_free_ai_call(2,4) ok")).rows[0].ok,
+  true,
+);
+assert.equal(
+  (await db.query("SELECT reserve_free_ai_call(2,4) ok")).rows[0].ok,
+  true,
+);
+assert.equal(
+  (await db.query("SELECT reserve_free_ai_call(2,4) ok")).rows[0].ok,
+  false,
+);
+const lockKey = "a".repeat(64);
+const aiLease = (await db.query("SELECT claim_ai_work($1) token", [lockKey]))
+  .rows[0].token;
+assert.ok(aiLease);
+assert.equal(
+  (await db.query("SELECT claim_ai_work($1) token", [lockKey])).rows[0].token,
+  null,
+);
+await db.query("SELECT release_ai_work($1,$2)", [lockKey, aiLease]);
+assert.equal(
+  (
+    await db.query(
+      "SELECT token FROM analytics_internal.ai_work_locks WHERE key=$1",
+      [lockKey],
+    )
+  ).rows[0].token,
+  null,
+);
+await db.query(
+  "UPDATE analytics_internal.ai_work_locks SET lease_until=now()-interval '1 second' WHERE key=$1",
+  [lockKey],
+);
+assert.ok(
+  (await db.query("SELECT claim_ai_work($1) token", [lockKey])).rows[0].token,
+);
+await db.exec("RESET ROLE; SET ROLE anon");
+for (const sql of [
+  "SELECT * FROM ai_provider_health",
+  "SELECT * FROM statistic_collection_state",
+  "SELECT reserve_free_ai_call(40,4)",
+  "INSERT INTO market_statistics DEFAULT VALUES",
+  "INSERT INTO market_ai_reports DEFAULT VALUES",
+]) {
+  let denied = false;
+  try {
+    await db.exec(sql);
+  } catch {
+    denied = true;
+  }
+  assert.ok(denied, sql);
+}
+await db.exec("RESET ROLE");
+results.push(
+  "PASS atomic free AI budget and duplicate work lease; browser cannot access health, quotas, collectors or write reports/statistics",
+);
 console.log(results.join("\n"));
 await db.close();
