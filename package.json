@@ -12,8 +12,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "node scripts/test-database.mjs",
-    "test:server": "deno test --config supabase/deno.json --allow-env supabase/functions/_shared/providers_test.ts supabase/functions/_shared/stage2_test.ts",
-    "test:browser": "playwright test"
+    "test:server": "deno test --config supabase/deno.json --allow-env supabase/functions/_shared/providers_test.ts supabase/functions/_shared/stage2_test.ts supabase/functions/_shared/automation_test.ts",
+    "test:browser": "playwright test",
+    "deploy:plan": "node scripts/prepare-deployment.mjs",
+    "deploy:supabase": "node scripts/deploy-supabase.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

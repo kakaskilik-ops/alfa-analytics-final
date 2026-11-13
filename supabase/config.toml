@@ -17,3 +17,15 @@ entrypoint = "./functions/collect-news/index.ts"
 [functions.ingest-regional-history]
 verify_jwt = false
 entrypoint = "./functions/ingest-regional-history/index.ts"
+
+[functions.collect-fx]
+verify_jwt = false
+entrypoint = "./functions/collect-fx/index.ts"
+
+[functions.collect-quotes]
+verify_jwt = false
+entrypoint = "./functions/collect-quotes/index.ts"
+
+[functions.compute-orientations]
+verify_jwt = false
+entrypoint = "./functions/compute-orientations/index.ts"

@@ -183,7 +183,7 @@ export function getLiveMetalIds(data: LiveMarketData | null): Set<string> {
 }
 export { METALS };
 
-import { convertPrice } from "./currency";
+import { convertPrice, getHistoricalRate } from "./currency";
 export function displayQuote(
   q: MetalQuote,
   data: LiveMarketData | null,
@@ -193,19 +193,41 @@ export function displayQuote(
   const conv = (v: number | null) =>
     v === null ? null : convertPrice(v, "USD", currency, "kg", unit);
   const factor = convertPrice(1, "USD", currency, "kg", unit);
+  if (factor === null)
+    return {
+      ...q,
+      metal: { ...q.metal, currency, unit },
+      price: null,
+      change: null,
+      changePct: null,
+      high: null,
+      low: null,
+      average: null,
+      series: [],
+      dataStatus: "unavailable",
+    };
+  const mass = UNIT_TO_KG[unit];
+  const series = q.series.flatMap((p) => {
+    const rate = getHistoricalRate("USD", currency, p.date);
+    return rate === null
+      ? []
+      : [{ date: p.date, price: p.price * mass * rate }];
+  });
+  const first = series[0]?.price,
+    last = series[series.length - 1]?.price;
+  const change = series.length >= 2 ? last - first : null;
   return {
     ...q,
     metal: { ...q.metal, currency, unit },
     price: conv(q.price),
-    change: q.change === null || factor === null ? null : q.change * factor,
-    changePct: factor === null ? null : q.changePct,
-    high: conv(q.high),
-    low: conv(q.low),
-    average: conv(q.average),
-    series:
-      factor === null
-        ? []
-        : q.series.map((p) => ({ ...p, price: p.price * factor })),
+    change,
+    changePct: change === null ? null : (change / first) * 100,
+    high: series.length ? Math.max(...series.map((p) => p.price)) : null,
+    low: series.length ? Math.min(...series.map((p) => p.price)) : null,
+    average: series.length
+      ? series.reduce((s, p) => s + p.price, 0) / series.length
+      : null,
+    series: factor === null ? [] : series,
     dataStatus: factor === null ? "unavailable" : q.dataStatus,
   };
 }

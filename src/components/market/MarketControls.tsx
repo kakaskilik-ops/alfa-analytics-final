@@ -60,7 +60,7 @@ export default function MarketControls({
         <p className="text-xs text-ink-400">
           {getRate("USD", config.currency) === null
             ? "Подтверждённый валютный курс отсутствует. Цена не пересчитывается."
-            : `История пересчитывается по текущему подтверждённому курсу; это не исторический валютный ряд. Курс: ${getPairMetadata("USD", config.currency)?.origin ?? ""}, ${formatDateTime(getPairMetadata("USD", config.currency)?.date ?? 0)}`}
+            : `История пересчитывается по подтверждённому курсу на дату наблюдения. Если исторического курса нет, точка пропускается. Курс: ${getPairMetadata("USD", config.currency)?.origin ?? ""}, ${formatDateTime(getPairMetadata("USD", config.currency)?.date ?? 0)}`}
         </p>
       )}
       {METALS.map((m) => {

@@ -106,5 +106,69 @@ try {
 }
 assert.ok(invalid);
 results.push("PASS database rejects out-of-scope news");
+await db.exec("SET ROLE service_role");
+const lease = (
+  await db.query("SELECT claim_automation_job('collect-fx') token")
+).rows[0].token;
+assert.ok(lease);
+assert.equal(
+  (await db.query("SELECT claim_automation_job('collect-fx') token")).rows[0]
+    .token,
+  null,
+);
+await db.query("SELECT finish_automation_job('collect-fx',$1::uuid)", [lease]);
+assert.equal(
+  (await db.query("SELECT claim_automation_job('collect-fx') token")).rows[0]
+    .token,
+  null,
+);
+assert.equal(
+  (await db.query("SELECT count(*)::int n FROM get_quote_adapters()")).rows[0]
+    .n,
+  0,
+);
+await db.exec(
+  `INSERT INTO fx_observations(source_id,base_currency,quote_currency,rate,rate_date,source_url,origin,data_status) VALUES('frankfurter-v2','USD','EUR',2,now(),'https://example.com','TEST','live')`,
+);
+await db.exec("SET ROLE anon");
+assert.equal(
+  (
+    await db.query(
+      "SELECT count(*)::int n FROM app_exchange_rates WHERE origin='TEST'",
+    )
+  ).rows[0].n,
+  1,
+);
+for (const sql of [
+  "SELECT * FROM ingestion_payloads",
+  "SELECT * FROM analytics_internal.reference_benchmarks",
+  "SELECT claim_automation_job('collect-fx')",
+  "SELECT * FROM get_quote_adapters()",
+  "INSERT INTO fx_observations DEFAULT VALUES",
+]) {
+  let denied = false;
+  try {
+    await db.exec(sql);
+  } catch {
+    denied = true;
+  }
+  assert.ok(denied, sql);
+}
+await db.exec("RESET ROLE");
+for (const rate of ["NaN", "Infinity", "-1", "0"]) {
+  let denied = false;
+  try {
+    await db.query(
+      `INSERT INTO fx_observations(source_id,base_currency,quote_currency,rate,rate_date,source_url,origin,data_status) VALUES('frankfurter-v2','USD','RUB',$1,now(),'https://example.com','TEST','live')`,
+      [rate],
+    );
+  } catch {
+    denied = true;
+  }
+  assert.ok(denied, rate);
+}
+results.push(
+  "PASS automation lease/cooldown, FX invoker view, private provenance/benchmarks and finite positive rates",
+);
 console.log(results.join("\n"));
 await db.close();

@@ -36,3 +36,6 @@ Thumbs.db
 # Automated browser artifacts
 test-results/
 playwright-report/
+# Generated deployment bundles may contain environment-specific configuration.
+work/
+supabase/.branches/

@@ -1,11 +1,13 @@
+export function allowedOrigins():string[]{return [...new Set(['https://alfammetal.ru','https://www.alfammetal.ru',...(Deno.env.get('ALLOWED_ORIGIN')??'').split(',').map(v=>v.trim()).filter(Boolean)])];}
 export function headers(req: Request): Record<string, string> {
-  const allowed = Deno.env.get("ALLOWED_ORIGIN") ?? "";
+  const allowed = allowedOrigins();
+  const origin=req.headers.get("origin")??"";
   return {
     "Content-Type": "application/json",
     "Cache-Control": "no-store",
     Vary: "Origin",
-    ...(req.headers.get("origin") === allowed && allowed
-      ? { "Access-Control-Allow-Origin": allowed }
+    ...(allowed.includes(origin)
+      ? { "Access-Control-Allow-Origin": origin }
       : {}),
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers":
@@ -21,7 +23,7 @@ export function guard(req: Request, maxBytes = 8192): Response | null {
   if (req.method !== "POST")
     return json(req, { error: "Метод не поддерживается" }, 405);
   const origin = req.headers.get("origin");
-  if (origin && origin !== Deno.env.get("ALLOWED_ORIGIN"))
+  if (origin && !allowedOrigins().includes(origin))
     return json(req, { error: "Доступ запрещён" }, 403);
   if (Number(req.headers.get("content-length") ?? 0) > maxBytes)
     return json(req, { error: "Слишком большой запрос" }, 413);

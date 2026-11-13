@@ -1,0 +1,33 @@
+name: Verify ALFA ANALYTICS
+on:
+  push:
+    branches: [main, feature/world-markets-news-ai]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+      - run: npm run test:db
+      - run: npm run test:server
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - run: npm run deploy:plan

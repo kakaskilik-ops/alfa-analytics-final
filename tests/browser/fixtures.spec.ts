@@ -78,7 +78,7 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
         data_status: "live",
       }));
     }
-    if (table === "exchange_rates")
+    if (table === "app_exchange_rates")
       data = [
         {
           base_currency: "USD",

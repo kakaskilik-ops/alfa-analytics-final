@@ -10,6 +10,7 @@ export interface SourceDefinition extends PriceSource {
 }
 
 export const PRICE_SOURCES: SourceDefinition[] = [
+ {id:'frankfurter-v2',name:'Frankfurter v2',url:'https://frankfurter.dev/',apiEndpoint:'https://api.frankfurter.dev/v2/rates',marketType:'spot',region:'Глобальный',qualityScore:.9,apiKeyRequired:false,attribution:'Frankfurter — расчётные справочные курсы с указанием первичных провайдеров',license:'https://frankfurter.dev/license/ — смешанные справочные курсы, не официальная цена сделки',freeTierLimit:'Без ключа. Серверное обновление не чаще раза в час.',defaultStatus:'pending'},
   {
     id: "yahoo-finance",
     name: "Yahoo Finance (Unofficial)",
