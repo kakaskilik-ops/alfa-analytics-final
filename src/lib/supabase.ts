@@ -39,3 +39,39 @@ export const supabase: SupabaseClient | null = SUPABASE_CONFIGURED
       },
     })
   : null;
+/** Edge analysis needs a longer deadline than small database reads. Credentials stay scoped to the configured Supabase URL. */
+export async function invokeAnalysis(
+  body: unknown,
+  accessToken: string,
+): Promise<unknown> {
+  if (!SUPABASE_CONFIGURED) throw new Error("Сервер ИИ не настроен.");
+  const response = await fetch(
+    `${url!.replace(/\/$/, "")}/functions/v1/ai-analyze`,
+    {
+      method: "POST",
+      signal: AbortSignal.timeout(90000),
+      headers: {
+        "Content-Type": "application/json",
+        apikey: key!,
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(body),
+    },
+  );
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Некорректный ответ сервера ИИ.");
+  }
+  if (!response.ok) {
+    const error =
+      data && typeof data === "object" && "error" in data
+        ? (data as { error: unknown }).error
+        : null;
+    throw new Error(
+      typeof error === "string" ? error : "Сервис ИИ недоступен.",
+    );
+  }
+  return data;
+}

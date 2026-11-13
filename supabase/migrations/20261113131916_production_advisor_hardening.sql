@@ -1,0 +1,22 @@
+-- Resolve production advisors without widening browser access or deleting data.
+CREATE POLICY service_daily_budget ON public.ai_daily_budget FOR ALL TO service_role USING(true) WITH CHECK(true);
+CREATE POLICY service_request_limits ON public.ai_request_limits FOR ALL TO service_role USING(true) WITH CHECK(true);
+CREATE POLICY service_payloads ON public.ingestion_payloads FOR ALL TO service_role USING(true) WITH CHECK(true);
+CREATE POLICY service_news_runs ON public.news_ingestion_runs FOR ALL TO service_role USING(true) WITH CHECK(true);
+ALTER POLICY select_own_favorites ON public.favorites USING((select auth.uid())=user_id);
+ALTER POLICY insert_own_favorites ON public.favorites WITH CHECK((select auth.uid())=user_id);
+ALTER POLICY update_own_favorites ON public.favorites USING((select auth.uid())=user_id) WITH CHECK((select auth.uid())=user_id);
+ALTER POLICY delete_own_favorites ON public.favorites USING((select auth.uid())=user_id);
+ALTER POLICY read_own_summaries ON public.analytical_summaries USING((select auth.uid())=owner_id);
+CREATE INDEX quality_records_metal_idx ON public.data_quality_records(metal_id);
+CREATE INDEX quality_records_source_idx ON public.data_quality_records(source_id);
+CREATE INDEX favorites_metal_idx ON public.favorites(metal_id);
+CREATE INDEX coverage_source_idx ON public.metal_source_coverage(source_id);
+CREATE INDEX news_articles_source_idx ON public.news_articles(source_id);
+CREATE INDEX news_runs_source_idx ON public.news_ingestion_runs(source_id);
+CREATE INDEX news_links_metal_idx ON public.news_metal_links(metal_id);
+CREATE INDEX history_source_idx ON public.price_history(source_id);
+CREATE INDEX history_region_idx ON public.price_history(region_code);
+CREATE INDEX history_specification_idx ON public.price_history(specification_id);
+CREATE INDEX quotation_specification_idx ON public.price_quotations(specification_id);
+CREATE INDEX update_logs_source_idx ON public.update_logs(source_id);

@@ -105,7 +105,7 @@ export default function QuotesTable({
                   <DataStatusBadge status={quote.dataStatus} />
                 </td>
                 <td className="px-5 py-4 text-right font-medium tabular-nums text-ink-100">
-                  {formatPrice(quote.price)}{" "}
+                  {formatPrice(quote.price, quote.metal.currency)}{" "}
                   <span className="text-xs text-ink-400">
                     /{" "}
                     {quote.metal.unit === "ozt"
@@ -118,7 +118,7 @@ export default function QuotesTable({
                 <td className="px-5 py-4 text-right">
                   <Delta
                     value={quote.change}
-                    text={formatPriceChange(quote.change)}
+                    text={formatPriceChange(quote.change, quote.metal.currency)}
                     className="justify-end"
                   />
                 </td>

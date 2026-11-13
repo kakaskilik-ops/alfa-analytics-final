@@ -1,3 +1,4 @@
+import { METAL_IDS } from "../../supabase/functions/_shared/universe";
 import type { Metal } from "@/types/market";
 
 const EXCHANGE_TYPES = ["Биржевая", "Спотовая", "Оптовая"];
@@ -11,7 +12,7 @@ const REGIONAL = ["Европа", "США", "Китай", "Россия"];
 
 const COMMON_MARKETS = ["exchange", "spot", "wholesale"];
 
-export const METALS: Metal[] = [
+const CATALOG_ARCHIVE: Metal[] = [
   // ===== ЦВЕТНЫЕ МЕТАЛЛЫ =====
   {
     id: "copper",
@@ -2354,14 +2355,14 @@ const ADDITIONAL_MATERIALS: [string, Metal["categoryId"], string[]][] = [
   ),
 ];
 const knownNames = new Set(
-  METALS.flatMap((m) => [m.nameRu, m.symbol, ...m.aliases]).map((n) =>
+  CATALOG_ARCHIVE.flatMap((m) => [m.nameRu, m.symbol, ...m.aliases]).map((n) =>
     n.toLowerCase(),
   ),
 );
 for (const [name, categoryId, applications] of ADDITIONAL_MATERIALS) {
   if (knownNames.has(name.toLowerCase())) continue;
   const id = `grade-${name.toLowerCase().replace(/[^a-zа-яё0-9]+/gu, "-")}`;
-  METALS.push({
+  CATALOG_ARCHIVE.push({
     id,
     symbol: name,
     name,
@@ -2387,6 +2388,34 @@ for (const [name, categoryId, applications] of ADDITIONAL_MATERIALS) {
   knownNames.add(name.toLowerCase());
 }
 
+CATALOG_ARCHIVE.push({
+  id: "chromium",
+  symbol: "Cr",
+  name: "Chromium",
+  nameRu: "Хром",
+  aliases: ["хром", "хрома"],
+  atomicNumber: 24,
+  categoryId: "non-ferrous",
+  unit: "kg",
+  currency: "USD",
+  description:
+    "Хром для промышленного легирования. Коммерческая чистота и форма подтверждаются сертификатом партии.",
+  applications: ["Легирование", "Покрытия"],
+  quoteTypes: ["Спотовая", "Оптовая"],
+  regions: ["Европа", "США", "Азия"],
+  marketTypes: ["spot", "wholesale"],
+  priceFactors: ["Производство", "Спрос", "Условия поставки"],
+});
+export const METALS: Metal[] = METAL_IDS.map((id) => {
+  const metal = CATALOG_ARCHIVE.find((m) => m.id === id);
+  if (!metal) throw new Error(`Missing catalogue entry: ${id}`);
+  return {
+    ...metal,
+    unit: "kg",
+    currency: "USD",
+    regions: ["Европа", "США", "Азия"],
+  };
+});
 export const METAL_MAP: Record<string, Metal> = Object.fromEntries(
   METALS.map((metal) => [metal.id, metal]),
 );

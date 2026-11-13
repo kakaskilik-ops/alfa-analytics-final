@@ -1,38 +1,61 @@
-unit-final.log
+stage2-unit.log
 
 > alfa-analytics@1.0.0 test
 > vitest run
 
 
- RUN  v5.1.0 /workspace/work/alfa
+ RUN  v5.1.0 /workspace/work/alfa-analytics-final
 
 
- Test Files  1 passed (1)
-      Tests  47 passed (47)
-   Start at  14:19:09
-   Duration  464ms (import 49%, transform 37%, tests 10%, worker 4%)
+ Test Files  3 passed (3)
+      Tests  78 passed (78)
+   Start at  16:35:42
+   Duration  1.01s (import 55%, transform 23%, tests 17%, worker 5%)
+
+    Isolate  3 workers spawned · ~195ms startup each (spawn + environment, per file)
+             at least ~391ms faster with isolate: false — reuses workers across files instead of one per file
 
 
 
-deno-tests-final.log
-running 11 tests from ./work/alfa/supabase/functions/_shared/providers_test.ts
-provider: canonical mass normalization ... ok (800µs)
-provider rejects {"price":0} ... ok (277µs)
-provider rejects {"currency":"RUB"} ... ok (35µs)
-provider rejects {"unit":"short-ton"} ... ok (70µs)
-provider rejects {"unit":"constructor"} ... ok (88µs)
+stage2-server-tests.log
+Check supabase/functions/_shared/providers_test.ts
+Check supabase/functions/_shared/stage2_test.ts
+running 11 tests from ./supabase/functions/_shared/providers_test.ts
+provider: canonical mass normalization ... ok (728µs)
+provider rejects {"price":0} ... ok (349µs)
+provider rejects {"currency":"RUB"} ... ok (54µs)
+provider rejects {"unit":"short-ton"} ... ok (46µs)
+provider rejects {"unit":"constructor"} ... ok (79µs)
 provider rejects {"publishedAt":"bad"} ... ok (56µs)
-provider rejects {"sourceUrl":"javascript:alert(1)"} ... ok (178µs)
-provider rejects {"grade":""} ... ok (46µs)
-provider rejects {"priceType":"unknown"} ... ok (58µs)
-provider rejects {"composition":42} ... ok (59µs)
-http: only POST and configured Origin ... ok (13ms)
+provider rejects {"sourceUrl":"javascript:alert(1)"} ... ok (121µs)
+provider rejects {"grade":""} ... ok (81µs)
+provider rejects {"priceType":"unknown"} ... ok (47µs)
+provider rejects {"composition":42} ... ok (43µs)
+http: only POST and configured Origin ... ok (16ms)
+------- post-test output -------
+(node:9230) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+----- post-test output end -----
+running 10 tests from ./supabase/functions/_shared/stage2_test.ts
+regional provider: Asia requires country and certified content ... ok (1ms)
+history keeps region, country and exact commercial key ... ok (686µs)
+canonical adapter validates source identity ... ok (194µs)
+feed transport refuses redirect outside approved hosts ... ok (6ms)
+OpenAI transport uses mocked response only and validates translations ... ok (958µs)
+server handlers return configuration unavailable without secrets ... ok (4ms)
+AI endpoint authenticates, validates input and does not imitate answers without key ... ok (10ms)
+AI endpoint assembles factual context and uses mocked model response ... ok (4ms)
+AI endpoint refuses a depleted global budget without model request ... ok (3ms)
+news collector imports allowed metadata and skips duplicates on repeated run ... ok (11ms)
 
-ok | 11 passed | 0 failed (19ms)
+ok | 21 passed | 0 failed (200ms)
 
 
 
-db-results.txt
+stage2-db-final.log
+
+> alfa-analytics@1.0.0 test:db
+> node scripts/test-database.mjs
+
 PASS 20261109141643_create_metals_analytics_schema.sql
 PASS 20261109141704_seed_metals_sources_coverage.sql
 PASS 20261109141716_secure_collector_and_schedule.sql
@@ -40,23 +63,56 @@ PASS 20261109141751_full_metals_catalog_without_demo_prices.sql
 PASS 20261109141810_clear_metal_demo_parameter_defaults.sql
 PASS 20261112090000_quality_and_analytics.sql
 PASS 20261112090100_catalog_sync.sql
-PASS atomic quota: 10 accepted, 2 denied
-PASS anonymous read catalogue; write and internal details denied
-PASS RLS excludes demonstration records
+PASS 20261112180000_regional_markets_and_news.sql
+PASS legacy 129 materials preserved plus chromium; exactly 13 active; 3 regional markets
+PASS atomic shared token budget blocks third reservation
+PASS atomic feed frequency claim, repeated call and future Retry-After denied
+PASS public reads scoped quotes and news, internal budget/feed settings/logs/writes denied
+PASS database rejects out-of-scope news
 
 
-browser-results.txt
-PASS market missing-data state: no fake prices/NaN
-PASS catalogue search, details, favorites, Escape
-PASS analytics and CSV download
-PASS source registry, methodology and offline state
-PASS AI unavailable response without fabricated analysis
-PASS all 5 pages at mobile width 390px
-PASS no browser page errors
+stage2-playwright.log
+
+> alfa-analytics@1.0.0 test:browser
+> playwright test
+
+[WebServer] (node:8747) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:8760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:8785) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:8807) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:8825) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/browser/fixtures.spec.ts:59:1 › regional histories, FX, news and mobile rendering (8.9s)
+  ✓  2 tests/browser/offline.spec.ts:3:1 › offline catalogue, regional controls, news and mobile navigation (7.0s)
+
+  2 passed (22.4s)
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
 
 
-browser-data-results.txt
-PASS test fixtures: real-data path, index, 2 price charts, source median 11 USD/kg, period filtering, mobile catalogue; no page errors
+stage2-deno-check.log
+Check supabase/functions/ai-analyze/index.ts
+Check supabase/functions/collect-news/index.ts
+Check supabase/functions/ingest-quotes/index.ts
+Check supabase/functions/ingest-regional-history/index.ts
+Check supabase/functions/collect-market-data/index.ts
+
+
+stage2-ci-final.log
+npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+
+added 328 packages in 6s
 
 
 npm audit: {"info": 0, "low": 0, "moderate": 0, "high": 0, "critical": 0, "total": 0}

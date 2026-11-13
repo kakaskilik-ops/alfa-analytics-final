@@ -30,7 +30,7 @@ const record = (
   sourceUrl: "https://example.com/quote",
   currency: "USD",
   unit: "kg",
-  region: "Россия",
+  region: "Европа",
   marketType: "wholesale",
   grade: "М1",
   productForm: "Катод",
@@ -41,6 +41,10 @@ const record = (
   timestamp: now - 1000,
   retrievedAt: now,
   attribution: "Источник",
+  country: null,
+  purity: 99.9,
+  elementContent: null,
+  deliveryTerms: "FCA склад",
   ...patch,
 });
 describe("Расчёт рыночной оценки", () => {
@@ -178,7 +182,7 @@ describe("Валидация входящих котировок", () => {
     ));
 });
 describe("История и отсутствие данных", () => {
-  const gold = METALS.find((m) => m.id === "gold")!;
+  const gold = { ...METALS.find((m) => m.id === "tungsten")!, unit: "ozt" };
   const at = new Date(now);
   const live = {
     metalId: "gold",
@@ -281,44 +285,25 @@ describe("Валюты, экспорт и каталог", () => {
     );
     expect(buildExcelXml([q], "1M", new Date(now))).not.toContain("NaN");
   });
-  it("каталог содержит обязательные марки без дублирования id", () => {
-    expect(new Set(METALS.map((m) => m.id)).size).toBe(METALS.length);
-    expect(CATEGORIES.length).toBe(9);
-    for (const name of [
-      "ПОС-18",
-      "ПОС-30",
-      "ПОС-40",
-      "ПОС-60",
-      "Б83",
-      "Б16",
-      "Б88",
-      "БН",
-      "Р6М3",
-      "Р9М4К8",
-      "Р6М5",
-      "Р18",
-      "Р6М5К5",
-      "Р9",
-      "Р12",
-      "Б55",
-      "Б19",
-      "Б28",
-      "ЭИ943",
-      "ЭИ904Л",
-      "МН18",
-      "Н28",
-      "МН40",
-      "Н65",
-      "ВТ1-0",
-      "ВК-ТК",
-      "W/Cu/Ni",
-      "W/Ni/Co",
-      "W/Ni",
-      "W/Ni/Fe",
-      "29НК",
-      "49КФ",
-      "Ц0",
-    ])
-      expect(METALS.some((m) => m.nameRu === name)).toBe(true);
+  it("каталог содержит ровно 13 требуемых материалов", () => {
+    expect(METALS.map((m) => m.symbol)).toEqual([
+      "W",
+      "Mo",
+      "FeMo",
+      "FeW",
+      "Sn",
+      "Zn",
+      "Cu",
+      "Al",
+      "Cr",
+      "Co",
+      "Zr",
+      "Nb",
+      "Ta",
+    ]);
+    expect(new Set(METALS.map((m) => m.id)).size).toBe(13);
+    expect(
+      CATEGORIES.every((c) => METALS.some((m) => m.categoryId === c.id)),
+    ).toBe(true);
   });
 });

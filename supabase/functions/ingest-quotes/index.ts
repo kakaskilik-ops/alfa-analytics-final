@@ -81,13 +81,17 @@ Deno.serve(async (req: Request) => {
         r.product_form,
         r.composition,
         r.price_type,
+        r.country,
+        r.purity,
+        r.element_content,
+        r.delivery_terms,
       ]);
       if (seen.has(identity)) return reply({ error: "duplicate_quote" }, 400);
       seen.add(identity);
     }
     const { error } = await db.from("price_quotations").upsert(rows, {
       onConflict:
-        "metal_id,source_id,quoted_at,region,market_type,grade,product_form,composition,price_type",
+        "metal_id,source_id,quoted_at,region,market_type,grade,product_form,composition,price_type,country,purity,element_content,delivery_terms",
     });
     if (error) return reply({ error: "batch_rejected" }, 400);
     return reply({ accepted: rows.length });

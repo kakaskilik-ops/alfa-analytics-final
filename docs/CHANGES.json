@@ -1,432 +1,596 @@
-[
-  {
-    "file": ".env.example",
-    "status": "added",
-    "sha256": "d110176d7ab3b107ed1294b76feda84fdcbdce768614d50be2a7c3cdd4c9dd49"
-  },
-  {
-    "file": ".gitignore",
-    "status": "added",
-    "sha256": "aea31c8dbdd875e3952064abbd48cba2eef9e477cdb070b453a1e15d85997b18"
-  },
-  {
-    "file": "README.md",
-    "status": "added",
-    "sha256": "a6a05c7170214ec2e4543edcf9e2f6c38ad17f23a521df147adb03ed62dbbffc"
-  },
-  {
-    "file": "docs/API.md",
-    "status": "added",
-    "sha256": "9afbb376380d636b9b9800513a4a52551833be016ac013559917d2d42f647d09"
-  },
-  {
-    "file": "docs/ARCHIVE-INVENTORY.json",
-    "status": "added",
-    "sha256": "d87b09dffa9e96a2c8a74de9c2da4d8cd492a89f2a7f5adf68f0bc6418e9da4e"
-  },
-  {
-    "file": "docs/METHODOLOGY.md",
-    "status": "added",
-    "sha256": "ddfb15e29a9f063c067b1e32f37241dbe3473c5750fd591df752bedc6c225318"
-  },
-  {
-    "file": "docs/REPORT.md",
-    "status": "added",
-    "sha256": "690a0fc52baac795466cc5881a2c143dd66087f4b6979cc7d9339de5610f6b9e"
-  },
-  {
-    "file": "docs/VERIFICATION.txt",
-    "status": "added",
-    "sha256": "76e88b57d7c7e4ca8fc79110913825976a3d516a6a76f82c0bace9340b67c38c"
-  },
-  {
-    "file": "eslint.config.js",
-    "status": "changed",
-    "sha256": "aa22806a57a2db3b30f285629fdbc8e68c8e3f67788424c8bf97348479c2995b"
-  },
-  {
-    "file": "index.html",
-    "status": "changed",
-    "sha256": "e0385a42b6c8bb03d8c665c852c9f52caa9625ece86fa6bbe2d7aee1a9b52d02"
-  },
-  {
-    "file": "ops/Caddyfile",
-    "status": "added",
-    "sha256": "7a9493f5e2ee68f972f872f2667b3ac44de9159ba27f34380b4e572d083f522a"
-  },
-  {
-    "file": "ops/schedule.sql",
-    "status": "added",
-    "sha256": "0f3b4a44eea72fc2c72cc2af128e6a83f37494dc3434d7740cae361207353475"
-  },
-  {
-    "file": "package-lock.json",
-    "status": "changed",
-    "sha256": "3eecf2eba2a1d5b3e8491a1871c490b699838246c30b6150835c94bb68ca4d42"
-  },
-  {
-    "file": "package.json",
-    "status": "changed",
-    "sha256": "24c6843927713b58cb95fd92e70e81e5952c3b2c4b2144d060aba1861e68e417"
-  },
-  {
-    "file": "postcss.config.js",
-    "status": "retained",
-    "sha256": "e32657baf631d7c5f4dc67b4b2ee0ec8e7d5b3c41860e09cddce7c0377cd80bc"
-  },
-  {
-    "file": "public/favicon.svg",
-    "status": "added",
-    "sha256": "bdcab2ef25613928b0ff057f3496bb5ed012cc3febb8bb7f7fb6356c9aa11dc0"
-  },
-  {
-    "file": "scripts/generate-catalog.mjs",
-    "status": "added",
-    "sha256": "5d0fec0bae0626ae667dfee40fd5cc8a6f6eb0460868144c134477dbffe183d9"
-  },
-  {
-    "file": "src/App.tsx",
-    "status": "changed",
-    "sha256": "82ee1e6c2d61d12b18f0ad20d52c25e54962fcc4c9f32fcb098f29a85f0dfc9e"
-  },
-  {
-    "file": "src/components/ai/ChatBubble.tsx",
-    "status": "changed",
-    "sha256": "fc1d34ac1c94a768eee527551755fcdceb97254240123efc2d633ab51cdeb61b"
-  },
-  {
-    "file": "src/components/brand/Logo.tsx",
-    "status": "changed",
-    "sha256": "fce631ea1f9e99842331b78bf7bbe5d39502a71ec04e45fc2f0ae1f3fd79faca"
-  },
-  {
-    "file": "src/components/charts/PriceChart.tsx",
-    "status": "changed",
-    "sha256": "680f3de1e3d131614aeb3feb867892655bf831723e689dc231dfcf3132e266c8"
-  },
-  {
-    "file": "src/components/common/DataStatusBadge.tsx",
-    "status": "changed",
-    "sha256": "eb85b6cc169f8091c98086ab8ca90ea616f4d1e39e5f6db2d0693af4ce779660"
-  },
-  {
-    "file": "src/components/common/Delta.tsx",
-    "status": "changed",
-    "sha256": "5cc1f173af952dedc947f36fcd81a0a202cb0a17c3460a3b3f1ebe7fb021849b"
-  },
-  {
-    "file": "src/components/common/ErrorBoundary.tsx",
-    "status": "added",
-    "sha256": "9a323578daafb73a2ddfac66bd5750dad6ea66b40a2230c98e42a01d4108ed20"
-  },
-  {
-    "file": "src/components/common/LastUpdated.tsx",
-    "status": "changed",
-    "sha256": "5a56faeb772e3c3007b102fe7dfa95c5b2ab1258fdc2c43260f729be418a8f87"
-  },
-  {
-    "file": "src/components/common/Panel.tsx",
-    "status": "changed",
-    "sha256": "d0174e2511d60390e3d658827a9f810562f3cdcd844b94122703fa535a9c1dd4"
-  },
-  {
-    "file": "src/components/common/PeriodSwitcher.tsx",
-    "status": "changed",
-    "sha256": "ce42d3f8bf44689edf2b45089f653502101b69edd05050d2e07c554979950995"
-  },
-  {
-    "file": "src/components/common/SearchInput.tsx",
-    "status": "changed",
-    "sha256": "947c82dfd0a71f2e3e04e80afca5190be07d3557ab2f08d3b438c59d9b5978b8"
-  },
-  {
-    "file": "src/components/layout/PageHeader.tsx",
-    "status": "changed",
-    "sha256": "83957a2b52a31cc655b007fb755a806b2376f2df8587b29aedfb02d745c0f238"
-  },
-  {
-    "file": "src/components/layout/Sidebar.tsx",
-    "status": "changed",
-    "sha256": "fecb24d53a2f15219ecc1a44654bf0992168424fe56ecc9930134889c995e1a8"
-  },
-  {
-    "file": "src/components/market/MarketStatCard.tsx",
-    "status": "changed",
-    "sha256": "8bf9d04cfa0977b7a8b061f2c8be3e0082172dc4afd4f799dd1e6fb8acfa9a9f"
-  },
-  {
-    "file": "src/components/market/MoversList.tsx",
-    "status": "changed",
-    "sha256": "7824a444423e421b35c8ec617cd5e95e85f4eab7bae83d9b4d27d66da30b423b"
-  },
-  {
-    "file": "src/components/market/QuotesTable.tsx",
-    "status": "changed",
-    "sha256": "0cee72dea1df040346ee6ca5c934840a73bca13d5e0b4be63a6182a99efb2217"
-  },
-  {
-    "file": "src/components/metals/MetalCard.tsx",
-    "status": "changed",
-    "sha256": "f7f1edc133f50ea5c24d1646c7ee9686c0eace507a951600c3e1fffefe8ea988"
-  },
-  {
-    "file": "src/components/metals/MetalDetailDialog.tsx",
-    "status": "changed",
-    "sha256": "0949031ca97a5c774924fed69390e54bfe4f5f475a7f38ca983a6fb36b05aa5f"
-  },
-  {
-    "file": "src/components/metals/PriceConverter.tsx",
-    "status": "changed",
-    "sha256": "5698383aca26fa53a4f31d3db940a264eee681178fa1c88aa732350100f8760d"
-  },
-  {
-    "file": "src/components/metals/PriceSummaryPanel.tsx",
-    "status": "changed",
-    "sha256": "34e70ae5da6c50d3eb2c62fb6946e88583c6cbf21efef6588d010ea72f86baf8"
-  },
-  {
-    "file": "src/data/categories.ts",
-    "status": "changed",
-    "sha256": "31dd64dda02751d254d7ba4fc61d81d917bb196dc6fbf1e5a82b9c980be41d77"
-  },
-  {
-    "file": "src/data/metals.ts",
-    "status": "changed",
-    "sha256": "e1daaa8f4f68a3de4163b82e1924e129e8336cb836a280988db042e99e7c4d81"
-  },
-  {
-    "file": "src/data/periods.ts",
-    "status": "changed",
-    "sha256": "3758b22ea1770afca4236ccc64b3528217d94f6be058f29af75c21686bf55ce6"
-  },
-  {
-    "file": "src/data/sources.ts",
-    "status": "changed",
-    "sha256": "8b3c0b72b70ee7f34b3749391a0e38514185a0e50846ffa5e2b357a02a1dcbb1"
-  },
-  {
-    "file": "src/hooks/useAsyncData.ts",
-    "status": "changed",
-    "sha256": "606e43b9f60066bda0422249b225cfe09a51bedee04dd49868c98fddd51ab6e3"
-  },
-  {
-    "file": "src/hooks/useFavorites.ts",
-    "status": "changed",
-    "sha256": "4d1272ae80dcbf0da514bc21f850b179b1aed29be81efa114197f711337e4ddc"
-  },
-  {
-    "file": "src/index.css",
-    "status": "retained",
-    "sha256": "e3510467a2dc2b72c7c7c57a0e2c0b0de2ddbc92ea4b7ff008065903507da71d"
-  },
-  {
-    "file": "src/lib/cn.ts",
-    "status": "changed",
-    "sha256": "66ce082b8f7d70f89335eb6f9de86ebf1adfb8715f244845db88d10f98cada06"
-  },
-  {
-    "file": "src/lib/format.ts",
-    "status": "changed",
-    "sha256": "ddc350c83c789ca574c7f86c01fcc2f27aefdce47b006a45c1ca2b945e91d6d9"
-  },
-  {
-    "file": "src/lib/supabase.ts",
-    "status": "changed",
-    "sha256": "c2789afa924dfe2bf59106a0257d5f03a68da2bca0fd43ab24193c64bf269bad"
-  },
-  {
-    "file": "src/main.tsx",
-    "status": "changed",
-    "sha256": "b29b978bb603a32c324e9c76c76412ea364e8d26888fabd5c9aa6dc7e09439ec"
-  },
-  {
-    "file": "src/pages/AiAnalystPage.tsx",
-    "status": "changed",
-    "sha256": "de08a833a2311ac2b3fd2f902282440873ba8d9a86a60ad9faa3dc8b65d5a740"
-  },
-  {
-    "file": "src/pages/AnalyticsPage.tsx",
-    "status": "added",
-    "sha256": "720d23fb300cc1c36b58ae2510910c130114338097976bcb3236f5a76ea91fd4"
-  },
-  {
-    "file": "src/pages/MarketPage.tsx",
-    "status": "changed",
-    "sha256": "25bd36b43e43e8180a9e99ded5b8570f061c904f86249c3d11af1bdc83248c56"
-  },
-  {
-    "file": "src/pages/MetalsPage.tsx",
-    "status": "changed",
-    "sha256": "11d67886c0c852ec56a0b0c46e85ff0469fa9415720b2fe6e630f99cf35bd583"
-  },
-  {
-    "file": "src/pages/SourcesPage.tsx",
-    "status": "changed",
-    "sha256": "3ed87436b86f6ee8c28c9c177f601c7c5a1925cbd9918c5b7911c79beb8689f7"
-  },
-  {
-    "file": "src/services/ai.ts",
-    "status": "changed",
-    "sha256": "9bf8918821aaa8ab31d8ed86e723c3771b2ffa8837f32cbccd960b015a8871c0"
-  },
-  {
-    "file": "src/services/averagePrice.ts",
-    "status": "changed",
-    "sha256": "1871e113c18aa35c4694defdcf1e76617f4a1651548e25522e6faff8e23fa131"
-  },
-  {
-    "file": "src/services/currency.ts",
-    "status": "changed",
-    "sha256": "db8e92ed40e9ad6fcc20770431517e53465e4f03049909d426390ccecf8e2f32"
-  },
-  {
-    "file": "src/services/database.ts",
-    "status": "changed",
-    "sha256": "5ced33bf29f35eb71d3f705822b4530ec9a7f25d642899a8e9af29dfa026a2f7"
-  },
-  {
-    "file": "src/services/export.ts",
-    "status": "changed",
-    "sha256": "0889280cd93a9cabbd3b54b1708b2d8a1b47a70b13d6f857ed37e7f50e5a0786"
-  },
-  {
-    "file": "src/services/liveData.ts",
-    "status": "changed",
-    "sha256": "a2fd3f2dee025feb08501355668e64f40ee8979c2c686923f633e3120f65c7a1"
-  },
-  {
-    "file": "src/services/market.ts",
-    "status": "changed",
-    "sha256": "803940be2636f8f1fab563b49498f73317a9bb271060c0c77035379600cb1c96"
-  },
-  {
-    "file": "src/services/quoteValidation.ts",
-    "status": "added",
-    "sha256": "8fa51a98fa0adf67c4e96d3c9178f3f3ea29d52c96938adc798125022b4fb14d"
-  },
-  {
-    "file": "src/services/sources.ts",
-    "status": "changed",
-    "sha256": "ae57ea7cd483663a8223a9a57f01fca0695dabefd509195997498c79d07b315d"
-  },
-  {
-    "file": "src/tests/market.test.ts",
-    "status": "added",
-    "sha256": "3254c1fc551fccc9a544a6810ca88769ffcfece6f8ce88a77b8362b55755c2a9"
-  },
-  {
-    "file": "src/types/market.ts",
-    "status": "changed",
-    "sha256": "6afb26a3ddca93ec8b600f871ab3f9faae2e7fa0bb28f1bd14e3d94105057d07"
-  },
-  {
-    "file": "src/vite-env.d.ts",
-    "status": "retained",
-    "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
-  },
-  {
-    "file": "supabase/.env.example",
-    "status": "added",
-    "sha256": "169582b0582c9127f1fef3c017945355869fd262c670f997ce83f8754a5e30fa"
-  },
-  {
-    "file": "supabase/config.toml",
-    "status": "changed",
-    "sha256": "32afa74522b63fa2579799693047f464058c3f72745cc843f95d3a70f0310ba6"
-  },
-  {
-    "file": "supabase/functions/_shared/http.ts",
-    "status": "added",
-    "sha256": "b37c55c3baa89a6160d840fa95f5426b95cbd4d8a0fa031ba9ac75c423aa6ede"
-  },
-  {
-    "file": "supabase/functions/_shared/providers.ts",
-    "status": "added",
-    "sha256": "aed376744b008dfe7c4a65f220061fa4c5227d019191c4aad33bd15745b154ae"
-  },
-  {
-    "file": "supabase/functions/_shared/providers_test.ts",
-    "status": "added",
-    "sha256": "6dcbdc636ed2be89f8d786b56068ee2444c9c9f08a0f11fcf444f51777b315d7"
-  },
-  {
-    "file": "supabase/functions/ai-analyze/index.ts",
-    "status": "added",
-    "sha256": "0db1d7484df08808141c7636e68180488f31785f1262c49f65445e0de8dc08a8"
-  },
-  {
-    "file": "supabase/functions/collect-market-data/index.ts",
-    "status": "changed",
-    "sha256": "590ef4e70ec66addc60534f7857e86aaace744066247a722d42fd68d1f469f7f"
-  },
-  {
-    "file": "supabase/functions/ingest-quotes/index.ts",
-    "status": "added",
-    "sha256": "ddb69eaef94f51dd99fbdb3151f8b91d70317c11932e7bbda60f90d796465378"
-  },
-  {
-    "file": "supabase/migrations/20261109141643_create_metals_analytics_schema.sql",
-    "status": "retained",
-    "sha256": "32eb68909849d3d78d16f0a439809e8c3bc975024d39feb0356daea8bf6af15a"
-  },
-  {
-    "file": "supabase/migrations/20261109141704_seed_metals_sources_coverage.sql",
-    "status": "retained",
-    "sha256": "250d2b75a50564408bf5f9bc64eb6a332972a03c88274beebda78d29650a56f7"
-  },
-  {
-    "file": "supabase/migrations/20261109141716_secure_collector_and_schedule.sql",
-    "status": "changed",
-    "sha256": "d47b7a00d15003395077f3eeb421f139f735305903ba3499ad1997b3951dd076"
-  },
-  {
-    "file": "supabase/migrations/20261109141751_full_metals_catalog_without_demo_prices.sql",
-    "status": "retained",
-    "sha256": "987f384879caa174a7c8d79f7603f4fdd9ea67444453a5b64be9394fbdb2e1ce"
-  },
-  {
-    "file": "supabase/migrations/20261109141810_clear_metal_demo_parameter_defaults.sql",
-    "status": "retained",
-    "sha256": "8693c917d3dd004c3ce17d3409eb7b4b991933ec7a065faeb9cce76309075e5c"
-  },
-  {
-    "file": "supabase/migrations/20261112090000_quality_and_analytics.sql",
-    "status": "added",
-    "sha256": "19ac0574614fd3556ad52c16c46749da70116f27dc50a2ef5047cc024e3887e5"
-  },
-  {
-    "file": "supabase/migrations/20261112090100_catalog_sync.sql",
-    "status": "added",
-    "sha256": "481164cbda8e8f5f8046fddf7b65e61eb62ef5b2e37bd7beffd9a12173981e59"
-  },
-  {
-    "file": "tailwind.config.js",
-    "status": "changed",
-    "sha256": "745aad171fcb96f06ece3e57a06a8a7e26546e323e734495ceeeb69da4c9c91b"
-  },
-  {
-    "file": "tsconfig.app.json",
-    "status": "retained",
-    "sha256": "9750ea1ad666ba467781ab8e047a2337b7692b774de0865a98dbd189ca3fd87e"
-  },
-  {
-    "file": "tsconfig.json",
-    "status": "retained",
-    "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808"
-  },
-  {
-    "file": "tsconfig.node.json",
-    "status": "retained",
-    "sha256": "a96b9ba5e40d95b92adf56431fdf9cbe25b5c2557621f0666615bff6889dfc50"
-  },
-  {
-    "file": "vite.config.ts",
-    "status": "changed",
-    "sha256": "179923b0b0681a8a3822fb9349b56f28be7f12fa0dcf17bacdfcab5f771a6ac5"
-  },
-  {
-    "file": "vitest.config.ts",
-    "status": "added",
-    "sha256": "17d601594098cfcefe8b53d76b775edfb15f893cdcd138e7dc661e86d5741702"
-  }
-]
+{
+  "base_commit": "3c8ef6f63d613b978dd2af8f389436c745f69745",
+  "branch": "feature/world-markets-news-ai",
+  "files": [
+    {
+      "file": ".env.example",
+      "status": "retained",
+      "sha256": "d110176d7ab3b107ed1294b76feda84fdcbdce768614d50be2a7c3cdd4c9dd49"
+    },
+    {
+      "file": ".gitignore",
+      "status": "modified",
+      "sha256": "b92c3f335ea0106d9532434a32f8f332b208a02546f748c02c047d7c45898c17"
+    },
+    {
+      "file": "README.md",
+      "status": "modified",
+      "sha256": "95d3334cd26f1cd0ba9260593a85191ae20e5f931e6b4c7d45d195b4b2a987a0"
+    },
+    {
+      "file": "docs/API.md",
+      "status": "modified",
+      "sha256": "b9ed5318500c8781c4e884be8cb46c35e531d4924cfb43e0fb13247a07904092"
+    },
+    {
+      "file": "docs/ARCHIVE-INVENTORY.json",
+      "status": "retained",
+      "sha256": "d87b09dffa9e96a2c8a74de9c2da4d8cd492a89f2a7f5adf68f0bc6418e9da4e"
+    },
+    {
+      "file": "docs/METHODOLOGY.md",
+      "status": "modified",
+      "sha256": "553cafda80741045eef54e36c9a414f9f84a600ebe550d0b508a3484d77f8be0"
+    },
+    {
+      "file": "docs/REPORT.md",
+      "status": "modified",
+      "sha256": "738c1ee1f812bfce61c54b00059d575f7cefef552b4604230047d76707ef3ef5"
+    },
+    {
+      "file": "docs/SOURCES.md",
+      "status": "added",
+      "sha256": "39cb2a3c6c530399132896a8b6c41f1707a87f4f07d605c445fe45a8c18a1b01"
+    },
+    {
+      "file": "docs/STAGE1-API.md",
+      "status": "added",
+      "sha256": "9afbb376380d636b9b9800513a4a52551833be016ac013559917d2d42f647d09"
+    },
+    {
+      "file": "docs/STAGE1-REPORT.md",
+      "status": "added",
+      "sha256": "690a0fc52baac795466cc5881a2c143dd66087f4b6979cc7d9339de5610f6b9e"
+    },
+    {
+      "file": "docs/STAGE2-FILES.md",
+      "status": "added",
+      "sha256": "0d79e6fe0fb00407c8877b0ebcb8ad8f41969ad1edc15127fc179b66581a576e"
+    },
+    {
+      "file": "docs/VERIFICATION.txt",
+      "status": "modified",
+      "sha256": "b459510a2c43ffa5fa0124f4f76e12ced00c947004a530d9baeee856268156d2"
+    },
+    {
+      "file": "eslint.config.js",
+      "status": "retained",
+      "sha256": "aa22806a57a2db3b30f285629fdbc8e68c8e3f67788424c8bf97348479c2995b"
+    },
+    {
+      "file": "index.html",
+      "status": "retained",
+      "sha256": "e0385a42b6c8bb03d8c665c852c9f52caa9625ece86fa6bbe2d7aee1a9b52d02"
+    },
+    {
+      "file": "ops/Caddyfile",
+      "status": "retained",
+      "sha256": "7a9493f5e2ee68f972f872f2667b3ac44de9159ba27f34380b4e572d083f522a"
+    },
+    {
+      "file": "ops/news-schedule.sql",
+      "status": "added",
+      "sha256": "b3369eaef5634bbead458ff991b182776266261496d8aa7aa4dede0813fba14f"
+    },
+    {
+      "file": "ops/schedule.sql",
+      "status": "retained",
+      "sha256": "0f3b4a44eea72fc2c72cc2af128e6a83f37494dc3434d7740cae361207353475"
+    },
+    {
+      "file": "package-lock.json",
+      "status": "modified",
+      "sha256": "3c74637f8fc1084044edec960d831f5fb7551a36b0f9dbeb4cf4a301267d111f"
+    },
+    {
+      "file": "package.json",
+      "status": "modified",
+      "sha256": "c2fca9dbf07919e056fe4d15911c20a3d6f2b244d7f0f83550a6790d14e5fb64"
+    },
+    {
+      "file": "playwright.config.ts",
+      "status": "added",
+      "sha256": "c7204b4ca03c0444edbc4effb19438f03050f48c7c8c92b579cb4c871af85b7c"
+    },
+    {
+      "file": "postcss.config.js",
+      "status": "retained",
+      "sha256": "e32657baf631d7c5f4dc67b4b2ee0ec8e7d5b3c41860e09cddce7c0377cd80bc"
+    },
+    {
+      "file": "public/favicon.svg",
+      "status": "retained",
+      "sha256": "bdcab2ef25613928b0ff057f3496bb5ed012cc3febb8bb7f7fb6356c9aa11dc0"
+    },
+    {
+      "file": "scripts/generate-catalog.mjs",
+      "status": "modified",
+      "sha256": "7cba6fde323fb43a83234b1e6ec6166071b622c0b9271391fc2c3925a3ae115c"
+    },
+    {
+      "file": "scripts/test-database.mjs",
+      "status": "added",
+      "sha256": "fb4aadd80fbc221a9d0f97e8410641e224765a447b3a0e156fad6d6b4fd80c00"
+    },
+    {
+      "file": "shared/news.ts",
+      "status": "added",
+      "sha256": "a9a0b09957d84e3cbebf8fbb67719fe54e42224885f93c8bdc94fff62e5f5248"
+    },
+    {
+      "file": "src/App.tsx",
+      "status": "modified",
+      "sha256": "ddd653e03a968eda109b4d0abeac7cf60f0666c315858b13b397922bfd190aef"
+    },
+    {
+      "file": "src/components/ai/ChatBubble.tsx",
+      "status": "retained",
+      "sha256": "fc1d34ac1c94a768eee527551755fcdceb97254240123efc2d633ab51cdeb61b"
+    },
+    {
+      "file": "src/components/brand/Logo.tsx",
+      "status": "retained",
+      "sha256": "fce631ea1f9e99842331b78bf7bbe5d39502a71ec04e45fc2f0ae1f3fd79faca"
+    },
+    {
+      "file": "src/components/charts/PriceChart.tsx",
+      "status": "modified",
+      "sha256": "0f1c44dd1e1b3f7ac8e0a5bc4c3663d4f80bdacd714b6f5d27c8d034ac234d5e"
+    },
+    {
+      "file": "src/components/common/DataStatusBadge.tsx",
+      "status": "retained",
+      "sha256": "eb85b6cc169f8091c98086ab8ca90ea616f4d1e39e5f6db2d0693af4ce779660"
+    },
+    {
+      "file": "src/components/common/Delta.tsx",
+      "status": "retained",
+      "sha256": "5cc1f173af952dedc947f36fcd81a0a202cb0a17c3460a3b3f1ebe7fb021849b"
+    },
+    {
+      "file": "src/components/common/ErrorBoundary.tsx",
+      "status": "retained",
+      "sha256": "9a323578daafb73a2ddfac66bd5750dad6ea66b40a2230c98e42a01d4108ed20"
+    },
+    {
+      "file": "src/components/common/LastUpdated.tsx",
+      "status": "retained",
+      "sha256": "5a56faeb772e3c3007b102fe7dfa95c5b2ab1258fdc2c43260f729be418a8f87"
+    },
+    {
+      "file": "src/components/common/Panel.tsx",
+      "status": "retained",
+      "sha256": "d0174e2511d60390e3d658827a9f810562f3cdcd844b94122703fa535a9c1dd4"
+    },
+    {
+      "file": "src/components/common/PeriodSwitcher.tsx",
+      "status": "retained",
+      "sha256": "ce42d3f8bf44689edf2b45089f653502101b69edd05050d2e07c554979950995"
+    },
+    {
+      "file": "src/components/common/SearchInput.tsx",
+      "status": "retained",
+      "sha256": "947c82dfd0a71f2e3e04e80afca5190be07d3557ab2f08d3b438c59d9b5978b8"
+    },
+    {
+      "file": "src/components/layout/PageHeader.tsx",
+      "status": "retained",
+      "sha256": "83957a2b52a31cc655b007fb755a806b2376f2df8587b29aedfb02d745c0f238"
+    },
+    {
+      "file": "src/components/layout/Sidebar.tsx",
+      "status": "modified",
+      "sha256": "1a07debfd453d7079ebd38df9f66e85bacca9935b472df3f3e35376c8b42ed6d"
+    },
+    {
+      "file": "src/components/market/MarketControls.tsx",
+      "status": "added",
+      "sha256": "64f20c6de26e528d42e780cb680d603c5dc417d9d7ff194f9127fd2c15855e46"
+    },
+    {
+      "file": "src/components/market/MarketStatCard.tsx",
+      "status": "retained",
+      "sha256": "8bf9d04cfa0977b7a8b061f2c8be3e0082172dc4afd4f799dd1e6fb8acfa9a9f"
+    },
+    {
+      "file": "src/components/market/MoversList.tsx",
+      "status": "retained",
+      "sha256": "7824a444423e421b35c8ec617cd5e95e85f4eab7bae83d9b4d27d66da30b423b"
+    },
+    {
+      "file": "src/components/market/QuotesTable.tsx",
+      "status": "modified",
+      "sha256": "9741867e27dd33ef1059969cbfba11458988753d5915522f8d974d8fc7869ff9"
+    },
+    {
+      "file": "src/components/market/RegionalComparison.tsx",
+      "status": "added",
+      "sha256": "9aa8b8eb01d4050153a55eb63ad821c11de608aa1dd526c4d330667590c003eb"
+    },
+    {
+      "file": "src/components/metals/MetalCard.tsx",
+      "status": "modified",
+      "sha256": "3b595aa222e80e98f430c165a4dffbb165fe2fa156968a679e76c30a2339dc60"
+    },
+    {
+      "file": "src/components/metals/MetalDetailDialog.tsx",
+      "status": "modified",
+      "sha256": "2b2e53dcf9805ec7c769e91d720f99eb36bf4f708dccb96fc4f26f1f36b987d5"
+    },
+    {
+      "file": "src/components/metals/MetalNews.tsx",
+      "status": "added",
+      "sha256": "9ac72cdbcd02952c28205a86002fb99f983a793fae10263b74f7d2c264143eb5"
+    },
+    {
+      "file": "src/components/metals/PriceConverter.tsx",
+      "status": "modified",
+      "sha256": "d0066014a4647eebf091b6c51215637ab94098eb09b8931bd8692d3e85967c78"
+    },
+    {
+      "file": "src/components/metals/PriceSummaryPanel.tsx",
+      "status": "retained",
+      "sha256": "34e70ae5da6c50d3eb2c62fb6946e88583c6cbf21efef6588d010ea72f86baf8"
+    },
+    {
+      "file": "src/data/categories.ts",
+      "status": "modified",
+      "sha256": "53bc4d53d4708b0ec8094a7f56c7f885d18380bdcb98b7fc30594a6e75b0c6a0"
+    },
+    {
+      "file": "src/data/displayModes.ts",
+      "status": "added",
+      "sha256": "4b5d35493c7766dbe6de8e53c8507bc57c3197850e0b6e00a4479b3fef3361e6"
+    },
+    {
+      "file": "src/data/metals.ts",
+      "status": "modified",
+      "sha256": "2b2f5113e749675185271130ca4f264fef5da6255e135b74e1306dee38d467d5"
+    },
+    {
+      "file": "src/data/periods.ts",
+      "status": "retained",
+      "sha256": "3758b22ea1770afca4236ccc64b3528217d94f6be058f29af75c21686bf55ce6"
+    },
+    {
+      "file": "src/data/sources.ts",
+      "status": "retained",
+      "sha256": "8b3c0b72b70ee7f34b3749391a0e38514185a0e50846ffa5e2b357a02a1dcbb1"
+    },
+    {
+      "file": "src/hooks/useAsyncData.ts",
+      "status": "retained",
+      "sha256": "606e43b9f60066bda0422249b225cfe09a51bedee04dd49868c98fddd51ab6e3"
+    },
+    {
+      "file": "src/hooks/useFavorites.ts",
+      "status": "retained",
+      "sha256": "4d1272ae80dcbf0da514bc21f850b179b1aed29be81efa114197f711337e4ddc"
+    },
+    {
+      "file": "src/index.css",
+      "status": "retained",
+      "sha256": "e3510467a2dc2b72c7c7c57a0e2c0b0de2ddbc92ea4b7ff008065903507da71d"
+    },
+    {
+      "file": "src/lib/cn.ts",
+      "status": "retained",
+      "sha256": "66ce082b8f7d70f89335eb6f9de86ebf1adfb8715f244845db88d10f98cada06"
+    },
+    {
+      "file": "src/lib/format.ts",
+      "status": "modified",
+      "sha256": "24261b07ea941b5fa2f1fc0ba7684d43a7cdc0b8ccedff50ff9b8200d7fc3fb3"
+    },
+    {
+      "file": "src/lib/supabase.ts",
+      "status": "modified",
+      "sha256": "bd5d9ec7fcdeabbaa3cd3ea715b8740219d2b1a6acab660482a1dacf795d9ea0"
+    },
+    {
+      "file": "src/main.tsx",
+      "status": "retained",
+      "sha256": "b29b978bb603a32c324e9c76c76412ea364e8d26888fabd5c9aa6dc7e09439ec"
+    },
+    {
+      "file": "src/pages/AiAnalystPage.tsx",
+      "status": "modified",
+      "sha256": "33157a1453223b38923b9d3492808e54242d6aacffe60fdaf0948ecbaf213674"
+    },
+    {
+      "file": "src/pages/AnalyticsPage.tsx",
+      "status": "modified",
+      "sha256": "02fa88566066b740049ec9b209cec3b55fcad1d93bcb34c62ac66be4843ff74e"
+    },
+    {
+      "file": "src/pages/MarketPage.tsx",
+      "status": "retained",
+      "sha256": "25bd36b43e43e8180a9e99ded5b8570f061c904f86249c3d11af1bdc83248c56"
+    },
+    {
+      "file": "src/pages/MetalsPage.tsx",
+      "status": "retained",
+      "sha256": "11d67886c0c852ec56a0b0c46e85ff0469fa9415720b2fe6e630f99cf35bd583"
+    },
+    {
+      "file": "src/pages/NewsPage.tsx",
+      "status": "added",
+      "sha256": "8b9bb58e5f28d373173a2f98d538179b16585bd5a6c1a42c7bd972ea27fa52c7"
+    },
+    {
+      "file": "src/pages/SourcesPage.tsx",
+      "status": "modified",
+      "sha256": "44f6e50902db5ed35c7a2960a7199b22049846ef0055c8d7e57cbeb6abc0fd4a"
+    },
+    {
+      "file": "src/services/ai.ts",
+      "status": "modified",
+      "sha256": "87861703adf43a6bf01da6b97673488bcd87eba99af7a56ad8cf83cb69b72a1c"
+    },
+    {
+      "file": "src/services/averagePrice.ts",
+      "status": "retained",
+      "sha256": "1871e113c18aa35c4694defdcf1e76617f4a1651548e25522e6faff8e23fa131"
+    },
+    {
+      "file": "src/services/currency.ts",
+      "status": "modified",
+      "sha256": "fc625aaae7f4f9af9e020372fb9d056211484267cb1794a79eefff10357c8d36"
+    },
+    {
+      "file": "src/services/database.ts",
+      "status": "modified",
+      "sha256": "df7ed8b788246db7b8ccd9c8899ee490870dca59b95a32961fd38dcfdc567e5d"
+    },
+    {
+      "file": "src/services/export.ts",
+      "status": "retained",
+      "sha256": "0889280cd93a9cabbd3b54b1708b2d8a1b47a70b13d6f857ed37e7f50e5a0786"
+    },
+    {
+      "file": "src/services/liveData.ts",
+      "status": "modified",
+      "sha256": "66939d2530c3a259b04fa7a47b62ed1c2a816c2ab709fca379c28d0d74d09cce"
+    },
+    {
+      "file": "src/services/market.ts",
+      "status": "retained",
+      "sha256": "803940be2636f8f1fab563b49498f73317a9bb271060c0c77035379600cb1c96"
+    },
+    {
+      "file": "src/services/news.ts",
+      "status": "added",
+      "sha256": "0113b7fa2b25cced6a9eb31d7ab83264af4c2b713ef3ad4e4c216e8b1dfcb35b"
+    },
+    {
+      "file": "src/services/quoteValidation.ts",
+      "status": "modified",
+      "sha256": "d5ffd1db524ef803b4f23beddc1a9a5c4b8d2481c3a31c3f6ab449f4eb0aa655"
+    },
+    {
+      "file": "src/services/sources.ts",
+      "status": "retained",
+      "sha256": "ae57ea7cd483663a8223a9a57f01fca0695dabefd509195997498c79d07b315d"
+    },
+    {
+      "file": "src/tests/market.test.ts",
+      "status": "modified",
+      "sha256": "4cbe5af743af6b5634db57f9c59c3b4a6321f3c0237dd9ed37f6b5998e79e9ba"
+    },
+    {
+      "file": "src/tests/news.test.ts",
+      "status": "added",
+      "sha256": "07161dc588d3a3effbd6c65db7a9903fad143ae0a1969954f228dd8c56530b19"
+    },
+    {
+      "file": "src/tests/regional.test.ts",
+      "status": "added",
+      "sha256": "e5dc59e8d90585d8e39eea517774993d37e4b1b9c5de4312552c565e811d724f"
+    },
+    {
+      "file": "src/types/market.ts",
+      "status": "modified",
+      "sha256": "4f88a6e55263b23872d1fb16ce1b1b505b82e19b737e9138272313ee0fb8092d"
+    },
+    {
+      "file": "src/vite-env.d.ts",
+      "status": "retained",
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    {
+      "file": "supabase/.env.example",
+      "status": "modified",
+      "sha256": "f8d41f47d3acfadca8941eab721333b19eb1484662f1b2e5c28998fa60d3de2f"
+    },
+    {
+      "file": "supabase/config.toml",
+      "status": "modified",
+      "sha256": "634fff22727cd06e44cb28d7081c6a8eee8e10248b447f769697bc6e42a12200"
+    },
+    {
+      "file": "supabase/deno.json",
+      "status": "added",
+      "sha256": "ac738ef46181a34cdd137c8e7f5683f21858bb02b7a740a02b36699867d50bcd"
+    },
+    {
+      "file": "supabase/deno.lock",
+      "status": "added",
+      "sha256": "6b3e9138f244d07d4b633deb3f81e75dd089abbde6e642829b7b8b8ad435d56c"
+    },
+    {
+      "file": "supabase/functions/_shared/analysis.ts",
+      "status": "added",
+      "sha256": "27e8be767a45ca3907c78116d4144c27d4c3fdf820dcd17dceff16f432ff6c05"
+    },
+    {
+      "file": "supabase/functions/_shared/http.ts",
+      "status": "modified",
+      "sha256": "2f04a23637735ddabb82359261377f2c12439cbe9c75c79cceb445919917f09d"
+    },
+    {
+      "file": "supabase/functions/_shared/network.ts",
+      "status": "added",
+      "sha256": "77d7a4b888dbce1c239c7c434525ce764afeebeb84b1d326f4fa76e966e3f6ac"
+    },
+    {
+      "file": "supabase/functions/_shared/openai.ts",
+      "status": "added",
+      "sha256": "b62a1239d1af9665cd0dcf3c49b5c2272fe2ba4c2fc3c74307cb0b55eeaa5f11"
+    },
+    {
+      "file": "supabase/functions/_shared/providers.ts",
+      "status": "modified",
+      "sha256": "e947e57d999968189603c7cc772e3a79214454feb8bbe94ec80e179128fa68f6"
+    },
+    {
+      "file": "supabase/functions/_shared/providers_test.ts",
+      "status": "modified",
+      "sha256": "237c7f01794c427271add063c4421e76d9deead95e82ce398a8ee7968c9ad8d2"
+    },
+    {
+      "file": "supabase/functions/_shared/quoteAdapters.ts",
+      "status": "added",
+      "sha256": "053056b68180e0e7de90cb74f484c3c28901d75e73c7a7c5c4062f3e410e03d7"
+    },
+    {
+      "file": "supabase/functions/_shared/stage2_test.ts",
+      "status": "added",
+      "sha256": "01a0992e4fcc22ad3cf24557f1d47f55891dc78f563db505bafcc208b30135ac"
+    },
+    {
+      "file": "supabase/functions/_shared/universe.ts",
+      "status": "added",
+      "sha256": "733322bffe9068cb4b4f130321edc550133f9b19f89b13db3966d17e0b0c9ad6"
+    },
+    {
+      "file": "supabase/functions/ai-analyze/handler.ts",
+      "status": "added",
+      "sha256": "adef7cb8b4aac578e716285596cb239626f197e3bd0fb2c54a3a92f5f831c4f0"
+    },
+    {
+      "file": "supabase/functions/ai-analyze/index.ts",
+      "status": "modified",
+      "sha256": "ef613549c7326983d7fc16c045f652e59a0aeb19657f79f9e5f1869588c0361f"
+    },
+    {
+      "file": "supabase/functions/collect-market-data/index.ts",
+      "status": "modified",
+      "sha256": "14e0f7713eb44a2bb11ceb35a4155e42efd91a48f0555b98cc19aff9d9bad8cd"
+    },
+    {
+      "file": "supabase/functions/collect-news/handler.ts",
+      "status": "added",
+      "sha256": "3b8e6f81913aef2c23324bd6522a66ca7953a5de33cd3b5788c4142e2fb0e6c3"
+    },
+    {
+      "file": "supabase/functions/collect-news/index.ts",
+      "status": "added",
+      "sha256": "ef613549c7326983d7fc16c045f652e59a0aeb19657f79f9e5f1869588c0361f"
+    },
+    {
+      "file": "supabase/functions/ingest-quotes/index.ts",
+      "status": "modified",
+      "sha256": "4fd83060b3b8f75e56c4402bbc6e41715a3115e9a52c8414f31bf26b51733d27"
+    },
+    {
+      "file": "supabase/functions/ingest-regional-history/handler.ts",
+      "status": "added",
+      "sha256": "d632241737a6a5e12d1bd9cf309ac8300a597dc41c2b2071ce0dbc6c0c16a550"
+    },
+    {
+      "file": "supabase/functions/ingest-regional-history/index.ts",
+      "status": "added",
+      "sha256": "ef613549c7326983d7fc16c045f652e59a0aeb19657f79f9e5f1869588c0361f"
+    },
+    {
+      "file": "supabase/migrations/20261109141643_create_metals_analytics_schema.sql",
+      "status": "retained",
+      "sha256": "32eb68909849d3d78d16f0a439809e8c3bc975024d39feb0356daea8bf6af15a"
+    },
+    {
+      "file": "supabase/migrations/20261109141704_seed_metals_sources_coverage.sql",
+      "status": "retained",
+      "sha256": "250d2b75a50564408bf5f9bc64eb6a332972a03c88274beebda78d29650a56f7"
+    },
+    {
+      "file": "supabase/migrations/20261109141716_secure_collector_and_schedule.sql",
+      "status": "retained",
+      "sha256": "d47b7a00d15003395077f3eeb421f139f735305903ba3499ad1997b3951dd076"
+    },
+    {
+      "file": "supabase/migrations/20261109141751_full_metals_catalog_without_demo_prices.sql",
+      "status": "retained",
+      "sha256": "987f384879caa174a7c8d79f7603f4fdd9ea67444453a5b64be9394fbdb2e1ce"
+    },
+    {
+      "file": "supabase/migrations/20261109141810_clear_metal_demo_parameter_defaults.sql",
+      "status": "retained",
+      "sha256": "8693c917d3dd004c3ce17d3409eb7b4b991933ec7a065faeb9cce76309075e5c"
+    },
+    {
+      "file": "supabase/migrations/20261112090000_quality_and_analytics.sql",
+      "status": "retained",
+      "sha256": "19ac0574614fd3556ad52c16c46749da70116f27dc50a2ef5047cc024e3887e5"
+    },
+    {
+      "file": "supabase/migrations/20261112090100_catalog_sync.sql",
+      "status": "retained",
+      "sha256": "481164cbda8e8f5f8046fddf7b65e61eb62ef5b2e37bd7beffd9a12173981e59"
+    },
+    {
+      "file": "supabase/migrations/20261112180000_regional_markets_and_news.sql",
+      "status": "added",
+      "sha256": "c69d43aabe9c0c0f439e6be808cfaf3945755b6264cb4d19c626834c72e15e7d"
+    },
+    {
+      "file": "tailwind.config.js",
+      "status": "retained",
+      "sha256": "745aad171fcb96f06ece3e57a06a8a7e26546e323e734495ceeeb69da4c9c91b"
+    },
+    {
+      "file": "tests/browser/fixtures.spec.ts",
+      "status": "added",
+      "sha256": "e715542b13d8286824489a895cfea8b2de2e7d65c986b48e3dd6aff9542bd74d"
+    },
+    {
+      "file": "tests/browser/offline.spec.ts",
+      "status": "added",
+      "sha256": "1f0bd3e11911fcd56176156e4eb7236226ea175a5ad9b0287e476a43ac368f20"
+    },
+    {
+      "file": "tsconfig.app.json",
+      "status": "retained",
+      "sha256": "9750ea1ad666ba467781ab8e047a2337b7692b774de0865a98dbd189ca3fd87e"
+    },
+    {
+      "file": "tsconfig.json",
+      "status": "retained",
+      "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808"
+    },
+    {
+      "file": "tsconfig.node.json",
+      "status": "retained",
+      "sha256": "a96b9ba5e40d95b92adf56431fdf9cbe25b5c2557621f0666615bff6889dfc50"
+    },
+    {
+      "file": "vite.config.ts",
+      "status": "retained",
+      "sha256": "179923b0b0681a8a3822fb9349b56f28be7f12fa0dcf17bacdfcab5f771a6ac5"
+    },
+    {
+      "file": "vitest.config.ts",
+      "status": "retained",
+      "sha256": "17d601594098cfcefe8b53d76b775edfb15f893cdcd138e7dc661e86d5741702"
+    }
+  ]
+}

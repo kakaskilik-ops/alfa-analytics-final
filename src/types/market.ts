@@ -83,6 +83,11 @@ export interface PriceSource {
 }
 
 export interface PriceQuoteRecord {
+  country?: string | null;
+  purity?: number | null;
+  elementContent?: number | null;
+  deliveryTerms?: string | null;
+  specificationId?: string | null;
   sourceName: string;
   sourceUrl: string;
   sourceId: string;

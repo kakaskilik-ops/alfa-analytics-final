@@ -1,3 +1,5 @@
+import { fetchNewsSources } from "@/services/news";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import { useEffect, useState } from "react";
 import { CheckCircle2, AlertCircle, XCircle, Clock } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
@@ -45,6 +47,11 @@ const STATUS_COLORS: Record<SourceStatus, string> = {
 };
 
 export default function SourcesPage({ liveData }: SourcesPageProps) {
+  const newsRegistry = useAsyncData(
+    fetchNewsSources,
+    "news-source-registry",
+    true,
+  );
   const [error, setError] = useState("");
   const [sources, setSources] = useState<SourceIntegration[]>([]);
   const [coverage, setCoverage] = useState<Set<string>>(new Set());
@@ -111,6 +118,38 @@ export default function SourcesPage({ liveData }: SourcesPageProps) {
           Обоснованные веса задаёт оператор источника; без них средневзвешенная
           не рассчитывается.
         </p>
+      </Panel>
+      <Panel className="mb-4 p-5">
+        <h2 className="font-semibold text-base mb-3">Новостные источники</h2>
+        {newsRegistry.state.status === "error" && (
+          <p className="text-sm text-ink-400">
+            Реестр недоступен до подключения базы. Настроена официальная
+            RSS-лента USGS; работа расписания здесь не подтверждена.
+          </p>
+        )}
+        {newsRegistry.state.status === "loading" && <p>Загрузка…</p>}
+        {newsRegistry.state.status === "ready" &&
+          newsRegistry.state.data.map((source) => (
+            <div key={source.id} className="mb-3 text-sm">
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-brand-400"
+              >
+                {source.name}
+              </a>
+              <p className="text-xs text-ink-400">
+                {source.status === "connected"
+                  ? "Последняя загрузка успешна"
+                  : source.status === "error"
+                    ? "Ошибка обновления"
+                    : "Ожидает загрузки"}{" "}
+                · {formatDateTime(source.updatedAt)}
+              </p>
+              <p className="text-xs text-ink-400">{source.license}</p>
+            </div>
+          ))}
       </Panel>
       {/* Summary stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

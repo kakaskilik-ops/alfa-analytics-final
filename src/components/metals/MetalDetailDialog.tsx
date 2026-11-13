@@ -1,3 +1,5 @@
+import MetalNews from "@/components/metals/MetalNews";
+import RegionalComparison from "@/components/market/RegionalComparison";
 import { createPortal } from "react-dom";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Star, X } from "lucide-react";
@@ -17,7 +19,7 @@ import {
 } from "@/lib/format";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { fetchQuotationRecords } from "@/services/database";
-import { buildHybridQuote } from "@/services/liveData";
+import { displayQuote, buildHybridQuote } from "@/services/liveData";
 import type { LiveMarketData } from "@/services/liveData";
 import { cn } from "@/lib/cn";
 import type { Metal, PeriodKey, UnitCode } from "@/types/market";
@@ -44,12 +46,23 @@ export default function MetalDetailDialog({
   const [period, setPeriod] = useState<PeriodKey>(initialPeriod);
   const liveMetalData = liveData?.quotes.get(metal.id) ?? null;
   const quote = useMemo(
-    () => buildHybridQuote(metal, period, updatedAt, liveMetalData),
-    [metal, period, updatedAt, liveMetalData],
+    () =>
+      displayQuote(
+        buildHybridQuote(metal, period, updatedAt, liveMetalData),
+        liveData ?? null,
+      ),
+    [metal, period, updatedAt, liveMetalData, liveData],
   );
   const quotations = useAsyncData(
-    () => fetchQuotationRecords(metal.id),
-    metal.id,
+    () =>
+      fetchQuotationRecords(metal.id).then((rows) =>
+        rows.filter(
+          (r) =>
+            r.region === liveMetalData?.region ||
+            (!liveMetalData && r.region === liveData?.selectedRegion),
+        ),
+      ),
+    `${metal.id}-${liveData?.selectedRegion}`,
     SUPABASE_CONFIGURED,
   );
   const titleId = useId();
@@ -102,16 +115,19 @@ export default function MetalDetailDialog({
   const unitLabel =
     metal.unit === "ozt"
       ? "тр. унц."
-      : metal.unit === "ton"
+      : quote.metal.unit === "ton"
         ? "т"
-        : metal.unit === "lb"
+        : quote.metal.unit === "lb"
           ? "фунт"
           : "кг";
 
   const tiles = [
-    { label: "Максимум", value: formatPrice(quote.high) },
-    { label: "Минимум", value: formatPrice(quote.low) },
-    { label: "Изменение", value: formatPriceChange(quote.change) },
+    { label: "Максимум", value: formatPrice(quote.high, quote.metal.currency) },
+    { label: "Минимум", value: formatPrice(quote.low, quote.metal.currency) },
+    {
+      label: "Изменение",
+      value: formatPriceChange(quote.change, quote.metal.currency),
+    },
     { label: "Дата обновления", value: formatDateTime(quote.publishedAt) },
   ];
 
@@ -122,7 +138,10 @@ export default function MetalDetailDialog({
       value: metal.atomicNumber === null ? "—" : String(metal.atomicNumber),
     },
     { label: "Категория", value: CATEGORY_MAP[metal.categoryId].name },
-    { label: "Единица измерения", value: `USD за ${unitLabel}` },
+    {
+      label: "Единица измерения",
+      value: `${quote.metal.currency} за ${unitLabel}`,
+    },
   ];
 
   const sourceInfo = liveMetalData
@@ -200,10 +219,10 @@ export default function MetalDetailDialog({
                 </span>
               </div>
               <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight text-ink-100">
-                {formatPrice(quote.price)}
+                {formatPrice(quote.price, quote.metal.currency)}
               </p>
               <p className="mt-1 text-xs text-ink-400">
-                за {unitLabel}, {metal.currency}
+                за {unitLabel}, {quote.metal.currency}
               </p>
             </div>
             <div className="flex items-center gap-3 text-sm">
@@ -213,7 +232,7 @@ export default function MetalDetailDialog({
                 className="text-base"
               />
               <span className="tabular-nums text-ink-400">
-                {formatPriceChange(quote.change)}
+                {formatPriceChange(quote.change, quote.metal.currency)}
               </span>
             </div>
           </div>
@@ -227,7 +246,7 @@ export default function MetalDetailDialog({
               data={quote.series}
               period={period}
               positive={(quote.change ?? 0) >= 0}
-              valueFormatter={formatPrice}
+              valueFormatter={(v) => formatPrice(v, quote.metal.currency)}
               height={260}
             />
           </div>
@@ -246,10 +265,17 @@ export default function MetalDetailDialog({
             ))}
           </div>
 
+          <RegionalComparison
+            metalId={metal.id}
+            data={liveData ?? null}
+            period={period}
+            at={updatedAt}
+          />
+          <MetalNews metalId={metal.id} />
           <PriceConverter
             pricePerKg={quote.price}
-            currency={metal.currency}
-            fromUnit={metal.unit as UnitCode}
+            currency={quote.metal.currency}
+            fromUnit={quote.metal.unit as UnitCode}
           />
 
           <div>

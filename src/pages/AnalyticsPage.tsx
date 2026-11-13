@@ -1,3 +1,5 @@
+import RegionalComparison from "@/components/market/RegionalComparison";
+import { fetchNews } from "@/services/news";
 import { useMemo, useState } from "react";
 import PageHeader from "@/components/layout/PageHeader";
 import Panel from "@/components/common/Panel";
@@ -22,7 +24,7 @@ export default function AnalyticsPage({
   liveData: LiveMarketData | null;
 }) {
   const [period, setPeriod] = useState<PeriodKey>("1M");
-  const [selected, setSelected] = useState(["copper", "gold"]);
+  const [selected, setSelected] = useState(["tungsten", "molybdenum"]);
   const [material, setMaterial] = useState("copper");
   const quotes = useMemo(
     () =>
@@ -40,6 +42,11 @@ export default function AnalyticsPage({
     SUPABASE_CONFIGURED,
   );
   const records = regional.state.status === "ready" ? regional.state.data : [];
+  const events = useAsyncData(
+    () => fetchNews({ limit: 60 }),
+    "analytics-events",
+    true,
+  );
   const groups = [...new Set(records.map(comparisonKey))];
   return (
     <>
@@ -104,7 +111,7 @@ export default function AnalyticsPage({
             <h2 className="text-base font-semibold">{q.metal.nameRu}</h2>
             <div className="text-sm text-ink-300 mt-2 flex flex-wrap gap-4">
               <span>
-                Цена: {formatPrice(q.price)} /{" "}
+                Цена: {formatPrice(q.price, q.metal.currency)} /{" "}
                 {q.metal.unit === "ozt" ? "тр. унц." : "кг"}
               </span>
               <span>Динамика: {formatPercent(q.changePct)}</span>
@@ -119,7 +126,18 @@ export default function AnalyticsPage({
               data={q.series}
               period={period}
               positive={(q.changePct ?? 0) >= 0}
-              valueFormatter={formatPrice}
+              valueFormatter={(v) => formatPrice(v, q.metal.currency)}
+              events={
+                events.state.status === "ready"
+                  ? events.state.data
+                      .filter((n) => n.metalIds.includes(q.metal.id))
+                      .map((n) => ({
+                        date: n.publishedAt,
+                        title: n.titleRu ?? n.originalTitle,
+                        url: n.url,
+                      }))
+                  : []
+              }
             />
             <p className="text-xs text-ink-400">
               {q.sourceName} · {q.marketLabel || "Нет данных"}
@@ -128,6 +146,32 @@ export default function AnalyticsPage({
         ))}
       </div>
       <Panel className="p-5 mt-4">
+        <RegionalComparison
+          metalId={material}
+          data={liveData}
+          period={period}
+          at={updatedAt}
+        />
+        {events.state.status === "ready" && (
+          <div className="my-4 text-xs space-y-2">
+            {events.state.data
+              .filter((n) => n.metalIds.includes(material))
+              .slice(0, 8)
+              .map((n) => (
+                <p key={n.id}>
+                  <a
+                    href={n.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-brand-400"
+                  >
+                    {new Date(n.publishedAt).toLocaleDateString("ru-RU")} ·{" "}
+                    {n.titleRu ?? n.originalTitle}
+                  </a>
+                </p>
+              ))}
+          </div>
+        )}
         <h2 className="text-base font-semibold mb-3">
           Сравнение регионов и условий рынка
         </h2>

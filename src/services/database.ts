@@ -1,3 +1,4 @@
+import { METAL_IDS } from "../../supabase/functions/_shared/universe";
 import { supabase } from "@/lib/supabase";
 import type {
   CurrencyCode,
@@ -158,7 +159,7 @@ export async function fetchQuotationRecords(
   const { data, error } = await getClient()
     .from("price_quotations")
     .select(
-      "metal_id, source_id, original_price, original_currency, original_unit, normalized_price, normalized_currency, normalized_unit, grade, product_form, region, market_type, exchange_name, quality_score, data_status, validation_status, quoted_at, retrieved_at, source_url, attribution, price_type, composition, data_sources(name, url, independence_id)",
+      "metal_id, source_id, original_price, original_currency, original_unit, normalized_price, normalized_currency, normalized_unit, grade, product_form, region, market_type, exchange_name, quality_score, data_status, validation_status, quoted_at, retrieved_at, source_url, attribution, price_type, composition, country, purity, element_content, delivery_terms, specification_id, data_sources(name, url, independence_id)",
     )
     .eq("metal_id", metalId)
     .order("quoted_at", { ascending: false })
@@ -194,6 +195,12 @@ export async function fetchQuotationRecords(
       priceType: asString(row.price_type),
       independenceId: asString(source.independence_id ?? row.source_id),
       composition: asNullableString(row.composition),
+      country: asNullableString(row.country),
+      purity: row.purity == null ? null : asNumber(row.purity),
+      elementContent:
+        row.element_content == null ? null : asNumber(row.element_content),
+      deliveryTerms: asNullableString(row.delivery_terms),
+      specificationId: asNullableString(row.specification_id),
     } as PriceQuoteRecord & {
       originalPrice: number;
       originalCurrency: CurrencyCode;
@@ -206,8 +213,9 @@ export async function fetchAllLiveQuotations(): Promise<PriceQuoteRecord[]> {
   const { data, error } = await getClient()
     .from("price_quotations")
     .select(
-      "metal_id, source_id, original_price, original_currency, original_unit, normalized_price, normalized_currency, normalized_unit, grade, product_form, region, market_type, exchange_name, quality_score, data_status, validation_status, quoted_at, retrieved_at, source_url, attribution, price_type, composition, data_sources(name, url, independence_id)",
+      "metal_id, source_id, original_price, original_currency, original_unit, normalized_price, normalized_currency, normalized_unit, grade, product_form, region, market_type, exchange_name, quality_score, data_status, validation_status, quoted_at, retrieved_at, source_url, attribution, price_type, composition, country, purity, element_content, delivery_terms, specification_id, data_sources(name, url, independence_id)",
     )
+    .in("metal_id", [...METAL_IDS])
     .eq("data_status", "live")
     .gte("quoted_at", new Date(Date.now() - 4 * 86400000).toISOString())
     .eq("validation_status", "valid")
@@ -250,6 +258,12 @@ export async function fetchAllLiveQuotations(): Promise<PriceQuoteRecord[]> {
       priceType: asString(row.price_type),
       independenceId: asString(source.independence_id ?? row.source_id),
       composition: asNullableString(row.composition),
+      country: asNullableString(row.country),
+      purity: row.purity == null ? null : asNumber(row.purity),
+      elementContent:
+        row.element_content == null ? null : asNumber(row.element_content),
+      deliveryTerms: asNullableString(row.delivery_terms),
+      specificationId: asNullableString(row.specification_id),
     } as PriceQuoteRecord & {
       originalPrice: number;
       originalCurrency: CurrencyCode;

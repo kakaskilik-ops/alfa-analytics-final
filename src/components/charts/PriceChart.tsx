@@ -1,6 +1,7 @@
 import { useId, useMemo } from "react";
 import {
   Area,
+  ReferenceLine,
   AreaChart,
   CartesianGrid,
   ResponsiveContainer,
@@ -19,6 +20,7 @@ interface PriceChartProps {
   positive: boolean;
   valueFormatter: (value: number) => string;
   height?: number;
+  events?: { date: number; title: string; url: string }[];
 }
 
 interface ChartTooltipProps {
@@ -47,6 +49,7 @@ export default function PriceChart({
   positive,
   valueFormatter,
   height = 280,
+  events = [],
 }: PriceChartProps) {
   const gradientId = `price-fill-${useId().replace(/:/g, "")}`;
   const color = positive ? "#00C781" : "#F04452";
@@ -85,6 +88,8 @@ export default function PriceChart({
           <CartesianGrid vertical={false} stroke="#1C222B" />
           <XAxis
             dataKey="date"
+            type="number"
+            domain={["dataMin", "dataMax"]}
             ticks={ticks}
             tickFormatter={(value: number) => formatAxisLabel(value, period)}
             tick={axisTick}
@@ -104,6 +109,21 @@ export default function PriceChart({
             cursor={{ stroke: "#3A4453", strokeDasharray: "3 3" }}
             content={<ChartTooltip valueFormatter={valueFormatter} />}
           />
+          {events
+            .filter(
+              (e) =>
+                e.date >= data[0].date && e.date <= data[data.length - 1].date,
+            )
+            .slice(0, 8)
+            .map((e) => (
+              <ReferenceLine
+                key={e.url}
+                x={e.date}
+                stroke="#8A94A3"
+                strokeDasharray="3 3"
+                label={{ value: "Событие", fill: "#8A94A3", fontSize: 10 }}
+              />
+            ))}
           <Area
             type="monotone"
             dataKey="price"

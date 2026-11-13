@@ -208,6 +208,14 @@ Deno.serve(async (req: Request) => {
   }
 
   if (req.method !== "POST") return new Response(null, { status: 405 });
+  if (Deno.env.get("ENABLE_YAHOO_UNOFFICIAL") === "true")
+    return new Response(
+      JSON.stringify({
+        error:
+          "Legacy Yahoo requires a commercial-specification adapter for stage 2. Disable ENABLE_YAHOO_UNOFFICIAL; FX collection remains supported.",
+      }),
+      { status: 409, headers: { "Content-Type": "application/json" } },
+    );
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -309,7 +317,7 @@ Deno.serve(async (req: Request) => {
             },
             {
               onConflict:
-                "metal_id,source_id,quoted_at,region,market_type,grade,product_form,composition,price_type",
+                "metal_id,source_id,quoted_at,region,market_type,grade,product_form,composition,price_type,country,purity,element_content,delivery_terms",
             },
           );
 

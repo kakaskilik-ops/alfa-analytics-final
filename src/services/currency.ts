@@ -1,3 +1,4 @@
+import { historicalRate, type FxObservation } from "../../shared/fx";
 import type { CurrencyCode, UnitCode, ExchangeRate } from "@/types/market";
 import { supabase } from "@/lib/supabase";
 
@@ -35,6 +36,8 @@ export const UNIT_TO_KG: Record<UnitCode, number> = {
   lb: 0.45359237,
 };
 
+const rateMetadata = new Map<string, { date: number; origin: string }>();
+let rateHistory: FxObservation[] = [];
 let liveRateCache: Map<string, number> | null = null;
 let liveRateOrigin = "";
 let liveRateTimestamp = 0;
@@ -48,9 +51,19 @@ export function getRate(
   if (liveRateCache) {
     const key = `${base}-${quote}`;
     const cached = liveRateCache.get(key);
-    if (cached !== undefined) return cached;
+    if (
+      cached !== undefined &&
+      Date.now() - (rateMetadata.get(key)?.date ?? 0) <= 4 * 86400000
+    )
+      return cached;
     const reverse = liveRateCache.get(`${quote}-${base}`);
-    if (reverse !== undefined && reverse !== 0) return 1 / reverse;
+    if (
+      reverse !== undefined &&
+      reverse !== 0 &&
+      Date.now() - (rateMetadata.get(`${quote}-${base}`)?.date ?? 0) <=
+        4 * 86400000
+    )
+      return 1 / reverse;
   }
   return null;
 }
@@ -69,16 +82,19 @@ export function getRateTimestamp(): number {
 
 export async function loadLiveRates(): Promise<void> {
   liveRateCache = null;
+  rateMetadata.clear();
+  rateHistory = [];
   liveRateStatus = "unavailable";
   if (!supabase) return;
   try {
     const { data, error } = await supabase
-      .from("exchange_rates")
+      .from("app_exchange_rates")
       .select(
         "base_currency, quote_currency, rate, rate_date, origin, data_status",
       )
       .order("rate_date", { ascending: false })
-      .limit(50);
+      .order("provider_priority", { ascending: true })
+      .limit(5000);
 
     if (error || !data || data.length === 0) return;
 
@@ -93,6 +109,30 @@ export async function loadLiveRates(): Promise<void> {
       const rate = Number(row.rate);
       const rowDate = Date.parse(row.rate_date as string);
       if (
+        CURRENCY_CODES.includes(base) &&
+        CURRENCY_CODES.includes(quote) &&
+        Number.isFinite(rate) &&
+        rate > 0 &&
+        Number.isFinite(rowDate) &&
+        rowDate <= Date.now() + 300000 &&
+        ["live", "cached"].includes(row.data_status)
+      ) {
+        if (
+          !rateHistory.some(
+            (r) =>
+              r.base_currency === base &&
+              r.quote_currency === quote &&
+              r.rate_date === row.rate_date,
+          )
+        )
+          rateHistory.push({
+            base_currency: base,
+            quote_currency: quote,
+            rate,
+            rate_date: row.rate_date,
+          } as FxObservation);
+      }
+      if (
         !CURRENCY_CODES.includes(base) ||
         !CURRENCY_CODES.includes(quote) ||
         !Number.isFinite(rate) ||
@@ -105,6 +145,10 @@ export async function loadLiveRates(): Promise<void> {
         continue;
       if (cache.has(`${base}-${quote}`)) continue;
       cache.set(`${base}-${quote}`, rate);
+      rateMetadata.set(`${base}-${quote}`, {
+        date: rowDate,
+        origin: String(row.origin),
+      });
       if (rowDate > latestDate) {
         latestDate = rowDate;
         origin = row.origin as string;
@@ -117,7 +161,7 @@ export async function loadLiveRates(): Promise<void> {
     liveRateOrigin = origin;
     liveRateStatus = hasLive ? "live" : "unavailable";
   } catch {
-    // keep demo rates
+    // Leave rates unavailable when the database cannot be read.
   }
 }
 
@@ -158,4 +202,20 @@ export function getExchangeRates(): ExchangeRate[] {
     });
   }
   return rates;
+}
+
+export function getPairMetadata(base: CurrencyCode, quote: CurrencyCode) {
+  return (
+    rateMetadata.get(`${base}-${quote}`) ??
+    rateMetadata.get(`${quote}-${base}`) ??
+    null
+  );
+}
+
+export function getHistoricalRate(
+  base: CurrencyCode,
+  quote: CurrencyCode,
+  at: number,
+): number | null {
+  return historicalRate(rateHistory, base, quote, at);
 }
