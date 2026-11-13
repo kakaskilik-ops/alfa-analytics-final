@@ -102,6 +102,7 @@ export async function handler(req: Request): Promise<Response> {
           );
         }
         if (response.status !== 304) {
+          if (response.status === 202) throw new Error("source_feed_not_ready");
           if (!response.ok) throw new Error(`source_http_${response.status}`);
           const feed = await limitedText(response, 1048576);
           const entries = parseFeed(feed, source.format);
@@ -210,6 +211,7 @@ export async function handler(req: Request): Promise<Response> {
       } catch (error) {
         const known = [
           "source_rate_limited",
+          "source_feed_not_ready",
           "body_too_large",
           "feed_host_not_allowed",
           "invalid_redirect",

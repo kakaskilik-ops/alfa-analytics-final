@@ -15,7 +15,7 @@
 
 Миграции: 20261113131040, 20261113131047, 20261113131054, 20261113131112, 20261113131121, 20261113131145, 20261113131201, 20261113131345, 20261113131352, 20261113131916. Версии соответствуют удалённому migration history; файлы SQL не воспроизводились повторно.
 
-Edge Functions: collect-market-data v1, ai-analyze v1, ingest-quotes v1, collect-news v2, ingest-regional-history v1, collect-fx v1, collect-quotes v1, compute-orientations v1. AI имеет gateway JWT и собственную проверку пользователя; серверные импорты проверяют collector token через Vault. Получить токен через public RPC нельзя.
+Edge Functions: collect-market-data v1, ai-analyze v1, ingest-quotes v1, collect-news v3, ingest-regional-history v1, collect-fx v1, collect-quotes v1, compute-orientations v1. AI имеет gateway JWT и собственную проверку пользователя; серверные импорты проверяют collector token через Vault. Получить токен через public RPC нельзя.
 
 Проверены реальная запись/чтение FX и отдельная служебная запись integration-validation с чтением и удалением только созданного тестового ID. Тестовые котировки в базу не добавлялись. Анонимный REST: каталог и FX 200; raw/budget/запись FX 401. Нет привилегированных ключей в исходниках. Публичный publishable key настроен только в игнорируемом локальном .env; для Pages требуется такой же публичный runtime/build параметр.
 

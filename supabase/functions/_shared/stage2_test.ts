@@ -426,3 +426,60 @@ Deno.test(
       }
     }),
 );
+Deno.test(
+  "news collector rejects an HTTP 202 HTML challenge without importing an article",
+  () =>
+    withEnv({ ...base, NEWS_AI_TRANSLATION: "false" }, async () => {
+      const previous = globalThis.fetch;
+      let errorCode = "";
+      globalThis.fetch = async (input, init) => {
+        const url = String(input),
+          method = init?.method ?? "GET";
+        if (
+          url.includes("/rpc/verify_collector_token") ||
+          url.includes("/rpc/claim_news_source")
+        )
+          return Response.json(true);
+        if (url.includes("/rest/v1/news_sources") && method === "GET")
+          return Response.json([
+            {
+              id: "test",
+              feed_url: "https://example.com/rss",
+              allowed_hosts: ["example.com"],
+              format: "rss",
+            },
+          ]);
+        if (url.includes("/rest/v1/news_ingestion_runs") && method === "POST")
+          return Response.json({ id: "test-run" });
+        if (url === "https://example.com/rss")
+          return new Response("<html>Challenge</html>", {
+            status: 202,
+            headers: { "Content-Type": "text/html" },
+          });
+        if (
+          url.includes("/rest/v1/news_ingestion_runs") &&
+          method === "PATCH"
+        ) {
+          errorCode = JSON.parse(String(init?.body)).error_code;
+          return Response.json(null);
+        }
+        if (url.includes("/rest/v1/news_sources") && method === "PATCH")
+          return Response.json(null);
+        throw new Error("Unexpected request or article import");
+      };
+      try {
+        const response = await collector(
+          new Request("https://example.com/api", { method: "POST" }),
+        );
+        const result = await response.json();
+        assert(
+          response.status === 207 &&
+            result.accepted === 0 &&
+            result.failed === 1 &&
+            errorCode === "source_feed_not_ready",
+        );
+      } finally {
+        globalThis.fetch = previous;
+      }
+    }),
+);

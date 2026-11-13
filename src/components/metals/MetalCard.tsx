@@ -34,7 +34,7 @@ export default function MetalCard({
         type="button"
         onClick={onSelect}
         aria-label={`Открыть карточку: ${metal.nameRu}`}
-        className="absolute inset-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
+        className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
       />
 
       <div className="flex items-start justify-between gap-3">
@@ -46,7 +46,7 @@ export default function MetalCard({
             {CATEGORY_MAP[metal.categoryId].shortName}
           </p>
         </div>
-        <div className="relative z-10 flex max-w-[50%] shrink-0 items-center gap-2">
+        <div className="relative z-20 flex max-w-[50%] shrink-0 items-center gap-2">
           <span className="min-w-0 truncate rounded-md bg-ink-800 px-2 py-0.5 text-xs font-medium text-ink-300 transition-colors group-hover:text-brand-400">
             {metal.symbol}
           </span>

@@ -5,19 +5,19 @@
 - Supabase: организация alfa-analytics, ref `vlfzjvwgrvyllvshwmzr`, eu-west-2. До изменений подтверждены пустые таблицы, миграции и функции. Другие базы не изменялись.
 - Все 10 миграций применены. История файлов синхронизирована с версиями, назначенными инструментом Supabase.
 - 29 таблиц с RLS и view app_exchange_rates. Security advisors: 0; performance: только INFO unused_index для новой базы. Исправлены индексы внешних ключей и повторная оценка auth.uid в RLS.
-- 8 Edge Functions ACTIVE: collect-market-data, ai-analyze, ingest-quotes, collect-news (v2), ingest-regional-history, collect-fx, collect-quotes, compute-orientations. Старый collect-market-data сохранён, но не включён в расписание.
+- 8 Edge Functions ACTIVE: collect-market-data, ai-analyze, ingest-quotes, collect-news (v3), ingest-regional-history, collect-fx, collect-quotes, compute-orientations. Старый collect-market-data сохранён, но не включён в расписание.
 - 4 cron active=true: alfa-fx-hourly, alfa-quotes-30m, alfa-news-30m, alfa-orientations-30m. Секреты только Vault/runtime.
 - Реальный Frankfurter v2: HTTP 200, 84 курса USD/EUR/RUB/CNY за 7–13 ноября, исходный ответ с SHA256 в ingestion_payloads. Повторный вызов 202 cooldown. Нет тестовых production-цен.
 - REST: 13 активных материалов и 84 курса доступны публично; raw, AI budget, запись FX и неавторизованные FX/AI вызовы отклонены 401. Пять разделов интерфейса открыты с реальной облачной БД без mocks: REST 200, ошибок JavaScript нет. Публичные настройки только в игнорируемом .env.
 
 ## Проверки кода
 
-TypeScript/build/lint; 88 Vitest, 28 Deno, 2 Playwright локально проходят, включая Chromium 158/headless shell. Изолированный PGlite применяет все 10 миграций и проверяет RLS, приватность, finite rates и cooldown. npm audit: 0. Первый GitHub CI выявил тайм-аут браузерного fixture-сценария; добавлены тайм-ауты действий, trace и failure artifacts для диагностики. Итоговый статус CI смотреть в PR.
+TypeScript/build/lint; 88 Vitest, 29 Deno, 2 Playwright локально проходят, включая Chromium 158/headless shell. Изолированный PGlite применяет все 10 миграций и проверяет RLS, приватность, finite rates и cooldown. npm audit: 0. Первый GitHub CI выявил тайм-аут браузерного fixture-сценария; trace установил перехват клика анимированным live-индикатором; слои MetalCard исправлены, добавлены тайм-ауты действий и failure artifacts. Итоговый статус CI смотреть в PR.
 
 ## Требует доступа/настройки
 
 - Котировки LME/CME/SHFE/Argus не подключены: нет лицензированных ключей и mapping конкретного продукта. collect-quotes возвращает partial quote_sources_not_configured; orientations — partial no_verified_quotes. Приватные адаптеры и сравнение эталонов подготовлены, платные запросы выключены.
-- Новости: USGS зарегистрирован, сборщик и cron активны, первый реальный запуск HTTP 207 / collection_failed, принято 0 публикаций. Подключённость кода не означает работоспособность источника. Дальнейшие ошибки имеют безопасные HTTP/timeout/network-коды. Ошибка остаётся открытой до успешного получения разрешённого feed.
+- Новости: USGS зарегистрирован, сборщик и cron активны, первый реальный запуск HTTP 207 / collection_failed, принято 0 публикаций. Подключённость кода не означает работоспособность источника. Диагностический запрос из Supabase получил HTTP 202 text/html без RSS; добавлен source_feed_not_ready и тест отказа от импорта challenge. Дальнейшие ошибки имеют безопасные HTTP/timeout/network-коды. Ошибка остаётся открытой до успешного получения разрешённого feed.
 - OpenAI требует серверного ключа, модели и положительного бюджета; по умолчанию платных запросов нет. Реальные модельные ответы не проверены.
 - Cloudflare Pages подготовлен, но не опубликован: нет подключения Cloudflare. DNS и main не изменялись. alfammetal.ru при HTTP-проверке вернул 403.
 
