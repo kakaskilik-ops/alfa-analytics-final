@@ -1,25 +1,27 @@
 # Этап автоматизации — 13 ноября 2026
 
-## Реально проверено
+## Реально развёрнуто и проверено
 
-- Рабочая ветка `feature/world-markets-news-ai` продолжает коммит `8fcbb92`; main не изменяется.
-- Supabase connector доступен. Подтверждённая цель: организация alfa-analytics, `vlfzjvwgrvyllvshwmzr`, URL https://vlfzjvwgrvyllvshwmzr.supabase.co. get_project вернул `You do not have permission to perform this action`. list_projects показывает только alfa-crm, который явно исключён владельцем и не изменяется. Нужны права интеграции на целевую организацию. Удалённых изменений нет.
-- Реальный Frankfurter v2 HTTP 200, USD/EUR/RUB/CNY; 12 направлений кросс-курсов прошли парсер; дополнительно исторический запрос за 7 дней вернул 21 исходное наблюдение и 84 проверенных кросс-курса с сохранённой атрибуцией. Это проверка источника и кода, не проверка production-БД.
-- Сборка/TypeScript и lint проходят; Vitest 88, Deno 28, Playwright 2 проверки проходят. PGlite применил все 9 миграций, проверил RLS/приватность, числовые ограничения, блокировки и cooldown. Облачные advisors и проверка интерфейса с настоящей базой не выполнены из-за отказа в доступе к целевому проекту.
+- Supabase: организация alfa-analytics, ref `vlfzjvwgrvyllvshwmzr`, eu-west-2. До изменений подтверждены пустые таблицы, миграции и функции. Другие базы не изменялись.
+- Все 10 миграций применены. История файлов синхронизирована с версиями, назначенными инструментом Supabase.
+- 29 таблиц с RLS и view app_exchange_rates. Security advisors: 0; performance: только INFO unused_index для новой базы. Исправлены индексы внешних ключей и повторная оценка auth.uid в RLS.
+- 8 Edge Functions ACTIVE: collect-market-data, ai-analyze, ingest-quotes, collect-news (v2), ingest-regional-history, collect-fx, collect-quotes, compute-orientations. Старый collect-market-data сохранён, но не включён в расписание.
+- 4 cron active=true: alfa-fx-hourly, alfa-quotes-30m, alfa-news-30m, alfa-orientations-30m. Секреты только Vault/runtime.
+- Реальный Frankfurter v2: HTTP 200, 84 курса USD/EUR/RUB/CNY за 7–13 ноября, исходный ответ с SHA256 в ingestion_payloads. Повторный вызов 202 cooldown. Нет тестовых production-цен.
+- REST: 13 активных материалов и 84 курса доступны публично; raw, AI budget, запись FX и неавторизованные FX/AI вызовы отклонены 401. Пять разделов интерфейса открыты с реальной облачной БД без mocks: REST 200, ошибок JavaScript нет. Публичные настройки только в игнорируемом .env.
 
-## Реализовано в коде, не развёрнуто
+## Проверки кода
 
-- Три новые Edge Functions: collect-fx, collect-quotes, compute-orientations; всего 8 подготовленных endpoints.
-- Новая миграция: public.ingestion_payloads, fx_observations, automation_runs, view app_exchange_rates; analytics_internal.automation_state, quote_adapters, reference_benchmarks. Ни один из этих объектов не объявляется созданным удалённо.
-- Частота/блокировки, безопасные журналы, сырой ответ FX и quotes, история валют, общий алгоритм расчёта, дневные снимки по реальным наблюдениям без перезаписи существующих дней, приватное сравнение лицензированного эталона.
-- Четыре cron-задания готовы к включению; активных новых расписаний нет. Сохраняется отказ от неразрешённых платных вызовов.
-- Cloudflare Pages/config/CSP, воспроизводимый deployment plan и проверяемый CLI-путь; CI проверяет проект без deploy. DNS не менялись.
+TypeScript/build/lint; 88 Vitest, 28 Deno, 2 Playwright локально проходят, включая Chromium 158/headless shell. Изолированный PGlite применяет все 10 миграций и проверяет RLS, приватность, finite rates и cooldown. npm audit: 0. Первый GitHub CI выявил тайм-аут браузерного fixture-сценария; добавлены тайм-ауты действий, trace и failure artifacts для диагностики. Итоговый статус CI смотреть в PR.
 
-## Осталось владельцу
+## Требует доступа/настройки
 
-Разрешить интеграции доступ к проекту vlfzjvwgrvyllvshwmzr организации alfa-analytics; затем сопоставить удалённую схему, применить недостающие миграции и функции, включить расписание и проверить реальные записи. Подключить Pages и публичные настройки Supabase. Для металлических потоков предоставить законный API-доступ с mapping спецификаций. Для ИИ задать серверный ключ, модель и согласованный бюджет. Не передавать секреты в чат.
+- Котировки LME/CME/SHFE/Argus не подключены: нет лицензированных ключей и mapping конкретного продукта. collect-quotes возвращает partial quote_sources_not_configured; orientations — partial no_verified_quotes. Приватные адаптеры и сравнение эталонов подготовлены, платные запросы выключены.
+- Новости: USGS зарегистрирован, сборщик и cron активны, первый реальный запуск HTTP 207 / collection_failed, принято 0 публикаций. Подключённость кода не означает работоспособность источника. Дальнейшие ошибки имеют безопасные HTTP/timeout/network-коды. Ошибка остаётся открытой до успешного получения разрешённого feed.
+- OpenAI требует серверного ключа, модели и положительного бюджета; по умолчанию платных запросов нет. Реальные модельные ответы не проверены.
+- Cloudflare Pages подготовлен, но не опубликован: нет подключения Cloudflare. DNS и main не изменялись. alfammetal.ru при HTTP-проверке вернул 403.
 
-Полная инструкция: [DEPLOYMENT.md](DEPLOYMENT.md). Источники и матрица покрытия: [SOURCES.md](SOURCES.md).
+Пошаговый запуск: [DEPLOYMENT.md](DEPLOYMENT.md). Источники: [SOURCES.md](SOURCES.md). Список фактически созданных объектов: [DATABASE.md](DATABASE.md).
 
 ---
 

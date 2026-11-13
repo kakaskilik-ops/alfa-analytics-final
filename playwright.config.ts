@@ -5,6 +5,10 @@ export default defineConfig({
   timeout: 60000,
   use: {
     headless: true,
+    actionTimeout: 15000,
+    navigationTimeout: 20000,
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
     viewport: { width: 1440, height: 1000 },
     launchOptions: {
       executablePath: process.env.CHROMIUM_PATH,

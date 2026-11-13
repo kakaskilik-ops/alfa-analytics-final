@@ -102,7 +102,7 @@ export async function handler(req: Request): Promise<Response> {
           );
         }
         if (response.status !== 304) {
-          if (!response.ok) throw new Error("source_http_error");
+          if (!response.ok) throw new Error(`source_http_${response.status}`);
           const feed = await limitedText(response, 1048576);
           const entries = parseFeed(feed, source.format);
           for (const item of entries) {
@@ -207,7 +207,28 @@ export async function handler(req: Request): Promise<Response> {
           .eq("id", run.id);
         if (finishError) throw new Error("log_write_failed");
         accepted += sourceAccepted;
-      } catch {
+      } catch (error) {
+        const known = [
+          "source_rate_limited",
+          "body_too_large",
+          "feed_host_not_allowed",
+          "invalid_redirect",
+          "too_many_redirects",
+          "database_read_failed",
+          "database_write_failed",
+          "link_write_failed",
+          "status_write_failed",
+          "log_write_failed",
+        ];
+        const message = error instanceof Error ? error.message : "";
+        const errorCode =
+          known.includes(message) || /^source_http_[0-9]{3}$/.test(message)
+            ? message
+            : error instanceof DOMException && error.name === "TimeoutError"
+              ? "source_timeout"
+              : error instanceof TypeError
+                ? "source_network_error"
+                : "collection_failed";
         failed++;
         await db
           .from("news_sources")
@@ -219,7 +240,7 @@ export async function handler(req: Request): Promise<Response> {
             finished_at: new Date().toISOString(),
             accepted: sourceAccepted,
             status: "error",
-            error_code: "collection_failed",
+            error_code: errorCode,
           })
           .eq("id", run.id);
       }

@@ -30,4 +30,10 @@ jobs:
       - run: npm run test:server
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-${{ github.run_id }}
+          path: test-results/
+          retention-days: 3
       - run: npm run deploy:plan
