@@ -1,3 +1,4 @@
+import AutomationStatus from "@/components/market/AutomationStatus";
 import { fetchNewsSources } from "@/services/news";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { useEffect, useState } from "react";
@@ -46,7 +47,7 @@ const STATUS_COLORS: Record<SourceStatus, string> = {
   demo: "text-ink-400",
 };
 
-export default function SourcesPage({ liveData }: SourcesPageProps) {
+export default function SourcesPage({ liveData, updatedAt }: SourcesPageProps) {
   const newsRegistry = useAsyncData(
     fetchNewsSources,
     "news-source-registry",
@@ -105,6 +106,7 @@ export default function SourcesPage({ liveData }: SourcesPageProps) {
           </button>
         </p>
       )}
+      <AutomationStatus updatedAt={updatedAt} />
       <Panel className="mb-4 p-5 text-sm text-ink-300">
         <h2 className="mb-2 font-semibold">Методология</h2>
         <p>
@@ -123,8 +125,8 @@ export default function SourcesPage({ liveData }: SourcesPageProps) {
         <h2 className="font-semibold text-base mb-3">Новостные источники</h2>
         {newsRegistry.state.status === "error" && (
           <p className="text-sm text-ink-400">
-            Реестр недоступен до подключения базы. Настроена официальная
-            RSS-лента USGS; работа расписания здесь не подтверждена.
+            Реестр временно недоступен. Настроена официальная RSS-лента USGS;
+            работа расписания здесь не подтверждена.
           </p>
         )}
         {newsRegistry.state.status === "loading" && <p>Загрузка…</p>}
@@ -181,14 +183,18 @@ export default function SourcesPage({ liveData }: SourcesPageProps) {
           </p>
         </div>
         <div className="rounded-xl border border-ink-800 bg-ink-900/70 p-4">
-          <p className="text-xs text-ink-400">Последний сбор</p>
+          <p className="text-xs text-ink-400">
+            Последняя региональная котировка
+          </p>
           <p className="mt-2 text-sm font-medium text-ink-100">
-            {logs.length > 0
-              ? formatDateTime(logs[0].finishedAt ?? logs[0].startedAt)
-              : "—"}
+            {liveData?.updatedAt
+              ? formatDateTime(liveData.updatedAt)
+              : "Нет данных"}
           </p>
           <p className="mt-1 text-xs text-ink-500">
-            {logs.length > 0 ? `${logs[0].rowsWritten} записей` : "нет данных"}
+            {liveMetalIds.length
+              ? `${liveMetalIds.length} материалов`
+              : "Подтверждённых региональных цен пока нет"}
           </p>
         </div>
       </div>

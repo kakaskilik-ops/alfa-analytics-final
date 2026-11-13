@@ -45,10 +45,15 @@ export function classifyNews(title: string, excerpt: string) {
     Object.keys(categoryTerms) as (keyof typeof NEWS_CATEGORIES)[]
   ).filter((k) => categoryTerms[k].test(text));
   const metalIds = METAL_IDS.filter((id) => terms[id].test(text));
-  // Require an explicit metal name and industrial/economic context, never bare W/Sn/Co.
+  // A broad critical-material item is sector news with NO inferred metal tags.
+  const sector =
+    /critical (?:raw materials|minerals)|sustainable raw materials|world mineral(?:s)? (?:outlook|production)|минеральн.{0,15}сырь|критическ.{0,20}(?:сырь|минерал)/iu.test(
+      text,
+    );
+  // Require explicit supported metal names or a narrowly defined sector context.
   if (
     !categories.length ||
-    !metalIds.length ||
+    (!metalIds.length && !sector) ||
     /copper (?:hair|haircut)|tin man|tin soldier|cobalt (?:blue dress|paint colour|strike)|chromium (?:browser|web browser)/iu.test(
       text,
     )
@@ -79,7 +84,7 @@ export function stripMarkup(v: unknown, max = 800): string {
     .slice(0, max);
 }
 export function canonicalUrl(input: string): string {
-  const u = new URL(input);
+  const u = new URL(input.replace(/&(?:amp;)+/gi, "&"));
   if (u.protocol !== "https:" || u.username || u.password)
     throw new Error("invalid_article_url");
   for (const key of [...u.searchParams.keys()])

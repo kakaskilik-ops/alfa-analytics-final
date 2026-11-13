@@ -48,7 +48,6 @@ export async function handler(req: Request): Promise<Response> {
         })),
         {
           onConflict: "source_id,base_currency,quote_currency,rate_date",
-          ignoreDuplicates: true,
         },
       )
       .select("id");

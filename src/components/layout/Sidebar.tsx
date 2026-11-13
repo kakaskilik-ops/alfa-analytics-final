@@ -1,4 +1,11 @@
-import { Bot, Gem, TrendingUp, Activity, type LucideIcon } from "lucide-react";
+import {
+  Bot,
+  Gem,
+  TrendingUp,
+  Activity,
+  Database,
+  type LucideIcon,
+} from "lucide-react";
 import Logo from "@/components/brand/Logo";
 
 import { cn } from "@/lib/cn";
@@ -11,6 +18,7 @@ const NAV_ITEMS: { id: Section; label: string; icon: LucideIcon }[] = [
   { id: "metals", label: "Металлы", icon: Gem },
   { id: "analytics", label: "Аналитика", icon: TrendingUp },
   { id: "news", label: "Новости", icon: Activity },
+  { id: "sources", label: "Источники", icon: Database },
   { id: "ai", label: "ИИ-аналитик", icon: Bot },
 ];
 

@@ -4,7 +4,7 @@ import Panel from "@/components/common/Panel";
 import { METALS, METAL_MAP } from "@/data/metals";
 import { REGIONS } from "../../supabase/functions/_shared/universe";
 import { NEWS_CATEGORIES } from "../../shared/news";
-import { fetchNews } from "@/services/news";
+import { fetchNews, fetchNewsSources } from "@/services/news";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { formatDateTime } from "@/lib/format";
 import { sendAiRequest } from "@/services/ai";
@@ -19,9 +19,14 @@ export default function NewsPage() {
   });
   const [region, setRegion] = useState(""),
     [category, setCategory] = useState(""),
-    [days, setDays] = useState("7");
+    [days, setDays] = useState("30");
   const [analysis, setAnalysis] = useState(""),
     [busy, setBusy] = useState(false);
+  const sourceHealth = useAsyncData(
+    fetchNewsSources,
+    "news-source-health",
+    true,
+  );
   const load = useAsyncData(
     () =>
       fetchNews({
@@ -66,6 +71,20 @@ export default function NewsPage() {
         title="Новости рынка металлов"
         description="Публикации разрешённых источников. Сохраняются ссылки и метаданные, полные статьи не копируются."
       />
+      {sourceHealth.state.status === "ready" && (
+        <p className="mb-4 text-xs text-ink-400">
+          Источников с успешной проверкой:{" "}
+          {
+            sourceHealth.state.data.filter((s) => s.status === "connected")
+              .length
+          }{" "}
+          из {sourceHealth.state.data.length}. Публикуются только материалы с
+          явным упоминанием металла или проверенным отраслевым контекстом.
+          {sourceHealth.state.data.some((s) => s.status === "error")
+            ? " Часть источников временно отвечает с ошибкой."
+            : ""}
+        </p>
+      )}
       <div className="flex flex-wrap gap-3 mb-4">
         {[
           {
@@ -186,16 +205,23 @@ export default function NewsPage() {
                 {n.sourceName} · {formatDateTime(n.publishedAt)}
               </p>
               <h2 className="text-lg font-semibold">
-                {n.titleRu ?? "Публикация ожидает перевода"}
+                {n.titleRu ?? n.originalTitle}
               </h2>
               <p className="text-sm text-ink-300">
                 {n.summaryRu ??
                   "Русское резюме ещё не подготовлено. Доступен оригинальный заголовок и ссылка на источник."}
               </p>
               <p className="text-xs text-ink-400">
-                Оригинал: {n.originalTitle}
+                {n.titleRu
+                  ? "Оригинал: " + n.originalTitle
+                  : "Оригинальный заголовок источника; русский перевод пока не подготовлен."}
               </p>
               <div className="flex flex-wrap gap-2 text-xs text-brand-400">
+                {!n.metalIds.length && (
+                  <span>
+                    Отрасль в целом — без привязки к конкретному металлу
+                  </span>
+                )}
                 {n.metalIds.map((id) => (
                   <span key={id}>{METAL_MAP[id]?.nameRu}</span>
                 ))}

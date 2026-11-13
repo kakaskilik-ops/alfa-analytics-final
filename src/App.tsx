@@ -89,7 +89,7 @@ export default function App() {
               : (liveData?.error ??
                 (scopedData?.quotes.size
                   ? "Данные источников загружены"
-                  : "Нет подтверждённых котировок"))}
+                  : "Нет подтверждённых региональных котировок"))}
           </span>
           <button
             disabled={loading}
