@@ -19,6 +19,7 @@ export async function analyseVerifiedFacts(
     question: string;
     scope: unknown;
     ownerId?: string;
+    guestId?: string;
     automatic?: boolean;
     messages?: { role: string; content: string }[];
   },
@@ -35,7 +36,7 @@ export async function analyseVerifiedFacts(
       : [
           "manual",
           ...route,
-          args.ownerId,
+          args.ownerId ?? args.guestId,
           args.question,
           args.scope,
           args.messages,
@@ -55,6 +56,15 @@ export async function analyseVerifiedFacts(
       .gte("generated_at", new Date().toISOString().slice(0, 10));
     if (countError) throw new ModelError("cache_unavailable");
     if ((count ?? 0) >= 2) throw new ModelError("automatic_daily_limit");
+  } else if (args.guestId) {
+    const { data, error } = await db
+      .from("guest_ai_cache")
+      .select("report")
+      .eq("cache_key", hash)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (error) throw new ModelError("cache_unavailable");
+    if (data) return { report: data.report as VerifiedReport, cached: true };
   } else {
     const { data, error: cacheError } = await db
       .from("analytical_summaries")
@@ -191,6 +201,15 @@ export async function analyseVerifiedFacts(
         },
         { onConflict: "evidence_hash", ignoreDuplicates: true },
       );
+      if (error) throw new ModelError("report_store_failed");
+    } else if (args.guestId) {
+      const { error } = await db
+        .from("guest_ai_cache")
+        .upsert({
+          cache_key: hash,
+          report,
+          expires_at: new Date(Date.now() + 86400000).toISOString(),
+        });
       if (error) throw new ModelError("report_store_failed");
     } else {
       const { error } = await db.from("analytical_summaries").upsert(

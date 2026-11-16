@@ -261,5 +261,48 @@ await db.exec("RESET ROLE");
 results.push(
   "PASS atomic free AI budget and duplicate work lease; browser cannot access health, quotas, collectors or write reports/statistics",
 );
+await db.exec("SET ROLE service_role");
+const guestHash = "b".repeat(64);
+const guestQuota = async (n) =>
+  (
+    await db.query("SELECT consume_guest_ai_quota($1,$2) ok", [
+      guestHash,
+      String(n).padStart(32, "0"),
+    ])
+  ).rows[0].ok;
+assert.equal(await guestQuota(0), true);
+assert.equal(await guestQuota(1), false);
+for (let i = 1; i < 5; i++) {
+  await db.query(
+    "UPDATE analytics_internal.guest_ai_limits SET last_request_at=now()-interval '31 seconds' WHERE visitor_hash=$1",
+    [guestHash],
+  );
+  assert.equal(await guestQuota(0), false);
+  assert.equal(await guestQuota(i), true);
+}
+await db.query(
+  "UPDATE analytics_internal.guest_ai_limits SET last_request_at=now()-interval '31 seconds' WHERE visitor_hash=$1",
+  [guestHash],
+);
+assert.equal(await guestQuota(5), false);
+await db.exec("RESET ROLE; SET ROLE anon");
+for (const sql of [
+  "SELECT * FROM guest_ai_cache",
+  "SELECT * FROM analytics_internal.guest_ai_limits",
+  "SELECT * FROM analytics_internal.guest_ai_nonces",
+  "SELECT consume_guest_ai_quota(repeat('a',64),repeat('0',32))",
+]) {
+  let denied = false;
+  try {
+    await db.exec(sql);
+  } catch {
+    denied = true;
+  }
+  assert.ok(denied, sql);
+}
+await db.exec("RESET ROLE");
+results.push(
+  "PASS guest cooldown and five/day atomic quota; guest cache and hashed network counters remain private",
+);
 console.log(results.join("\n"));
 await db.close();

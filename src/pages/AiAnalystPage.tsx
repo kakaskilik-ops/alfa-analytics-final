@@ -1,6 +1,5 @@
 import { Bot, Info, Send, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { supabase } from "@/lib/supabase";
 import Panel from "@/components/common/Panel";
 import ChatBubble, { type ChatMessage } from "@/components/ai/ChatBubble";
 import PageHeader from "@/components/layout/PageHeader";
@@ -25,10 +24,8 @@ const suggestions = [
 export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]),
     [draft, setDraft] = useState(""),
-    [busy, setBusy] = useState(false);
-  const [email, setEmail] = useState(""),
-    [userEmail, setUserEmail] = useState<string | null>(null),
-    [authMessage, setAuthMessage] = useState("");
+    [busy, setBusy] = useState(false),
+    [website, setWebsite] = useState("");
   const [ids, setIds] = useState<string[]>(() => {
       try {
         const id = sessionStorage.getItem("ai-metal");
@@ -54,16 +51,6 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
     };
   }, []);
   useEffect(() => {
-    if (!supabase) return;
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => setUserEmail(data.session?.user.email ?? null));
-    const { data } = supabase.auth.onAuthStateChange((_event, session) =>
-      setUserEmail(session?.user.email ?? null),
-    );
-    return () => data.subscription.unsubscribe();
-  }, []);
-  useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, busy]);
   async function ask(question: string, all = false) {
@@ -71,6 +58,7 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
     if (!text || busy) return;
     const request: AiRequest = {
       question: text,
+      website,
       metalIds: all ? [] : ids,
       period,
       region: region || undefined,
@@ -318,51 +306,11 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
           Новые генерации ограничены серверной квотой.
         </p>
       </Panel>
-      {supabase &&
-        (userEmail ? (
-          <div className="mb-4 flex flex-wrap gap-3 text-xs text-ink-400">
-            <p>Выполнен вход: {userEmail}</p>
-            <button
-              type="button"
-              className="text-brand-400"
-              onClick={() => void supabase?.auth.signOut()}
-            >
-              Выйти
-            </button>
-          </div>
-        ) : (
-          <form
-            className="mb-4 flex flex-wrap gap-3"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const { error } = await supabase!.auth.signInWithOtp({
-                email,
-                options: { emailRedirectTo: window.location.origin + "/#ai" },
-              });
-              setAuthMessage(
-                error
-                  ? "Не удалось отправить ссылку входа."
-                  : "Ссылка для входа отправлена на почту.",
-              );
-            }}
-          >
-            <input
-              required
-              type="email"
-              aria-label="Электронная почта"
-              placeholder="Электронная почта"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="min-w-0 max-w-full rounded border border-ink-700 bg-ink-900 p-2"
-            />
-            <button type="submit" className="text-sm text-brand-400">
-              Получить ссылку входа
-            </button>
-            <p role="status" className="text-xs text-ink-400">
-              {authMessage || "Для чата требуется вход в систему."}
-            </p>
-          </form>
-        ))}
+      <p className="mb-4 text-xs text-ink-400">
+        Вход и регистрация не нужны. Бесплатный чат: до пяти запросов в сутки с
+        одной сети, с паузой не менее тридцати секунд. Общий лимит провайдера
+        может ограничивать доступ раньше.
+      </p>
       <Panel className="flex min-h-[480px] flex-col overflow-hidden">
         <div className="flex items-center gap-3 border-b border-ink-800 px-5 py-4">
           <Bot size={20} className="text-brand-400" />
@@ -374,9 +322,9 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
         <div className="max-h-[65vh] flex-1 space-y-5 overflow-y-auto p-4 md:p-6">
           {!messages.length && (
             <p className="text-sm text-ink-400">
-              Выберите металл и период. После входа и подключения бесплатного
-              провайдера здесь появится настоящий ответ модели. Производственные
-              показатели и рыночные события без источника не подставляются.
+              Выберите металл и период и задайте вопрос. Здесь появится
+              настоящий ответ модели. Производственные показатели и рыночные
+              события без источника не подставляются.
             </p>
           )}
           {messages.map((m) => (
@@ -406,6 +354,18 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
           onSubmit={submit}
           className="flex gap-3 border-t border-ink-800 p-4"
         >
+          <div aria-hidden="true" className="absolute -left-[10000px]">
+            <label>
+              Website
+              <input
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+              />
+            </label>
+          </div>
           <input
             maxLength={2000}
             value={draft}

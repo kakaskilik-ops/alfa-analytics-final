@@ -1,3 +1,4 @@
+import { solveGuestProof } from "../../shared/guestProof";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -42,9 +43,34 @@ export const supabase: SupabaseClient | null = SUPABASE_CONFIGURED
 /** Edge analysis needs a longer deadline than small database reads. Credentials stay scoped to the configured Supabase URL. */
 export async function invokeAnalysis(
   body: unknown,
-  accessToken: string,
+  accessToken?: string,
 ): Promise<unknown> {
   if (!SUPABASE_CONFIGURED) throw new Error("Сервер ИИ не настроен.");
+  const raw = JSON.stringify(body);
+  let proofHeaders: Record<string, string> = {};
+  if (!accessToken) {
+    const challenge = await fetch(
+      `${url!.replace(/\/$/, "")}/functions/v1/ai-challenge`,
+      {
+        method: "POST",
+        signal: AbortSignal.timeout(15000),
+        headers: { "Content-Type": "application/json", apikey: key! },
+        body: raw,
+      },
+    );
+    const data = await challenge.json();
+    if (!challenge.ok || typeof data.token !== "string")
+      throw new Error(
+        typeof data.error === "string"
+          ? data.error
+          : "Не удалось проверить защиту чата.",
+      );
+    const counter = await solveGuestProof(data.token, data.difficulty);
+    proofHeaders = {
+      "x-ai-challenge": data.token,
+      "x-ai-proof": String(counter),
+    };
+  }
   const response = await fetch(
     `${url!.replace(/\/$/, "")}/functions/v1/ai-analyze`,
     {
@@ -53,9 +79,10 @@ export async function invokeAnalysis(
       headers: {
         "Content-Type": "application/json",
         apikey: key!,
-        Authorization: `Bearer ${accessToken}`,
+        ...proofHeaders,
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
-      body: JSON.stringify(body),
+      body: raw,
     },
   );
   let data: unknown;

@@ -1,3 +1,4 @@
+import { verifyGuestChallenge } from "../_shared/guestAccess.ts";
 import { handler as legacy } from "./legacy.ts";
 import { guard, json } from "../_shared/http.ts";
 import { serverClient } from "../_shared/jobs.ts";
@@ -42,27 +43,68 @@ export async function handler(req: Request): Promise<Response> {
   if (!url || !key) return json(req, { error: "Сервис не настроен" }, 503);
   const db = serverClient(url, key),
     token = req.headers.get("authorization")?.replace(/^Bearer /i, "");
-  if (!token) return json(req, { error: "Требуется вход" }, 401);
+
   try {
-    const {
-      data: { user },
-      error: authError,
-    } = await db.auth.getUser(token);
-    if (authError || !user) return json(req, { error: "Требуется вход" }, 401);
-    let input;
+    let ownerId: string | undefined, guestId: string | undefined;
+    if (token) {
+      const {
+        data: { user },
+        error,
+      } = await db.auth.getUser(token);
+      if (error || !user)
+        return json(
+          req,
+          { error: "Сессия недействительна. Обновите страницу." },
+          401,
+        );
+      ownerId = user.id;
+    }
+    let input, raw: string;
     try {
-      input = parseAiInput(
-        JSON.parse(await limitedText(new Response(req.body), 24576)),
-      );
+      raw = await limitedText(new Response(req.body), 24576);
+      const body = JSON.parse(raw);
+      if (body.website)
+        return json(req, { error: "Запрос отклонён защитой от спама." }, 403);
+      input = parseAiInput(body);
     } catch {
       return json(req, { error: "Некорректный запрос" }, 400);
     }
-    const { data: quota, error: quotaError } = await db.rpc(
-      "consume_ai_quota",
-      { p_user_id: user.id },
-    );
-    if (quotaError || !quota)
-      return json(req, { error: "Лимит запросов пользователя исчерпан" }, 429);
+    let nonce: string | undefined;
+    if (!ownerId) {
+      const proof = await verifyGuestChallenge(req, key, raw!);
+      if (!proof)
+        return json(
+          req,
+          {
+            error:
+              "Не пройдена проверка защиты чата. Обновите страницу и повторите запрос.",
+          },
+          403,
+        );
+      guestId = proof.visitor;
+      nonce = proof.nonce;
+    }
+    const { data: quota, error: quotaError } = ownerId
+      ? await db.rpc("consume_ai_quota", { p_user_id: ownerId })
+      : await db.rpc("consume_guest_ai_quota", {
+          p_visitor_hash: guestId,
+          p_nonce: nonce,
+        });
+    if (quotaError)
+      return json(
+        req,
+        { error: "Не удалось проверить лимит чата. Повторите позже." },
+        503,
+      );
+    if (!quota)
+      return json(
+        req,
+        {
+          error:
+            "Лимит бесплатного чата: до пяти запросов в сутки с одной сети и пауза не менее тридцати секунд.",
+        },
+        429,
+      );
     if (!modelConfigurations().length)
       throw new ModelError("ai_not_configured");
     const evidence = await buildMarketEvidence(db, input);
@@ -78,7 +120,8 @@ export async function handler(req: Request): Promise<Response> {
       facts: evidence.facts,
       question: input.question,
       scope,
-      ownerId: user.id,
+      ownerId,
+      guestId,
       messages: input.messages,
     });
     return json(req, {

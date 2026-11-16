@@ -400,3 +400,227 @@ Deno.test(
       },
     ),
 );
+
+Deno.test(
+  "guest chat caches privately, rejects quota exhaustion and validates supplied sessions",
+  () =>
+    env(
+      {
+        ...base,
+        GROQ_API_KEY: "TEST_GROQ",
+        SUPABASE_URL: "https://test.supabase.co",
+        SUPABASE_SERVICE_ROLE_KEY: "TEST_SERVER",
+      },
+      async () => {
+        const old = globalThis.fetch;
+        let calls = 0,
+          allowed = true,
+          saved: unknown = null,
+          quotaCalls = 0;
+        globalThis.fetch = async (input, init) => {
+          const url = String(input),
+            method = init?.method ?? "GET";
+          if (url.includes("/auth/v1/user"))
+            return Response.json({ message: "Invalid JWT" }, { status: 401 });
+          if (url.endsWith("/rpc/consume_guest_ai_quota")) {
+            quotaCalls++;
+            const args = JSON.parse(String(init?.body));
+            assert(
+              /^[a-f0-9]{64}$/.test(args.p_visitor_hash) &&
+                !String(init?.body).includes("192.0.2.1"),
+            );
+            return Response.json(allowed);
+          }
+          if (
+            url.endsWith("/rpc/reserve_free_ai_call") ||
+            url.endsWith("/rpc/reserve_ai_tokens")
+          )
+            return Response.json(true);
+          if (url.endsWith("/rpc/claim_ai_work"))
+            return Response.json("00000000-0000-0000-0000-000000000002");
+          if (url.endsWith("/rpc/release_ai_work")) return Response.json(null);
+          if (url.includes("/rest/v1/metals"))
+            return Response.json([
+              { id: "copper", name_ru: "Медь", symbol: "Cu", aliases: [] },
+            ]);
+          if (url.includes("/rest/v1/reference_price_observations")) {
+            const now = new Date(),
+              date = new Date(
+                Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+              )
+                .toISOString()
+                .slice(0, 10);
+            return Response.json([
+              {
+                metal_id: "copper",
+                period_start: date,
+                price: 111,
+                currency: "USD",
+                unit: "ton",
+                region: "Мировой ориентир (LME)",
+                specification: "TEST",
+                retrieved_at: now.toISOString(),
+              },
+            ]);
+          }
+          if (url.includes("/rest/v1/guest_ai_cache")) {
+            if (method === "POST") {
+              saved = JSON.parse(String(init?.body)).report;
+              return Response.json(null);
+            }
+            return Response.json(saved ? { report: saved } : null);
+          }
+          if (
+            url.includes("/rest/v1/analytical_summaries") ||
+            url.includes("/rest/v1/market_ai_reports")
+          )
+            throw new Error(
+              "Guest conversation must not enter user/public reports",
+            );
+          if (url.includes("/rest/v1/")) return Response.json([]);
+          if (url === "https://api.groq.com/openai/v1/chat/completions") {
+            calls++;
+            return Response.json({
+              model: "openai/gpt-oss-120b",
+              choices: [{ message: { content: JSON.stringify(draft) } }],
+            });
+          }
+          throw new Error("Unexpected request");
+        };
+        const req = async (token?: string) => {
+          const raw = JSON.stringify({
+            question: "Проанализируй медь",
+            metalIds: ["copper"],
+            period: "3M",
+          });
+          const r = new Request("https://example.com/api", {
+            method: "POST",
+            headers: {
+              "x-forwarded-for": "192.0.2.1",
+              ...(token ? { Authorization: "Bearer " + token } : {}),
+            },
+            body: raw,
+          });
+          if (!token) {
+            const { issueGuestChallenge } = await import("./guestAccess.ts");
+            const { solveGuestProof } =
+              await import("../../../shared/guestProof.ts");
+            const c = await issueGuestChallenge(r, "TEST_SERVER", raw);
+            r.headers.set("x-ai-challenge", c.token);
+            r.headers.set("x-ai-proof", String(await solveGuestProof(c.token)));
+          }
+          return r;
+        };
+        try {
+          const first = await analyse(await req());
+          const body = await first.json();
+          assert(
+            first.status === 200 &&
+              body.text.includes("111 USD/т") &&
+              saved &&
+              calls === 1,
+          );
+          const cached = await analyse(await req());
+          assert(
+            cached.status === 200 &&
+              (await cached.json()).cached === true &&
+              calls === 1,
+          );
+          allowed = false;
+          const limited = await analyse(await req());
+          assert(limited.status === 429 && calls === 1);
+          await limited.body?.cancel();
+          const invalid = await analyse(await req("INVALID"));
+          assert(invalid.status === 401 && quotaCalls === 3 && calls === 1);
+          await invalid.body?.cancel();
+        } finally {
+          globalThis.fetch = old;
+        }
+      },
+    ),
+);
+
+Deno.test(
+  "guest proof is bound to the body, network and expiry; missing proof makes no upstream call",
+  () =>
+    env(
+      {
+        ...base,
+        SUPABASE_URL: "https://test.supabase.co",
+        SUPABASE_SERVICE_ROLE_KEY: "TEST_SERVER",
+      },
+      async () => {
+        const { issueGuestChallenge, verifyGuestChallenge } =
+          await import("./guestAccess.ts");
+        const { solveGuestProof } =
+          await import("../../../shared/guestProof.ts");
+        const raw = JSON.stringify({
+            question: "Проанализируй медь",
+            metalIds: ["copper"],
+            period: "3M",
+          }),
+          now = Date.now();
+        const r = new Request("https://example.com/api", {
+          method: "POST",
+          headers: { "x-forwarded-for": "192.0.2.1" },
+          body: raw,
+        });
+        const challenge = await issueGuestChallenge(r, "TEST_SERVER", raw, now),
+          counter = await solveGuestProof(challenge.token);
+        r.headers.set("x-ai-challenge", challenge.token);
+        r.headers.set("x-ai-proof", String(counter));
+        assert(await verifyGuestChallenge(r, "TEST_SERVER", raw, now));
+        assert(!(await verifyGuestChallenge(r, "TEST_SERVER", raw + " ", now)));
+        assert(
+          !(await verifyGuestChallenge(r, "TEST_SERVER", raw, now + 300001)),
+        );
+        r.headers.set("x-forwarded-for", "192.0.2.2");
+        assert(!(await verifyGuestChallenge(r, "TEST_SERVER", raw, now)));
+        const old = globalThis.fetch;
+        let network = 0;
+        globalThis.fetch = async () => {
+          network++;
+          throw new Error("No upstream before a valid proof");
+        };
+        try {
+          const rejected = await analyse(
+            new Request("https://example.com/api", {
+              method: "POST",
+              body: raw,
+            }),
+          );
+          assert(rejected.status === 403 && network === 0);
+          await rejected.body?.cancel();
+        } finally {
+          globalThis.fetch = old;
+        }
+      },
+    ),
+);
+Deno.test(
+  "guest challenge rejects honeypot and foreign origins without model calls",
+  () =>
+    env({ ...base, SUPABASE_SERVICE_ROLE_KEY: "TEST_SERVER" }, async () => {
+      const { handler } = await import("../ai-challenge/handler.ts");
+      const bad = await handler(
+        new Request("https://example.com/api", {
+          method: "POST",
+          body: JSON.stringify({
+            question: "Проанализируй медь",
+            website: "spam",
+          }),
+        }),
+      );
+      assert(bad.status === 403);
+      await bad.body?.cancel();
+      const foreign = await handler(
+        new Request("https://example.com/api", {
+          method: "POST",
+          headers: { Origin: "https://attacker.example" },
+          body: "{}",
+        }),
+      );
+      assert(foreign.status === 403);
+      await foreign.body?.cancel();
+    }),
+);
