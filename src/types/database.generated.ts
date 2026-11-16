@@ -410,6 +410,27 @@ export type Database = {
           },
         ];
       };
+      guest_ai_cache: {
+        Row: {
+          cache_key: string;
+          created_at: string;
+          expires_at: string;
+          report: Json;
+        };
+        Insert: {
+          cache_key: string;
+          created_at?: string;
+          expires_at: string;
+          report: Json;
+        };
+        Update: {
+          cache_key?: string;
+          created_at?: string;
+          expires_at?: string;
+          report?: Json;
+        };
+        Relationships: [];
+      };
       index_observations: {
         Row: {
           constituents: Json;
@@ -1392,6 +1413,10 @@ export type Database = {
       claim_automation_job: { Args: { p_job: string }; Returns: string };
       claim_news_source: { Args: { p_id: string }; Returns: boolean };
       consume_ai_quota: { Args: { p_user_id: string }; Returns: boolean };
+      consume_guest_ai_quota: {
+        Args: { p_nonce: string; p_visitor_hash: string };
+        Returns: boolean;
+      };
       finish_automation_job: {
         Args: { p_job: string; p_token: string };
         Returns: undefined;
