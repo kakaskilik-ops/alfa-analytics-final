@@ -1,3 +1,8 @@
+import {
+  resolveAnalysisWindow,
+  type AnalysisWindow,
+} from "../../../shared/analysisWindow.ts";
+export { PERIOD_DAYS } from "../../../shared/analysisWindow.ts";
 import { isMetal, isRegion, METAL_IDS } from "./universe.ts";
 export interface AiInput {
   question: string;
@@ -6,18 +11,12 @@ export interface AiInput {
   region: string | null;
   newsId: string | null;
   kind: "chat" | "news" | "daily" | "weekly";
+  startDate?: string;
+  endDate?: string;
+  window?: AnalysisWindow;
   messages: { role: "user" | "assistant"; content: string }[];
 }
-export const PERIOD_DAYS: Record<string, number> = {
-  "1D": 1,
-  "1W": 7,
-  "1M": 30,
-  "3M": 90,
-  "6M": 183,
-  "1Y": 365,
-  "5Y": 1826,
-};
-export function parseAiInput(raw: unknown): AiInput {
+export function parseAiInput(raw: unknown, now = Date.now()): AiInput {
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
     throw new Error("invalid_request");
   const r = raw as Record<string, unknown>;
@@ -27,12 +26,16 @@ export function parseAiInput(raw: unknown): AiInput {
     r.question.length > 2000
   )
     throw new Error("invalid_question");
-  const period = r.period ?? "1M";
-  if (
-    typeof period !== "string" ||
-    !Object.prototype.hasOwnProperty.call(PERIOD_DAYS, period)
-  )
-    throw new Error("invalid_period");
+  const window = resolveAnalysisWindow(
+    {
+      question: r.question,
+      period: r.period as string | undefined,
+      startDate: r.startDate as string | undefined,
+      endDate: r.endDate as string | undefined,
+    },
+    now,
+  );
+  const period = window.period;
   const ids = r.metalIds ?? [];
   if (!Array.isArray(ids) || ids.length > 13 || ids.some((id) => !isMetal(id)))
     throw new Error("invalid_metals");
@@ -64,6 +67,9 @@ export function parseAiInput(raw: unknown): AiInput {
     question: r.question.trim(),
     metalIds: [...new Set(ids as string[])],
     period,
+    startDate: window.requested.start,
+    endDate: window.requested.end,
+    window,
     region: (r.region as string) ?? null,
     newsId: (r.newsId as string) ?? null,
     kind: kind as AiInput["kind"],
@@ -74,18 +80,34 @@ export function chooseMetalIds(
   input: AiInput,
   catalog: { id: string; name_ru: string; symbol: string; aliases: string[] }[],
 ): string[] {
-  if (input.metalIds.length) return input.metalIds;
   const text = input.question.toLowerCase();
+  const terms: Record<string, RegExp> = {
+    copper: /(?<![а-яa-z])(?:мед[ьиью]|copper)(?![а-яa-z])/iu,
+    aluminum: /алюмини|\balumin(?:um|ium)\b/iu,
+    tungsten: /(?<![а-яa-z])(?:вольфрам|tungsten)/iu,
+    molybdenum: /(?<![а-яa-z])(?:молибден|molybdenum)/iu,
+    ferromolybdenum: /ферромолибден|ferro[ -]?molybdenum/iu,
+    ferrotungsten: /ферровольфрам|ferro[ -]?tungsten/iu,
+    tin: /олов[оаяу]|\btin\b/iu,
+    zinc: /цинк|\bzinc\b/iu,
+    chromium: /хром|\bchromium\b/iu,
+    cobalt: /кобальт|\bcobalt\b/iu,
+    zirconium: /циркони|\bzirconium\b/iu,
+    niobium: /ниоби|\bniobium\b/iu,
+    tantalum: /тантал|\btantalum\b/iu,
+  };
   const mentioned = catalog
     .filter(
       (m) =>
         isMetal(m.id) &&
-        [m.name_ru, ...m.aliases].some(
-          (n) => n.length >= 3 && text.includes(n.toLowerCase()),
-        ),
+        (terms[m.id]?.test(text) ||
+          new RegExp(`(?<![A-Za-zА-Яа-я])${m.symbol}(?![A-Za-zА-Яа-я])`).test(
+            input.question,
+          )),
     )
     .map((m) => m.id);
-  return mentioned.length ? mentioned : [...METAL_IDS];
+  if (mentioned.length) return mentioned;
+  return input.metalIds.length ? input.metalIds : [...METAL_IDS];
 }
 export interface RegionalObservation {
   metal_id: string;

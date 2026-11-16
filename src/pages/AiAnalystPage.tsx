@@ -35,6 +35,8 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
       }
     }),
     [period, setPeriod] = useState("3M"),
+    [startDate, setStartDate] = useState(""),
+    [endDate, setEndDate] = useState(""),
     [region, setRegion] = useState("");
   const status = useAsyncData(fetchAiRuntimeStatus, "free-ai-status", true),
     published = useAsyncData(
@@ -61,6 +63,8 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
       website,
       metalIds: all ? [] : ids,
       period,
+      startDate: period === "custom" ? startDate : undefined,
+      endDate: period === "custom" ? endDate : undefined,
       region: region || undefined,
       messages: messages
         .filter((m) => !m.error)
@@ -220,11 +224,13 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
               {[
                 ["1D", "День"],
                 ["1W", "Неделя"],
-                ["1M", "Месяц"],
+                ["1M", "Последние 30 дней"],
+                ["1Q", "Завершённый квартал"],
                 ["3M", "Девяносто дней"],
                 ["6M", "Полгода"],
-                ["1Y", "Год"],
+                ["1Y", "Последние 12 месяцев"],
                 ["5Y", "Пять лет"],
+                ["custom", "Произвольный диапазон"],
               ].map(([v, label]) => (
                 <option key={v} value={v}>
                   {label}
@@ -247,6 +253,35 @@ export default function AiAnalystPage({ updatedAt }: { updatedAt: Date }) {
             </select>
           </label>
         </div>
+        {period === "custom" && (
+          <div className="mt-3 flex flex-wrap gap-3">
+            <label className="text-xs text-ink-400">
+              Начало
+              <input
+                type="date"
+                aria-label="Начало периода анализа"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="block rounded border border-ink-700 bg-ink-950 p-2"
+              />
+            </label>
+            <label className="text-xs text-ink-400">
+              Окончание
+              <input
+                type="date"
+                aria-label="Конец периода анализа"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="block rounded border border-ink-700 bg-ink-950 p-2"
+              />
+            </label>
+          </div>
+        )}
+        <p className="mt-2 text-xs text-ink-500">
+          Металл и период, явно указанные в вопросе, имеют приоритет над
+          переключателями. Для месячных данных используются закрытые месяцы;
+          границы и фактическое покрытие указаны в отчёте.
+        </p>
         <details className="mt-3 text-xs text-ink-400">
           <summary className="cursor-pointer">
             Выбрать несколько материалов для сравнения

@@ -1,4 +1,5 @@
 import AutomationStatus from "@/components/market/AutomationStatus";
+import CoverageMatrix from "@/components/market/CoverageMatrix";
 import { fetchNewsSources } from "@/services/news";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { useEffect, useState } from "react";
@@ -107,6 +108,7 @@ export default function SourcesPage({ liveData, updatedAt }: SourcesPageProps) {
         </p>
       )}
       <AutomationStatus updatedAt={updatedAt} />
+      <CoverageMatrix data={liveData} />
       <Panel className="mb-4 p-5 text-sm text-ink-300">
         <h2 className="mb-2 font-semibold">Методология</h2>
         <p>

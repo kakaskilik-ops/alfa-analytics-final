@@ -48,6 +48,12 @@ test("guest chat solves proof without login and shows a Russian quota message", 
       );
       expect(proof).not.toBeNull();
       calls++;
+      if (calls === 2) {
+        const body = JSON.parse(r.postData());
+        expect(body.period).toBe("custom");
+        expect(body.startDate).toBe("2025-11-01");
+        expect(body.endDate).toBe("2026-10-31");
+      }
       return calls === 1
         ? route.fulfill({
             json: {
@@ -79,6 +85,9 @@ test("guest chat solves proof without login and shows a Russian quota message", 
   await expect(
     page.getByText("ТЕСТОВЫЙ ответ по подтверждённым данным.", { exact: true }),
   ).toBeVisible({ timeout: 35000 });
+  await page.getByLabel("Период ИИ-анализа").selectOption("custom");
+  await page.getByLabel("Начало периода анализа").fill("2025-11-01");
+  await page.getByLabel("Конец периода анализа").fill("2026-10-31");
   await page.getByLabel("Вопрос ИИ-аналитику").fill("Проанализируй олово");
   await page
     .getByRole("button", { name: "Отправить вопрос", exact: true })

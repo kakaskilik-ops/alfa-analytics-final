@@ -1,0 +1,319 @@
+{
+  "checkedAt": "2026-11-16",
+  "method": "Independent PostgreSQL calculation and source-table joins for the private Groq preview report",
+  "factCount": 59,
+  "matched": 59,
+  "independentSqlMetrics": {
+    "max": 14508,
+    "min": 10812,
+    "q25": 12845.5,
+    "q75": 13745.5,
+    "mean": 13165.5,
+    "change": 3696,
+    "median": 13277.5,
+    "changePct": 34.1842397336293,
+    "meanChange": 3601.8333333333335,
+    "previousMean": 9563.666666666666,
+    "meanChangePct": 37.6616360531177,
+    "endpointChange": 3768,
+    "endpointChangePct": 35.08379888268156,
+    "monthlyVolatilityPct": 4.106207209823051
+  },
+  "verification": [
+    {
+      "id": "F1",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F2",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F3",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F4",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F5",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F6",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F7",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F8",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F9",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F10",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F11",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F12",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F13",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F14",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F15",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F16",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F17",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F18",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F19",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F20",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F21",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F22",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F23",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F24",
+      "kind": "monthly_price",
+      "matched": true
+    },
+    {
+      "id": "F25",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F26",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F27",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F28",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F29",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F30",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F31",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F32",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F33",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F34",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F35",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F36",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F37",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F38",
+      "kind": "derived_metric",
+      "matched": true
+    },
+    {
+      "id": "F39",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F40",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F41",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F42",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F43",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F44",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F45",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F46",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F47",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F48",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F49",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F50",
+      "kind": "trade",
+      "matched": true
+    },
+    {
+      "id": "F51",
+      "kind": "news",
+      "matched": true
+    },
+    {
+      "id": "F52",
+      "kind": "news",
+      "matched": true
+    },
+    {
+      "id": "F53",
+      "kind": "news",
+      "matched": true
+    },
+    {
+      "id": "F54",
+      "kind": "news",
+      "matched": true
+    },
+    {
+      "id": "F55",
+      "kind": "fx",
+      "matched": true
+    },
+    {
+      "id": "F56",
+      "kind": "fx",
+      "matched": true
+    },
+    {
+      "id": "F57",
+      "kind": "fx",
+      "matched": true
+    },
+    {
+      "id": "F58",
+      "kind": "fx",
+      "matched": true
+    },
+    {
+      "id": "F59",
+      "kind": "fx",
+      "matched": true
+    }
+  ]
+}

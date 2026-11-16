@@ -2,6 +2,7 @@ import Delta from "@/components/common/Delta";
 import { cn } from "@/lib/cn";
 import { formatPercent, formatPrice } from "@/lib/format";
 import type { MetalQuote } from "@/types/market";
+import { printAnalyticalReport } from "@/services/export";
 
 export interface ChatMessage {
   id: string;
@@ -47,6 +48,15 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
           )}
           {message.text}
         </div>
+        {!isUser && !message.error && (
+          <button
+            type="button"
+            className="mt-2 text-xs text-brand-400"
+            onClick={() => printAnalyticalReport(message.text)}
+          >
+            Печать / сохранить PDF
+          </button>
+        )}
 
         {message.sources && (
           <div className="mt-2 flex flex-wrap gap-3 text-xs text-brand-400">

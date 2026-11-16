@@ -73,5 +73,9 @@ it("uses only the official preview host and bounded product/country/year paramet
   const u = new URL(comtradeUrl("tungsten", now));
   expect(u.hostname).toBe("comtradeapi.un.org");
   expect(u.searchParams.get("period")).toBe("2025");
+  expect(
+    new URL(comtradeUrl("copper", now, 2024)).searchParams.get("period"),
+  ).toBe("2024");
+  expect(() => comtradeUrl("copper", now, 2026)).toThrow("invalid_trade_year");
   expect(u.searchParams.get("maxRecords")).toBe("100");
 });

@@ -5,6 +5,8 @@ import { METAL_MAP } from "@/data/metals";
 import Panel from "@/components/common/Panel";
 import PriceChart from "@/components/charts/PriceChart";
 import { formatDateTime } from "@/lib/format";
+import { useState } from "react";
+import { tableCsv, downloadCsv } from "@/services/export";
 const metricNames: Record<string, string> = {
   import_value: "Импорт, CIF",
   export_value: "Экспорт, FOB",
@@ -16,6 +18,8 @@ const metricNames: Record<string, string> = {
 const format = (v: number) =>
   new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(v);
 export default function MetalDataPanel({ metalId }: { metalId: string }) {
+  const [statisticKey, setStatisticKey] = useState("");
+  const [years, setYears] = useState("all");
   const stats = useAsyncData(
       () => fetchMetalStatistics(metalId),
       metalId,
@@ -32,6 +36,19 @@ export default function MetalDataPanel({ metalId }: { metalId: string }) {
         ? monthly.state.data.filter((p) => p.metal_id === metalId)
         : [],
     last = history[history.length - 1];
+  const key = (r: (typeof rows)[number]) =>
+    JSON.stringify([r.country, r.metric, r.commodity, r.unit, r.source]);
+  const groups = [...new Map(rows.map((r) => [key(r), r])).entries()];
+  const chosen = groups.some(([k]) => k === statisticKey)
+    ? statisticKey
+    : groups[0]?.[0];
+  const statisticalSeries = rows
+    .filter(
+      (r) =>
+        key(r) === chosen &&
+        (years === "all" || r.year >= new Date().getFullYear() - Number(years)),
+    )
+    .sort((a, b) => a.year - b.year);
   return (
     <Panel className="my-5 p-4 md:p-5">
       <h2 className="font-semibold">
@@ -90,6 +107,92 @@ export default function MetalDataPanel({ metalId }: { metalId: string }) {
       )}
       {rows.length ? (
         <>
+          <div className="mt-3 flex flex-wrap gap-3 text-xs">
+            <label>
+              Статистический ряд{" "}
+              <select
+                aria-label="Статистический ряд"
+                className="block w-full max-w-72 rounded border border-ink-700 bg-ink-950 p-2"
+                value={chosen}
+                onChange={(e) => setStatisticKey(e.target.value)}
+              >
+                {groups.map(([k, r]) => (
+                  <option key={k} value={k}>
+                    {r.country} · {metricNames[r.metric] ?? r.metric} · {r.unit}{" "}
+                    · {r.commodity}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Годы{" "}
+              <select
+                aria-label="Период годовой статистики"
+                className="block rounded border border-ink-700 bg-ink-950 p-2"
+                value={years}
+                onChange={(e) => setYears(e.target.value)}
+              >
+                <option value="all">Все доступные годы</option>
+                <option value="1">Последний завершённый год</option>
+                <option value="5">Пять лет</option>
+              </select>
+            </label>
+            <button
+              className="text-brand-400"
+              onClick={() =>
+                downloadCsv(
+                  `statistics-${metalId}.csv`,
+                  tableCsv(
+                    [
+                      "Металл",
+                      "Год",
+                      "Страна",
+                      "Показатель",
+                      "Значение",
+                      "Единица",
+                      "Код товара",
+                      "Оценка источника",
+                      "Источник",
+                      "Получено",
+                    ],
+                    statisticalSeries.map((r) => [
+                      r.metalId,
+                      r.year,
+                      r.country,
+                      r.metric,
+                      r.value,
+                      r.unit,
+                      r.commodity,
+                      String(r.estimated),
+                      r.sourceUrl,
+                      new Date(r.retrievedAt).toISOString(),
+                    ]),
+                  ),
+                )
+              }
+            >
+              Экспорт статистики CSV
+            </button>
+          </div>
+          <PriceChart
+            animate={false}
+            data={statisticalSeries.map((r) => ({
+              date: Date.UTC(r.year, 11, 31),
+              price: r.value,
+            }))}
+            period="5Y"
+            positive={true}
+            axisFormatter={(n) => String(new Date(n).getUTCFullYear())}
+            valueFormatter={(v) =>
+              format(v) + " " + (statisticalSeries[0]?.unit ?? "")
+            }
+            height={160}
+          />
+          <p className="text-xs text-ink-400">
+            Годовые точки одного источника, страны, кода товара, показателя и
+            единицы. Неполный год исключён. Для графика нужны два года; месячная
+            торговля из годовых итогов не восстанавливается.
+          </p>
           <p className="mt-2 text-xs text-ink-400">
             {rows[0].description}. {rows[0].commodity}. Не цена сделки и не
             полный рынок всех форм металла.

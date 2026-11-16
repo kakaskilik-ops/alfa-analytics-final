@@ -1,7 +1,18 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 import type { EvidenceFact } from "../../../shared/aiReport.ts";
-import { WORLD_BANK_URL } from "../../../shared/referenceMarkets.ts";
-import { type AiInput, PERIOD_DAYS, chooseMetalIds } from "./analysis.ts";
+import {
+  resolveAnalysisWindow,
+  monthEnd,
+} from "../../../shared/analysisWindow.ts";
+import {
+  buildPriceSeries,
+  normalizeTrade,
+  type MarketAnalytics,
+  type MonthlyInput,
+  type TradeInput,
+  type NewsContext,
+} from "../../../shared/marketCalculations.ts";
+import { type AiInput, chooseMetalIds } from "./analysis.ts";
 import { METAL_IDS } from "./universe.ts";
 function publicUrl(value: unknown): string | null {
   try {
@@ -18,328 +29,495 @@ function publicUrl(value: unknown): string | null {
     return null;
   }
 }
+// A limit is not a sample: page every bounded financial row, and fail closed if the safety ceiling is reached.
+type PageQuery<T> = {
+  range: (
+    a: number,
+    b: number,
+  ) => PromiseLike<{ data: T[] | null; error: unknown }>;
+};
+async function readAll<T>(query: () => PageQuery<T>, max = 5000): Promise<T[]> {
+  let rows: T[] = [];
+  for (let offset = 0; offset < max; offset += 500) {
+    const { data, error } = await query().range(offset, offset + 499);
+    if (error) throw Error("evidence_unavailable");
+    rows = rows.concat(data ?? []);
+    if (!data || data.length < 500) return rows;
+  }
+  throw Error("evidence_range_too_large");
+}
 export async function buildMarketEvidence(
   db: SupabaseClient,
   input: AiInput,
   now = Date.now(),
 ) {
-  const end = new Date(now),
-    start = new Date(now - PERIOD_DAYS[input.period] * 86400000);
-  const { data: catalog, error: catalogError } = await db
+  const window = resolveAnalysisWindow(
+    {
+      ...input,
+      startDate: input.period === "custom" ? input.startDate : undefined,
+      endDate: input.period === "custom" ? input.endDate : undefined,
+    },
+    now,
+  );
+  const { data: catalog, error } = await db
     .from("metals")
     .select("id,name_ru,symbol,aliases")
     .in("id", [...METAL_IDS]);
-  if (catalogError) throw new Error("evidence_unavailable");
-  const ids = chooseMetalIds(input, catalog ?? []);
-  const name = (id: string) => catalog?.find((m) => m.id === id)?.name_ru ?? id;
-  let newsQuery = db
-    .from("news_articles")
-    .select(
-      "id,original_title,title_ru,metal_ids,published_at,retrieved_at,canonical_url,source_id",
-    )
-    .eq("is_public", true)
-    .lte("published_at", end.toISOString());
-  newsQuery = input.newsId
-    ? newsQuery.eq("id", input.newsId)
-    : newsQuery
-        .or(`scope.eq.sector,metal_ids.ov.{${ids.join(",")}}`)
-        .gte("published_at", start.toISOString());
-  const results = await Promise.all([
-    db
-      .from("reference_price_observations")
+  if (error) throw Error("evidence_unavailable");
+  const ids = chooseMetalIds(input, catalog ?? []),
+    name = (id: string) => catalog?.find((m) => m.id === id)?.name_ru ?? id;
+  const monthStart = window.previous.start.slice(0, 7) + "-01",
+    queryStart = monthStart,
+    end = window.requested.end,
+    maxTradeYear = Number(end.slice(0, 4)) - (end.slice(5) < "12-31" ? 1 : 0);
+  const newsBase = () => {
+    const q = db
+      .from("news_articles")
       .select(
-        "metal_id,period_start,price,currency,unit,region,specification,retrieved_at",
+        "id,original_title,title_ru,excerpt,scope,metal_ids,regions,published_at,retrieved_at,canonical_url,source_id",
       )
-      .in("metal_id", ids)
-      .eq("source_id", "world-bank-pink-sheet")
-      .order("period_start", { ascending: false })
-      .order("retrieved_at", { ascending: false })
-      .limit(160),
-    db
-      .from("fx_observations")
-      .select("base_currency,quote_currency,rate,rate_date,retrieved_at")
-      .eq("source_id", "frankfurter-v2")
-      .gte("rate_date", new Date(now - 4 * 86400000).toISOString())
-      .lte("rate_date", end.toISOString())
-      .order("rate_date", { ascending: false })
-      .limit(60),
-    db
-      .from("market_statistics")
-      .select(
-        "metal_id,metric,value,unit,period_year,country,country_code,region,commodity_code,product_description,estimated,source_url,retrieved_at,source_id",
-      )
-      .in("metal_id", ids)
-      .order("period_year", { ascending: false })
-      .order("retrieved_at", { ascending: false })
-      .limit(220),
-    newsQuery.order("published_at", { ascending: false }).limit(8),
-    db
-      .from("price_quotations")
-      .select(
-        "metal_id,normalized_price,normalized_currency,normalized_unit,region,country,grade,product_form,purity,element_content,delivery_terms,source_id,source_url,quoted_at,retrieved_at,price_type",
-      )
-      .in("metal_id", ids)
-      .eq("validation_status", "valid")
-      .eq("data_status", "live")
-      .gte("quality_score", 0.7)
-      .gte(
-        "quoted_at",
-        new Date(Math.max(start.getTime(), now - 4 * 86400000)).toISOString(),
-      )
-      .lte("quoted_at", end.toISOString())
-      .order("quoted_at", { ascending: false })
-      .limit(26),
-  ]);
-  if (results.some((r) => r.error)) throw new Error("evidence_unavailable");
-  const monthly = results[0].data ?? [],
-    fx = results[1].data ?? [],
-    stats = results[2].data ?? [],
-    news = results[3].data ?? [],
-    quotes = results[4].data ?? [];
+      .eq("is_public", true)
+      .lte("published_at", end + "T23:59:59.999Z");
+    return input.newsId
+      ? q.eq("id", input.newsId)
+      : q
+          .or(`scope.eq.sector,metal_ids.ov.{${ids.join(",")}}`)
+          .gte("published_at", window.requested.start + "T00:00:00Z");
+  };
+  const [rawPrices, rawTrade, newsResult, fxResult, quotesResult] =
+    await Promise.all([
+      readAll<MonthlyInput>(() =>
+        db
+          .from("reference_price_observations")
+          .select(
+            "metal_id,source_id,period_start,price,currency,unit,region,specification,retrieved_at",
+          )
+          .in("metal_id", ids)
+          .eq("source_id", "world-bank-pink-sheet")
+          .gte("period_start", queryStart)
+          .lte("period_start", end)
+          .order("period_start", { ascending: true })
+          .order("id", { ascending: true }),
+      ),
+      readAll<TradeInput>(() =>
+        db
+          .from("market_statistics")
+          .select(
+            "metal_id,metric,value,unit,period_year,country,country_code,region,commodity_code,product_description,estimated,source_url,retrieved_at,source_id",
+          )
+          .in("metal_id", ids)
+          .gte("period_year", Number(window.previous.start.slice(0, 4)) - 1)
+          .lte("period_year", maxTradeYear)
+          .order("id", { ascending: true }),
+      ),
+      newsBase().order("published_at", { ascending: false }).limit(201),
+      db
+        .from("fx_observations")
+        .select("base_currency,quote_currency,rate,rate_date,retrieved_at")
+        .eq("source_id", "frankfurter-v2")
+        .gte("rate_date", new Date(now - 4 * 86400000).toISOString())
+        .lte("rate_date", new Date(now).toISOString())
+        .order("rate_date", { ascending: false })
+        .limit(60),
+      db
+        .from("price_quotations")
+        .select(
+          "metal_id,normalized_price,normalized_currency,normalized_unit,region,country,grade,product_form,purity,element_content,delivery_terms,source_id,source_url,quoted_at,retrieved_at,price_type",
+        )
+        .in("metal_id", ids)
+        .eq("validation_status", "valid")
+        .eq("data_status", "live")
+        .gte("quality_score", 0.7)
+        .gte("quoted_at", new Date(now - 4 * 86400000).toISOString())
+        .lte("quoted_at", new Date(now).toISOString())
+        .order("quoted_at", { ascending: false })
+        .limit(26),
+    ]);
+  if (newsResult.error || fxResult.error || quotesResult.error)
+    throw Error("evidence_unavailable");
+  const prices = buildPriceSeries(
+      rawPrices.filter((r) => ids.includes(r.metal_id)) as MonthlyInput[],
+      window,
+      now,
+    ),
+    trade = normalizeTrade(
+      rawTrade.filter(
+        (r) =>
+          ids.includes(r.metal_id) &&
+          (!input.region || r.region === input.region) &&
+          r.period_year < new Date(now).getUTCFullYear() &&
+          r.period_year <= maxTradeYear &&
+          r.period_year >= Number(window.previous.start.slice(0, 4)) - 1 &&
+          Number.isFinite(Date.parse(r.retrieved_at)) &&
+          Date.parse(r.retrieved_at) <= now &&
+          publicUrl(r.source_url),
+      ) as TradeInput[],
+      window,
+    );
+  const newsCandidates = (newsResult.data ?? []).filter(
+    (n) =>
+      publicUrl(n.canonical_url) &&
+      Date.parse(n.published_at) <=
+        Math.min(now, Date.parse(end + "T23:59:59.999Z")) &&
+      (!input.newsId
+        ? n.published_at >= window.requested.start + "T00:00:00Z"
+        : true) &&
+      Date.parse(n.retrieved_at) <= now &&
+      (!input.newsId || n.id === input.newsId) &&
+      (!input.region || !n.regions || n.regions.includes(input.region)),
+  );
+  const ranked = [...newsCandidates].sort(
+    (a, b) =>
+      Number(b.metal_ids?.some((id: string) => ids.includes(id))) -
+        Number(a.metal_ids?.some((id: string) => ids.includes(id))) ||
+      b.published_at.localeCompare(a.published_at),
+  );
+  const news: NewsContext[] = ranked.slice(0, 12).map((n) => ({
+    id: n.id,
+    title: String(n.title_ru ?? n.original_title).slice(0, 400),
+    excerpt: String(n.excerpt ?? "").slice(0, 400),
+    date: n.published_at,
+    url: n.canonical_url,
+    source: n.source_id,
+    metalIds: n.metal_ids ?? [],
+    scope: n.metal_ids?.some((id: string) => ids.includes(id))
+      ? "metal"
+      : "sector",
+    receivedAt: n.retrieved_at,
+  }));
+  const limitations: string[] = [];
+  for (const id of ids) {
+    if (!prices.some((s) => s.metalId === id))
+      limitations.push(
+        `${name(id)}: нет сопоставимого месячного ценового ряда в двух выбранных окнах.`,
+      );
+    if (!trade.some((r) => r.metal_id === id && r.relation === "current"))
+      limitations.push(
+        `${name(id)}: нет годовой торговли, полностью покрывающей выбранный диапазон; доступные календарные годы отделены как фон.`,
+      );
+  }
+  if (!news.some((n) => n.scope === "metal"))
+    limitations.push(
+      "Прямые новости об выбранных металлах за период отсутствуют; отраслевые новости не доказывают причины их ценовой динамики.",
+    );
+  if (newsCandidates.length > news.length)
+    limitations.push(
+      `В контексте ${news.length} наиболее релевантных публикаций из ${newsCandidates.length}${newsCandidates.length > 200 ? "+" : ""}; это не исчерпывающий обзор новостей.`,
+    );
+  limitations.push(
+    "Подтверждённого причинного анализа изменений цен, полного мирового баланса спроса/предложения и актуальных рядов производства/запасов нет.",
+  );
+  const analytics: MarketAnalytics = {
+    version: 3,
+    window,
+    metals: ids.map((id) => ({ id, name: name(id) })),
+    prices,
+    trade,
+    news,
+    limitations,
+    coverage: {
+      monthlyRows: rawPrices.length,
+      currentPoints: prices.reduce((n, s) => n + s.current.length, 0),
+      previousPoints: prices.reduce((n, s) => n + s.previous.length, 0),
+      tradeRows: trade.length,
+      newsCandidates: newsCandidates.length,
+      selectedNews: news.length,
+    },
+  };
   const facts: EvidenceFact[] = [];
-  const add = (fact: Omit<EvidenceFact, "id" | "withinPeriod">) => {
+  const add = (
+    f: Omit<EvidenceFact, "id" | "withinPeriod">,
+    withinPeriod?: boolean,
+  ) => {
     if (
-      !Number.isFinite(Date.parse(fact.periodStart)) ||
-      !Number.isFinite(Date.parse(fact.periodEnd)) ||
-      Date.parse(fact.periodEnd) > now ||
-      !Number.isFinite(Date.parse(fact.receivedAt)) ||
-      (typeof fact.value === "number" && !Number.isFinite(fact.value)) ||
-      !publicUrl(fact.url)
+      !publicUrl(f.url) ||
+      !Number.isFinite(Date.parse(f.receivedAt)) ||
+      Date.parse(f.receivedAt) > now
     )
       return;
     facts.push({
-      ...fact,
-      id: "",
+      ...f,
+      id: "F" + (facts.length + 1),
       withinPeriod:
-        Date.parse(fact.periodStart) >= start.getTime() &&
-        Date.parse(fact.periodEnd) <= now,
+        withinPeriod ??
+        (f.periodStart >= window.requested.start &&
+          f.periodEnd <= window.requested.end),
     });
   };
-  const seenMonths = new Set<string>(),
-    byMetal = new Map<string, typeof monthly>();
-  for (const r of monthly) {
-    if (
-      r.currency !== "USD" ||
-      r.unit !== "ton" ||
-      r.region !== "Мировой ориентир (LME)" ||
-      !/^\d{4}-\d{2}-01$/.test(r.period_start) ||
-      !(Number(r.price) > 0)
-    )
-      continue;
-    const key = r.metal_id + r.period_start;
-    if (seenMonths.has(key)) continue;
-    seenMonths.add(key);
-    byMetal.set(r.metal_id, [...(byMetal.get(r.metal_id) ?? []), r]);
+  for (const s of prices) {
+    for (const [scope, points] of [
+      ["current", s.current],
+      ["previous", s.previous],
+    ] as const)
+      for (const p of points)
+        add(
+          {
+            metalId: s.metalId,
+            kind: "monthly_price",
+            label: `${name(s.metalId)} — месячное среднее ${scope === "current" ? "текущего" : "предыдущего"} окна`,
+            value: p.price,
+            unit: s.unit,
+            periodStart: p.month,
+            periodEnd: monthEnd(p.month),
+            receivedAt: p.receivedAt,
+            region: s.region,
+            specification: s.specification,
+            source: s.source,
+            url: s.url,
+          },
+          scope === "current",
+        );
   }
-  for (const [metalId, points] of byMetal) {
-    const selected = points.filter(
-      (r) => Date.parse(r.period_start) >= start.getTime(),
+  for (const s of prices) {
+    const basis = facts.filter(
+        (f) =>
+          f.metalId === s.metalId &&
+          f.kind === "monthly_price" &&
+          f.specification === s.specification,
+      ),
+      receivedAt = [...s.current, ...s.previous]
+        .map((p) => p.receivedAt)
+        .sort()
+        .at(-1);
+    if (!receivedAt) continue;
+    const values: [string, string, number | null, string, string][] = [
+      [
+        "change",
+        "Изменение от первого до последнего месячного среднего",
+        s.currentMetrics.change,
+        "USD/т",
+        "last-first",
+      ],
+      [
+        "changePct",
+        "Изменение от первого до последнего месячного среднего",
+        s.currentMetrics.changePct,
+        "%",
+        "(last/first-1)*100",
+      ],
+      [
+        "min",
+        "Минимальное месячное среднее окна",
+        s.currentMetrics.min,
+        "USD/т",
+        "min(current)",
+      ],
+      [
+        "max",
+        "Максимальное месячное среднее окна",
+        s.currentMetrics.max,
+        "USD/т",
+        "max(current)",
+      ],
+      [
+        "mean",
+        "Арифметическое среднее месячных средних",
+        s.currentMetrics.mean,
+        "USD/т",
+        "sum(current)/count(current)",
+      ],
+      [
+        "previousMean",
+        "Среднее предыдущего сопоставимого окна",
+        s.previousMetrics.mean,
+        "USD/т",
+        "sum(previous)/count(previous)",
+      ],
+      [
+        "meanChange",
+        "Изменение среднего относительно прошлого окна",
+        s.meanChange,
+        "USD/т",
+        "mean(current)-mean(previous)",
+      ],
+      [
+        "meanChangePct",
+        "Изменение среднего относительно прошлого окна",
+        s.meanChangePct,
+        "%",
+        "(mean(current)/mean(previous)-1)*100",
+      ],
+      [
+        "endpointChange",
+        "Разница последних наблюдений двух окон",
+        s.endpointChange,
+        "USD/т",
+        "last(current)-last(previous)",
+      ],
+      [
+        "endpointChangePct",
+        "Разница последних наблюдений двух окон",
+        s.endpointChangePct,
+        "%",
+        "(last(current)/last(previous)-1)*100",
+      ],
+      [
+        "monthlyVolatilityPct",
+        "Выборочное стандартное отклонение месячных лог-доходностей",
+        s.currentMetrics.monthlyVolatilityPct,
+        "%",
+        "sampleStd(log(p[t]/p[t-1]))*100; only consecutive months; at least 6 returns",
+      ],
+    ];
+    values.push(
+      [
+        "q25",
+        "Нижний квартиль месячных средних",
+        s.currentMetrics.q25,
+        "USD/т",
+        "linear quantile (n-1)*0.25",
+      ],
+      [
+        "median",
+        "Медиана месячных средних",
+        s.currentMetrics.median,
+        "USD/т",
+        "linear quantile (n-1)*0.5",
+      ],
+      [
+        "q75",
+        "Верхний квартиль месячных средних",
+        s.currentMetrics.q75,
+        "USD/т",
+        "linear quantile (n-1)*0.75",
+      ],
     );
-    if (!selected.length && points.length) selected.push(points[0]);
-    const sampled = [
-      ...new Set([
-        selected[0],
-        selected[Math.floor(selected.length / 2)],
-        selected[selected.length - 1],
-      ]),
-    ].filter(Boolean);
-    for (const r of sampled) {
-      const date = new Date(r.period_start);
-      const last = new Date(
-        Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0),
-      )
-        .toISOString()
-        .slice(0, 10);
-      add({
-        metalId,
-        kind: "monthly_price",
-        label: `${name(metalId)} — месячное среднее World Bank`,
-        value: Number(r.price),
-        unit: "USD/т",
-        periodStart: r.period_start,
-        periodEnd: last,
-        receivedAt: r.retrieved_at,
-        region: r.region,
-        specification: r.specification,
-        source: "World Bank Pink Sheet",
-        url: WORLD_BANK_URL,
-      });
-    }
-    if (selected.length >= 2) {
-      const last = selected[0],
-        first = selected[selected.length - 1];
-      add({
-        metalId,
-        kind: "monthly_price",
-        label: `${name(metalId)} — изменение между доступными месячными средними`,
-        value: (Number(last.price) / Number(first.price) - 1) * 100,
-        unit: "%",
-        periodStart: first.period_start,
-        periodEnd: last.period_start,
-        receivedAt: last.retrieved_at,
-        region: last.region,
-        specification:
-          "Расчёт сервера по одинаковому ряду, USD/т. Не дневная динамика и не спотовая цена.",
-        source: "World Bank Pink Sheet",
-        url: WORLD_BANK_URL,
-      });
-    }
+    for (const [metricKey, label, value, unit, formula] of values)
+      if (value !== null && Number.isFinite(value))
+        add(
+          {
+            metalId: s.metalId,
+            kind: "derived_metric",
+            metricKey,
+            label: name(s.metalId) + " — " + label,
+            value,
+            unit,
+            periodStart: window.requested.start,
+            periodEnd: window.requested.end,
+            receivedAt,
+            region: s.region,
+            specification: s.specification,
+            source: s.source,
+            url: s.url,
+            basisIds: basis.map((f) => f.id),
+            formula,
+          },
+          true,
+        );
   }
-  const pairs = new Set<string>();
-  for (const r of fx) {
+  for (const r of trade)
+    add(
+      {
+        metalId: r.metal_id,
+        kind:
+          r.metric === "mine_production"
+            ? "production"
+            : r.metric === "reserves"
+              ? "reserves"
+              : "trade",
+        label: `${name(r.metal_id)} — ${r.metric}: ${r.country}`,
+        value: r.value,
+        unit: r.unit,
+        periodStart: r.period_year + "-01-01",
+        periodEnd: r.period_year + "-12-31",
+        receivedAt: r.retrieved_at,
+        region: r.country,
+        specification: `${r.product_description}; ${r.commodity_code}; ${r.estimated ? "оценка источника; " : ""}годовой показатель, не рыночная котировка`,
+        source: r.source_id,
+        url: r.source_url,
+      },
+      r.relation === "current",
+    );
+  for (const n of news)
+    add({
+      metalId: n.metalIds.find((id) => ids.includes(id)) ?? null,
+      kind: "news",
+      label:
+        n.scope === "metal"
+          ? "Новость выбранного металла"
+          : "Отраслевой контекст, не доказанная причина",
+      value: n.title,
+      unit: "",
+      periodStart: n.date,
+      periodEnd: n.date,
+      receivedAt: n.receivedAt,
+      region: "Глобальный контекст",
+      specification:
+        "Только заголовок и RSS-анонс; полный текст не прочитан, причинная связь с ценой не установлена.",
+      source: n.source,
+      url: n.url,
+    });
+  const seen = new Set<string>();
+  for (const r of fxResult.data ?? []) {
     const pair = r.base_currency + "/" + r.quote_currency;
     if (
       !["USD/RUB", "EUR/RUB", "CNY/RUB", "USD/CNY", "EUR/USD"].includes(pair) ||
-      pairs.has(pair) ||
+      seen.has(pair) ||
       !(Number(r.rate) > 0)
     )
       continue;
-    pairs.add(pair);
+    seen.add(pair);
     add({
       metalId: null,
       kind: "fx",
-      label: `Справочный курс ${pair}`,
+      label: "Справочный курс " + pair,
       value: Number(r.rate),
       unit: r.quote_currency + " за " + r.base_currency,
       periodStart: r.rate_date,
       periodEnd: r.rate_date,
       receivedAt: r.retrieved_at,
-      region: "Международный справочный курс",
+      region: "Международный",
       specification:
-        "Frankfurter blended reference. Не текущая биржевая цена и не официальный курс Банка России.",
+        "Последний справочный курс; не история валют за выбранный период и не доказанная причина динамики.",
       source: "Frankfurter v2",
       url: "https://frankfurter.dev/",
     });
   }
-  const statsCount = new Map<string, number>();
-  for (const r of stats) {
+  for (const q of quotesResult.data ?? []) {
     if (
-      (statsCount.get(r.metal_id) ?? 0) >= 6 ||
-      (input.region && r.region !== input.region) ||
-      !["import_value", "export_value", "mine_production", "reserves"].includes(
-        r.metric,
-      ) ||
-      !(Number(r.value) >= 0) ||
-      r.period_year >= end.getUTCFullYear()
-    )
-      continue;
-    statsCount.set(r.metal_id, (statsCount.get(r.metal_id) ?? 0) + 1);
-    const labels: Record<string, string> = {
-      import_value: "стоимость импорта (CIF)",
-      export_value: "стоимость экспорта (FOB)",
-      mine_production: "добыча",
-      reserves: "запасы",
-    };
-    add({
-      metalId: r.metal_id,
-      kind:
-        r.metric === "mine_production"
-          ? "production"
-          : r.metric === "reserves"
-            ? "reserves"
-            : "trade",
-      label: `${name(r.metal_id)} — ${labels[r.metric]}: ${r.country}`,
-      value: Number(r.value),
-      unit: r.unit,
-      periodStart: r.period_year + "-01-01",
-      periodEnd: r.period_year + "-12-31",
-      receivedAt: r.retrieved_at,
-      region: r.country,
-      specification: `${r.product_description}; ${r.commodity_code}${r.estimated ? "; оценка источника" : ""}. Торговая стоимость не является рыночной ценой.`,
-      source: r.source_id,
-      url: r.source_url,
-    });
-  }
-  for (const n of news) {
-    if (input.newsId && n.id !== input.newsId) continue;
-    add({
-      metalId: n.metal_ids?.[0] ?? null,
-      kind: "news",
-      label: "Полученная новость — только заголовок",
-      value: String(n.title_ru ?? n.original_title).slice(0, 400),
-      unit: "",
-      periodStart: n.published_at,
-      periodEnd: n.published_at,
-      receivedAt: n.retrieved_at,
-      region: "Регион не определён по заголовку",
-      specification:
-        "Полный текст статьи не загружен; заголовок не доказывает влияние на цену.",
-      source: n.source_id,
-      url: n.canonical_url,
-    });
-  }
-  const quoteKeys = new Set<string>();
-  for (const q of quotes) {
-    if (
-      (input.region && q.region !== input.region) ||
+      !publicUrl(q.source_url) ||
       q.normalized_currency !== "USD" ||
       q.normalized_unit !== "kg" ||
       !q.delivery_terms ||
       (q.purity == null && q.element_content == null) ||
+      (input.region && q.region !== input.region) ||
       (q.region === "Азия" && !q.country) ||
       !(Number(q.normalized_price) > 0)
     )
       continue;
-    const key = [
-      q.metal_id,
-      q.region,
-      q.grade,
-      q.product_form,
-      q.purity,
-      q.element_content,
-      q.delivery_terms,
-      q.price_type,
-    ].join("|");
-    if (quoteKeys.has(key)) continue;
-    quoteKeys.add(key);
     add({
       metalId: q.metal_id,
       kind: "regional_quote",
-      label: `${name(q.metal_id)} — отдельное наблюдение поставщика`,
+      label: name(q.metal_id) + " — отдельная региональная котировка",
       value: Number(q.normalized_price),
       unit: "USD/кг",
       periodStart: q.quoted_at,
       periodEnd: q.quoted_at,
       receivedAt: q.retrieved_at,
-      region: q.region,
-      specification: JSON.stringify({
-        grade: q.grade,
-        form: q.product_form,
-        purity: q.purity,
-        content: q.element_content,
-        delivery: q.delivery_terms,
-        priceType: q.price_type,
-        country: q.country,
-      }),
+      region: q.country ?? q.region,
+      specification: JSON.stringify([
+        q.grade,
+        q.product_form,
+        q.purity,
+        q.element_content,
+        q.delivery_terms,
+        q.price_type,
+      ]),
       source: q.source_id,
       url: q.source_url,
     });
   }
-  const sorted = facts.sort(
-    (a, b) =>
-      (a.metalId ?? "").localeCompare(b.metalId ?? "") ||
-      a.kind.localeCompare(b.kind) ||
-      b.periodStart.localeCompare(a.periodStart) ||
-      a.label.localeCompare(b.label) ||
-      String(a.value).localeCompare(String(b.value)),
-  );
-  const first = ids.flatMap((id) => {
-    const fact = sorted.find((f) => f.metalId === id);
-    return fact ? [fact] : [];
-  });
-  const bounded = [...first, ...sorted.filter((f) => !first.includes(f))]
-    .slice(0, 60)
-    .map((f, i) => ({ ...f, id: "F" + (i + 1) }));
   return {
-    facts: bounded,
+    facts,
+    analytics,
     metalIds: ids,
-    start: start.toISOString(),
-    end: end.toISOString(),
+    start: window.requested.start + "T00:00:00Z",
+    end: window.requested.end + "T23:59:59.999Z",
     coverage: ids.map((id) => ({
       id,
       name: name(id),
       kinds: [
-        ...new Set(bounded.filter((f) => f.metalId === id).map((f) => f.kind)),
+        ...new Set(facts.filter((f) => f.metalId === id).map((f) => f.kind)),
       ],
     })),
   };
@@ -347,17 +525,17 @@ export async function buildMarketEvidence(
 export async function evidenceFingerprint(
   facts: EvidenceFact[],
   extra: unknown = [],
-): Promise<string> {
+) {
   const value = JSON.stringify([
     "verified-evidence-v1",
     facts.map(({ receivedAt: _, ...f }) => f),
     extra,
   ]);
-  const digest = await crypto.subtle.digest(
+  const d = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(value),
   );
-  return [...new Uint8Array(digest)]
+  return [...new Uint8Array(d)]
     .map((x) => x.toString(16).padStart(2, "0"))
     .join("");
 }

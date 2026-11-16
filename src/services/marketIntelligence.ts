@@ -40,7 +40,9 @@ export async function fetchLatestMarketReport(): Promise<VerifiedReport | null> 
       typeof report.model !== "string"
     )
       throw new Error("invalid_report");
-    validateAnalystDraft(report.draft, report.facts);
+    validateAnalystDraft(report.draft, report.facts, {
+      professional: report.analytics?.version === 3,
+    });
     return report as VerifiedReport;
   } catch {
     throw new Error("Сохранённый отчёт не прошёл проверку формата.");

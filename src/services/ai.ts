@@ -10,6 +10,8 @@ export interface AiRequest {
   messages?: { role: "user" | "assistant"; content: string }[];
   metalIds?: string[];
   period?: string;
+  startDate?: string;
+  endDate?: string;
   context?: Record<string, unknown>;
 }
 export interface AiResponse {
@@ -36,6 +38,8 @@ export async function sendAiRequest(
     messages: request.messages,
     metalIds: request.metalIds,
     period: request.period ?? "1M",
+    startDate: request.startDate,
+    endDate: request.endDate,
   });
   if (
     !data ||

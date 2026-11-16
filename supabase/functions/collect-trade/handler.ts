@@ -62,52 +62,62 @@ export async function handler(req: Request) {
       if (attemptError) throw new JobError("trade_state_write_failed");
       processed++;
       try {
-        const url = comtradeUrl(target.metal_id),
-          response = await fetchFeed(url, ["comtradeapi.un.org"], {
-            Accept: "application/json",
-            "User-Agent": "ALFA-Analytics-Trade/1.0",
-          });
-        if (response.status !== 200) {
-          await response.body?.cancel();
-          if (response.status === 429) rateLimited = true;
-          throw new JobError(
-            response.status === 429
-              ? "trade_source_rate_limited"
-              : "trade_source_unavailable",
-          );
-        }
-        const raw = await limitedText(response, 1048576);
-        let observations;
-        try {
-          observations = parseComtrade(JSON.parse(raw), target.metal_id);
-        } catch {
-          throw new JobError("trade_validation_failed");
-        }
-        const payload = await storePayload(db, COMTRADE_SOURCE, url, raw);
-        if (observations.length) {
-          const { data: rows, error: writeError } = await db
-            .from("market_statistics")
-            .upsert(
-              observations.map((r) => ({
-                ...r,
-                source_id: COMTRADE_SOURCE,
-                source_url: url,
-                retrieved_at: new Date().toISOString(),
-                payload_id: payload,
-              })),
-              {
-                onConflict:
-                  "source_id,metal_id,metric,country_code,period_year,commodity_code",
-              },
-            )
-            .select("id");
-          if (writeError) throw new JobError("trade_write_failed");
-          written += rows?.length ?? 0;
+        // The free preview permits ONE period per call; do not send a comma-separated period.
+        const currentYear = new Date().getUTCFullYear();
+        for (const year of [currentYear - 1, currentYear - 2]) {
+          if (Date.now() - started > 75000)
+            throw new JobError("trade_time_budget");
+          const url = comtradeUrl(target.metal_id, Date.now(), year),
+            response = await fetchFeed(url, ["comtradeapi.un.org"], {
+              Accept: "application/json",
+              "User-Agent": "ALFA-Analytics-Trade/1.0",
+            });
+          if (response.status !== 200) {
+            await response.body?.cancel();
+            if (response.status === 429) rateLimited = true;
+            throw new JobError(
+              response.status === 429
+                ? "trade_source_rate_limited"
+                : "trade_source_unavailable",
+            );
+          }
+          const raw = await limitedText(response, 1048576);
+          let observations;
+          try {
+            observations = parseComtrade(JSON.parse(raw), target.metal_id);
+            if (observations.some((r) => r.period_year !== year))
+              throw new Error("wrong_trade_year");
+          } catch {
+            throw new JobError("trade_validation_failed");
+          }
+          const payload = await storePayload(db, COMTRADE_SOURCE, url, raw);
+          if (observations.length) {
+            const { data: rows, error: writeError } = await db
+              .from("market_statistics")
+              .upsert(
+                observations.map((r) => ({
+                  ...r,
+                  source_id: COMTRADE_SOURCE,
+                  source_url: url,
+                  retrieved_at: new Date().toISOString(),
+                  payload_id: payload,
+                })),
+                {
+                  onConflict:
+                    "source_id,metal_id,metric,country_code,period_year,commodity_code",
+                },
+              )
+              .select("id");
+            if (writeError) throw new JobError("trade_write_failed");
+            written += rows?.length ?? 0;
+          }
+          if (year === currentYear - 1)
+            await new Promise((r) => setTimeout(r, 1200));
         }
         await db
           .from("statistic_collection_state")
           .update({
-            status: observations.length ? "success" : "no_data",
+            status: "success",
             error_code: null,
           })
           .eq("metal_id", target.metal_id);

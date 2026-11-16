@@ -1,7 +1,10 @@
+import type { MarketAnalytics } from "./marketCalculations.ts";
+import { renderProfessionalReport } from "./professionalReport.ts";
 export interface EvidenceFact {
   id: string;
   metalId: string | null;
   kind:
+    | "derived_metric"
     | "monthly_price"
     | "regional_quote"
     | "fx"
@@ -20,14 +23,22 @@ export interface EvidenceFact {
   source: string;
   url: string;
   withinPeriod: boolean;
+  metricKey?: string;
+  basisIds?: string[];
+  formula?: string;
 }
 export interface AnalystDraft {
   summary: string;
   selectedFactIds: string[];
-  interpretations: { text: string; factIds: string[] }[];
+  interpretations: {
+    text: string;
+    factIds: string[];
+    section?: "dynamics" | "trade" | "factors";
+  }[];
   risks: string[];
   scenarios: {
     direction: "growth" | "decline" | "stable";
+    factIds?: string[];
     condition: string;
     description: string;
   }[];
@@ -42,6 +53,14 @@ export interface VerifiedReport {
   model: string;
   generatedAt: string;
   evidenceHash: string;
+  analytics?: MarketAnalytics;
+  diagnostics?: {
+    modelInputBytes: number;
+    modelPricePoints: number;
+    currentPoints: number;
+    previousPoints: number;
+    factsAvailable: number;
+  };
 }
 function prose(v: unknown, max: number): string {
   if (
@@ -61,6 +80,7 @@ function strings(v: unknown, maxItems: number, maxLength: number) {
 export function validateAnalystDraft(
   input: unknown,
   facts: EvidenceFact[],
+  options: { professional?: boolean } = {},
 ): AnalystDraft {
   if (!input || typeof input !== "object" || Array.isArray(input))
     throw new Error("invalid_report_structure");
@@ -79,7 +99,7 @@ export function validateAnalystDraft(
     !Array.isArray(r.interpretations) ||
     r.interpretations.length > 6 ||
     !Array.isArray(r.scenarios) ||
-    r.scenarios.length !== 3
+    (options.professional ? r.scenarios.length > 3 : r.scenarios.length !== 3)
   )
     throw new Error("invalid_report_structure");
   const interpretations = r.interpretations.map((x) => {
@@ -88,7 +108,13 @@ export function validateAnalystDraft(
     const e = x as Record<string, unknown>;
     const factIds = refs(e.factIds);
     if (!factIds.length) throw new Error("missing_fact_reference");
-    return { text: prose(e.text, 700), factIds };
+    return {
+      text: prose(e.text, 900),
+      factIds,
+      ...(["dynamics", "trade", "factors"].includes(String(e.section))
+        ? { section: e.section as "dynamics" | "trade" | "factors" }
+        : {}),
+    };
   });
   const scenarios = r.scenarios.map((x) => {
     if (!x || typeof x !== "object")
@@ -98,14 +124,16 @@ export function validateAnalystDraft(
       throw new Error("invalid_scenario");
     return {
       direction: e.direction as "growth" | "decline" | "stable",
-      condition: prose(e.condition, 400),
+      ...(e.factIds !== undefined ? { factIds: refs(e.factIds) } : {}),
+      condition: prose(e.condition, 500),
       description: prose(e.description, 600),
     };
   });
-  if (new Set(scenarios.map((s) => s.direction)).size !== 3)
+  if (new Set(scenarios.map((s) => s.direction)).size !== scenarios.length)
     throw new Error("invalid_scenario");
   const selectedFactIds = refs(r.selectedFactIds);
-  if (!selectedFactIds.length) throw new Error("missing_fact_reference");
+  if (!options.professional && !selectedFactIds.length)
+    throw new Error("missing_fact_reference");
   return {
     summary: prose(r.summary, 900),
     selectedFactIds,
@@ -117,6 +145,7 @@ export function validateAnalystDraft(
   };
 }
 export function renderVerifiedReport(report: VerifiedReport): string {
+  if (report.analytics) return renderProfessionalReport(report);
   const { draft: d, facts } = report;
   const number = (v: number | string) =>
     typeof v === "number"

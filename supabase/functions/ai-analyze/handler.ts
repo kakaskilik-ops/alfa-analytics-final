@@ -24,6 +24,8 @@ const messages: Record<string, string> = {
     "Провайдер отклонил доступ. Проверьте ключ, регион и условия аккаунта в панели провайдера.",
   provider_unavailable:
     "Бесплатный провайдер временно недоступен. Ответ не сформирован.",
+  context_too_large:
+    "Для бесплатной модели этот объём данных слишком велик. Выберите меньше металлов или более короткий период; история не была скрыто сокращена.",
   analysis_in_progress: "Такой анализ уже формируется. Повторите запрос позже.",
   unverified_model_response:
     "Ответ модели не прошёл проверку фактов и формата и не опубликован. Попробуйте позже.",
@@ -118,6 +120,7 @@ export async function handler(req: Request): Promise<Response> {
     };
     const result = await analyseVerifiedFacts(db, {
       facts: evidence.facts,
+      analytics: evidence.analytics,
       question: input.question,
       scope,
       ownerId,
