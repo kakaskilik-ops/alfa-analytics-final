@@ -48,6 +48,7 @@ if (!args["confirm-migrations"]) {
 run(["db", "push", "--linked"]);
 for (const name of [
   "ai-analyze",
+  "ai-challenge",
   "ai-status",
   "generate-market-report",
   "collect-trade",

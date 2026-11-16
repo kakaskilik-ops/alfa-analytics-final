@@ -62,6 +62,21 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
   await page.route("http://127.0.0.1:54321/**", async (route) => {
     const u = new URL(route.request().url()),
       table = u.pathname.split("/").at(-1);
+    if (route.request().method() === "OPTIONS")
+      return route.fulfill({
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        },
+      });
+    if (table === "ai-challenge")
+      return route.fulfill({
+        status: 503,
+        json: { error: "Тестовый ИИ временно недоступен." },
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
     let data = [];
     if (table === "price_quotations") data = quotations;
     if (table === "price_history") {
@@ -209,7 +224,7 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
     .getByRole("button", { name: "Проанализировать новость", exact: true })
     .click();
   await page
-    .getByText("Для ИИ-аналитики войдите в систему.", { exact: true })
+    .getByText("Тестовый ИИ временно недоступен.", { exact: true })
     .waitFor();
   await page.getByRole("button", { name: "Аналитика", exact: true }).click();
   await page.getByRole("heading", { name: "Аналитика", exact: true }).waitFor();
