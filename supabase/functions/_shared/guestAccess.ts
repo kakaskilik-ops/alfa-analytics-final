@@ -15,7 +15,7 @@ export async function visitorHash(req: Request, secret: string) {
   // Best-effort network fairness only. Forwarded headers are NOT authentication;
   // shared networks can share a quota. Global provider budgets remain authoritative.
   const address =
-    req.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim() ||
+    req.headers.get("x-forwarded-for")?.split(",").at(0)?.trim() ||
     "shared-unknown-network";
   return hex(
     await crypto.subtle.sign(
@@ -44,14 +44,13 @@ export async function issueGuestChallenge(
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replace(/=+$/, "");
-  const visitor = await visitorHash(req, secret),
-    signature = hex(
-      await crypto.subtle.sign(
-        "HMAC",
-        await signingKey(secret),
-        bytes("guest-proof-v1:" + encoded + "." + visitor),
-      ),
-    );
+  const signature = hex(
+    await crypto.subtle.sign(
+      "HMAC",
+      await signingKey(secret),
+      bytes("guest-proof-v2:" + encoded),
+    ),
+  );
   return { token: encoded + "." + signature, difficulty: 16 };
 }
 export async function verifyGuestChallenge(
@@ -79,7 +78,7 @@ export async function verifyGuestChallenge(
       payload.difficulty !== 16 ||
       !Number.isFinite(payload.expires) ||
       payload.expires < now ||
-      payload.expires > now + 300000 ||
+      payload.expires > now + 330000 ||
       !/^[a-f0-9]{32}$/.test(payload.nonce) ||
       payload.hash !== (await bodyHash(raw))
     )
@@ -91,7 +90,7 @@ export async function verifyGuestChallenge(
         "HMAC",
         await signingKey(secret),
         signature,
-        bytes("guest-proof-v1:" + encoded + "." + visitor),
+        bytes("guest-proof-v2:" + encoded),
       ))
     )
       return null;
