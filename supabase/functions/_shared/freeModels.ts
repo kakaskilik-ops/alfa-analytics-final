@@ -10,8 +10,12 @@ export interface ModelConfig {
   key: string;
 }
 export function modelConfigurations(): ModelConfig[] {
-  const result: ModelConfig[] = [],
-    key = Deno.env.get("OPENROUTER_API_KEY");
+  const result: ModelConfig[] = [];
+  // The owner confirmed a free Groq account. No billing or account upgrade API is called.
+  const groq = Deno.env.get("GROQ_API_KEY");
+  if (groq)
+    result.push({ provider: "groq", model: "openai/gpt-oss-120b", key: groq });
+  const key = Deno.env.get("OPENROUTER_API_KEY");
   const model =
     Deno.env.get("OPENROUTER_MODEL") ?? "google/gemma-4-31b-it:free";
   if (
@@ -20,10 +24,11 @@ export function modelConfigurations(): ModelConfig[] {
   ) {
     result.push({ provider: "openrouter", model, key });
   }
-  const groq = Deno.env.get("GROQ_API_KEY");
-  if (groq && Deno.env.get("GROQ_FREE_TIER_CONFIRMED") === "true")
-    result.push({ provider: "groq", model: "qwen/qwen3.8-27b", key: groq });
-  if (key && result.length && model !== "openrouter/free")
+  if (
+    key &&
+    result.some((c) => c.provider === "openrouter") &&
+    model !== "openrouter/free"
+  )
     result.push({ provider: "openrouter", model: "openrouter/free", key });
   return result;
 }
@@ -60,7 +65,8 @@ export async function generateFreeReport(
             model: c.model,
             messages,
             temperature: 0.15,
-            max_tokens: 2200,
+            max_tokens: c.provider === "groq" ? 3200 : 2200,
+            ...(c.provider === "groq" ? { reasoning_effort: "low" } : {}),
             response_format: { type: "json_object" },
             ...(c.provider === "openrouter"
               ? {
@@ -84,8 +90,7 @@ export async function generateFreeReport(
         await response.body?.cancel();
         if (
           response.status === 429 &&
-          c.provider === "openrouter" &&
-          !configs.some((v) => v.provider === "groq")
+          !configs.some((v) => v.provider !== c.provider)
         )
           break;
         continue;

@@ -26,11 +26,20 @@ export async function analyseVerifiedFacts(
   if (!modelConfigurations().length) throw new ModelError("ai_not_configured");
   if (!args.facts.some((f) => f.kind !== "fx"))
     throw new ModelError("insufficient_market_evidence");
+  const primary = modelConfigurations()[0];
+  const route = [primary.provider, primary.model];
   const hash = await evidenceFingerprint(
     args.facts,
     args.automatic
-      ? ["automatic"]
-      : ["manual", args.ownerId, args.question, args.scope, args.messages],
+      ? ["automatic", ...route]
+      : [
+          "manual",
+          ...route,
+          args.ownerId,
+          args.question,
+          args.scope,
+          args.messages,
+        ],
   );
   if (args.automatic) {
     const { data, error: cacheError } = await db

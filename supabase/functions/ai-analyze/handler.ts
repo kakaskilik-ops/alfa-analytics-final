@@ -30,6 +30,7 @@ const messages: Record<string, string> = {
 export async function handler(req: Request): Promise<Response> {
   // Existing paid integration remains available only behind an explicit owner opt-in.
   if (
+    !Deno.env.get("GROQ_API_KEY") &&
     Deno.env.get("AI_PROVIDER") === "openai" &&
     Deno.env.get("ALLOW_PAID_AI") === "true"
   )

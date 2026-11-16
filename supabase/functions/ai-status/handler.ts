@@ -25,7 +25,8 @@ export async function handler(req: Request): Promise<Response> {
     const { data } = await db
       .from("ai_provider_health")
       .select("last_success_at")
-      .in("provider", [...new Set(configs.map((c) => c.provider))])
+      .eq("provider", configs[0].provider)
+      .eq("model", configs[0].model)
       .order("last_success_at", { ascending: false })
       .limit(1);
     verifiedAt = data?.[0]?.last_success_at ?? null;

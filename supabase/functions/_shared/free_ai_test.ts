@@ -81,7 +81,7 @@ Deno.test("free provider makes no request without a reserved quota", () =>
   }),
 );
 Deno.test(
-  "a paid model configuration and unconfirmed Groq account are disabled",
+  "paid OpenRouter configuration is disabled and confirmed owner Groq is primary",
   () =>
     env(
       {
@@ -89,7 +89,14 @@ Deno.test(
         OPENROUTER_MODEL: "openai/gpt-paid",
         GROQ_API_KEY: "TEST_ONLY",
       },
-      async () => assert(modelConfigurations().length === 0),
+      async () => {
+        const configs = modelConfigurations();
+        assert(
+          configs.length === 1 &&
+            configs[0].provider === "groq" &&
+            configs[0].model === "openai/gpt-oss-120b",
+        );
+      },
     ),
 );
 Deno.test(
@@ -161,11 +168,14 @@ const draft = {
   conclusion: "Требуется наблюдение за новыми подтверждёнными данными.",
 };
 Deno.test(
-  "authenticated free analysis reads real-shaped evidence and rejects invented numeric output",
+  "authenticated Groq overrides legacy paid flags, reads evidence and rejects invented numbers",
   () =>
     env(
       {
         ...base,
+        GROQ_API_KEY: "TEST_GROQ",
+        AI_PROVIDER: "openai",
+        ALLOW_PAID_AI: "true",
         SUPABASE_URL: "https://test.supabase.co",
         SUPABASE_SERVICE_ROLE_KEY: "TEST_SERVER",
         ALLOWED_ORIGIN: "https://example.com",
@@ -222,10 +232,10 @@ Deno.test(
           if (url.includes("/rest/v1/ai_provider_health"))
             return Response.json(null);
           if (url.includes("/rest/v1/")) return Response.json([]);
-          if (url === "https://openrouter.ai/api/v1/chat/completions") {
+          if (url === "https://api.groq.com/openai/v1/chat/completions") {
             providerCalls++;
             return Response.json({
-              model: "TEST:free",
+              model: "openai/gpt-oss-120b",
               usage: { cost: 0 },
               choices: [
                 {
@@ -334,4 +344,59 @@ Deno.test(
       );
     assert(a === b);
   },
+);
+
+Deno.test(
+  "Groq is first with both keys and uses bounded reasoning JSON requests",
+  () =>
+    env({ ...base, GROQ_API_KEY: "TEST_GROQ" }, async () => {
+      let requests = 0;
+      const result = await generateFreeReport(
+        [{ role: "user", content: "TEST" }],
+        async () => true,
+        async (url, init) => {
+          requests++;
+          assert(
+            String(url) === "https://api.groq.com/openai/v1/chat/completions",
+          );
+          const body = JSON.parse(String(init?.body));
+          assert(
+            body.model === "openai/gpt-oss-120b" &&
+              body.reasoning_effort === "low" &&
+              body.response_format.type === "json_object" &&
+              body.max_tokens === 3200,
+          );
+          return Response.json({
+            model: body.model,
+            choices: [{ message: { content: "{}" } }],
+          });
+        },
+      );
+      assert(requests === 1 && result.provider === "groq");
+    }),
+);
+Deno.test(
+  "Groq 429 stops without another provider, and quota denial never contacts Groq",
+  () =>
+    env(
+      { ...base, OPENROUTER_API_KEY: undefined, GROQ_API_KEY: "TEST_GROQ" },
+      async () => {
+        let calls = 0;
+        for (const allowed of [true, false]) {
+          try {
+            await generateFreeReport(
+              [],
+              async () => allowed,
+              async () => {
+                calls++;
+                return new Response(null, { status: 429 });
+              },
+            );
+          } catch {
+            /* Expected. */
+          }
+        }
+        assert(calls === 1);
+      },
+    ),
 );
