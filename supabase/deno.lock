@@ -2,7 +2,8 @@
   "version": "5",
   "specifiers": {
     "npm:@supabase/supabase-js@2.57.4": "2.57.4",
-    "npm:fast-xml-parser@5.12.0": "5.12.0"
+    "npm:fast-xml-parser@5.12.0": "5.12.0",
+    "npm:fflate@0.8.3": "0.8.3"
   },
   "npm": {
     "@nodable/entities@3.1.0": {
@@ -95,6 +96,9 @@
       ],
       "bin": true
     },
+    "fflate@0.8.3": {
+      "integrity": "sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA=="
+    },
     "is-unsafe@2.0.3": {
       "integrity": "sha512-ZBllczCCO267vgdFb6Tq3pv+LhHaCiGMdr+ZsuL+OopruAg7S+3ZDs1vD0RPC0uSrkjzbraxaGjtX1YBxjPeFQ=="
     },
@@ -132,7 +136,8 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:fast-xml-parser@5.12.0"
+      "npm:fast-xml-parser@5.12.0",
+      "npm:fflate@0.8.3"
     ]
   }
 }

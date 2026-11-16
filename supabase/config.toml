@@ -3,7 +3,7 @@ verify_jwt = false
 entrypoint = "./functions/collect-market-data/index.ts"
 
 [functions.ai-analyze]
-verify_jwt = true
+verify_jwt = false
 entrypoint = "./functions/ai-analyze/index.ts"
 
 [functions.ingest-quotes]
@@ -29,3 +29,19 @@ entrypoint = "./functions/collect-quotes/index.ts"
 [functions.compute-orientations]
 verify_jwt = false
 entrypoint = "./functions/compute-orientations/index.ts"
+
+[functions.collect-reference-prices]
+verify_jwt = false
+entrypoint = "./functions/collect-reference-prices/index.ts"
+
+[functions.ai-status]
+verify_jwt = false
+entrypoint = "./functions/ai-status/index.ts"
+
+[functions.generate-market-report]
+verify_jwt = false
+entrypoint = "./functions/generate-market-report/index.ts"
+
+[functions.collect-trade]
+verify_jwt = false
+entrypoint = "./functions/collect-trade/index.ts"

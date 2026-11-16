@@ -39,9 +39,19 @@ export interface LiveMarketData {
 }
 let cachedData: LiveMarketData | null = null;
 let cacheAt = 0;
+let inFlight: Promise<LiveMarketData> | null = null;
 export async function loadLiveMarketData(
   force = false,
 ): Promise<LiveMarketData> {
+  if (inFlight) return inFlight;
+  inFlight = loadMarketData(force);
+  try {
+    return await inFlight;
+  } finally {
+    inFlight = null;
+  }
+}
+async function loadMarketData(force = false): Promise<LiveMarketData> {
   if (!force && cachedData && Date.now() - cacheAt < 300000) return cachedData;
   try {
     await loadLiveRates();

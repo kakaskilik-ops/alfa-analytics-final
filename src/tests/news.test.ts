@@ -152,3 +152,20 @@ describe("RSS, Atom and public JSON adapters", () => {
     );
   });
 });
+
+it("sector news keeps no inferred metal tags", () => {
+  const r = classifyNews(
+    "EU sustainable raw materials supply partnership",
+    "Critical raw materials regulation and trade",
+  );
+  expect(r?.metalIds).toEqual([]);
+  expect(classifyNews("Travel holiday", "Summer vacation")).toBeNull();
+});
+
+it("normalizes XML-escaped tracking separators before URL deduplication", () => {
+  expect(
+    canonicalUrl(
+      "https://example.com/article?utm_source=rss&amp;amp;utm_medium=feed&amp;id=123",
+    ),
+  ).toBe("https://example.com/article?id=123");
+});

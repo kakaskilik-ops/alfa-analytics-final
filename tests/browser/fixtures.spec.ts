@@ -78,6 +78,46 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
         data_status: "live",
       }));
     }
+    if (table === "fx_observations") {
+      const rates = { USD: 1, EUR: 0.9, RUB: 90, CNY: 7 };
+      data = Array.from({ length: 7 }, (_, i) =>
+        Object.entries(rates).flatMap(([a, x]) =>
+          Object.entries(rates)
+            .filter(([b]) => a !== b)
+            .map(([b, y]) => ({
+              base_currency: a,
+              quote_currency: b,
+              rate: y / x,
+              rate_date: new Date(now - (i + 1) * 86400000).toISOString(),
+              retrieved_at: new Date(now).toISOString(),
+              data_status: "live",
+              source_id: "frankfurter-v2",
+            })),
+        ),
+      ).flat();
+    }
+    if (table === "reference_price_observations")
+      data = ["aluminum", "copper", "tin", "zinc"].flatMap((m) =>
+        [1, 2, 3].map((i) => ({
+          metal_id: m,
+          source_id: "world-bank-pink-sheet",
+          period_start: new Date(
+            Date.UTC(
+              new Date(now).getUTCFullYear(),
+              new Date(now).getUTCMonth() - i,
+              1,
+            ),
+          )
+            .toISOString()
+            .slice(0, 10),
+          price: 100 + i,
+          currency: "USD",
+          unit: "ton",
+          region: "Мировой ориентир (LME)",
+          specification: "TEST monthly reference",
+          retrieved_at: new Date(now).toISOString(),
+        })),
+      );
     if (table === "app_exchange_rates")
       data = [
         {
@@ -107,6 +147,39 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
   await page
     .getByText("Данные источников загружены", { exact: true })
     .waitFor();
+  await page
+    .getByRole("heading", { name: "Курсы валют", exact: true })
+    .waitFor();
+  await expect(page.getByLabel("Результат конвертации")).toContainText(
+    "9 000,00 RUB",
+  );
+  await page.getByLabel("Сумма для конвертации").fill("0");
+  await expect(page.getByLabel("Результат конвертации")).toContainText(
+    "0,00 RUB",
+  );
+  await page.getByLabel("Сумма для конвертации").fill("100");
+  await page
+    .getByRole("button", { name: "История EUR/USD", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "История EUR/USD", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "7 дней", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "7 дней", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page
+    .getByRole("heading", { name: "Месячные ориентиры металлов", exact: true })
+    .waitFor();
+  await page
+    .getByRole("button", { name: "Месячная история: Медь", exact: true })
+    .click();
+  await expect(
+    page.getByRole("img", {
+      name: "Месячный график copper, 3 наблюдений",
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Металлы", exact: true }).click();
   await page
     .getByRole("button", { name: "Открыть карточку: Вольфрам", exact: true })
@@ -153,6 +226,7 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
     "Металлы",
     "Аналитика",
     "Новости",
+    "Источники",
     "ИИ-аналитик",
   ]) {
     await page.getByRole("button", { name, exact: true }).click();

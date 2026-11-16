@@ -54,3 +54,30 @@ export async function fetchFeed(
   }
   throw new Error("too_many_redirects");
 }
+
+export async function limitedBytes(
+  response: Response,
+  max: number,
+): Promise<Uint8Array> {
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("empty_response");
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > max) {
+      await reader.cancel();
+      throw new Error("body_too_large");
+    }
+    chunks.push(value);
+  }
+  const result = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    result.set(c, offset);
+    offset += c.length;
+  }
+  return result;
+}

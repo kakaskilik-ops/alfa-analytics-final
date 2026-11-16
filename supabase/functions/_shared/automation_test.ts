@@ -1,3 +1,4 @@
+import { handler as reference } from "../collect-reference-prices/handler.ts";
 import { handler as fx } from "../collect-fx/handler.ts";
 import { handler as quotes } from "../collect-quotes/handler.ts";
 import { handler as analytics } from "../compute-orientations/handler.ts";
@@ -7,7 +8,7 @@ function assert(v: unknown): asserts v {
 Deno.test(
   "automation rejects unsupported methods without contacting sources",
   async () => {
-    for (const handler of [fx, quotes, analytics])
+    for (const handler of [fx, quotes, analytics, reference])
       assert(
         (await handler(new Request("https://example.com", { method: "GET" })))
           .status === 405,

@@ -1,3 +1,5 @@
+import MetalDataPanel from "@/components/market/MetalDataPanel";
+import ReferenceMarkets from "@/components/market/ReferenceMarkets";
 import RegionalComparison from "@/components/market/RegionalComparison";
 import { fetchNews } from "@/services/news";
 import { useMemo, useState } from "react";
@@ -54,7 +56,8 @@ export default function AnalyticsPage({
         title="Аналитика"
         description="История, динамика и сравнение материалов. Цены отдельных рынков не взаимозаменяемы."
       />
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <ReferenceMarkets />
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 mb-4">
         <PeriodSwitcher value={period} onChange={setPeriod} />
         <button
           className="text-brand-400 text-sm"
@@ -238,6 +241,7 @@ export default function AnalyticsPage({
           поставки и налогообложения.
         </p>
       </Panel>
+      <MetalDataPanel metalId={material} />
     </>
   );
 }

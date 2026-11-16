@@ -49,6 +49,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_provider_health: {
+        Row: {
+          last_success_at: string;
+          model: string;
+          provider: string;
+        };
+        Insert: {
+          last_success_at: string;
+          model: string;
+          provider: string;
+        };
+        Update: {
+          last_success_at?: string;
+          model?: string;
+          provider?: string;
+        };
+        Relationships: [];
+      };
       ai_request_limits: {
         Row: {
           requests: number;
@@ -456,6 +474,33 @@ export type Database = {
           },
         ];
       };
+      market_ai_reports: {
+        Row: {
+          evidence_hash: string;
+          generated_at: string;
+          id: string;
+          model: string;
+          provider: string;
+          report: Json;
+        };
+        Insert: {
+          evidence_hash: string;
+          generated_at?: string;
+          id?: string;
+          model: string;
+          provider: string;
+          report: Json;
+        };
+        Update: {
+          evidence_hash?: string;
+          generated_at?: string;
+          id?: string;
+          model?: string;
+          provider?: string;
+          report?: Json;
+        };
+        Relationships: [];
+      };
       market_indices: {
         Row: {
           id: string;
@@ -476,6 +521,91 @@ export type Database = {
           version?: number;
         };
         Relationships: [];
+      };
+      market_statistics: {
+        Row: {
+          commodity_code: string;
+          country: string;
+          country_code: string;
+          estimated: boolean;
+          id: string;
+          metal_id: string;
+          metric: string;
+          payload_id: string;
+          period_year: number;
+          product_description: string;
+          region: string;
+          retrieved_at: string;
+          source_aggregate: boolean | null;
+          source_id: string;
+          source_reported: boolean | null;
+          source_url: string;
+          unit: string;
+          value: number;
+        };
+        Insert: {
+          commodity_code: string;
+          country: string;
+          country_code: string;
+          estimated?: boolean;
+          id?: string;
+          metal_id: string;
+          metric: string;
+          payload_id: string;
+          period_year: number;
+          product_description: string;
+          region: string;
+          retrieved_at?: string;
+          source_aggregate?: boolean | null;
+          source_id: string;
+          source_reported?: boolean | null;
+          source_url: string;
+          unit: string;
+          value: number;
+        };
+        Update: {
+          commodity_code?: string;
+          country?: string;
+          country_code?: string;
+          estimated?: boolean;
+          id?: string;
+          metal_id?: string;
+          metric?: string;
+          payload_id?: string;
+          period_year?: number;
+          product_description?: string;
+          region?: string;
+          retrieved_at?: string;
+          source_aggregate?: boolean | null;
+          source_id?: string;
+          source_reported?: boolean | null;
+          source_url?: string;
+          unit?: string;
+          value?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "market_statistics_metal_id_fkey";
+            columns: ["metal_id"];
+            isOneToOne: false;
+            referencedRelation: "active_metals";
+            referencedColumns: ["metal_id"];
+          },
+          {
+            foreignKeyName: "market_statistics_payload_id_fkey";
+            columns: ["payload_id"];
+            isOneToOne: false;
+            referencedRelation: "ingestion_payloads";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "market_statistics_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "data_sources";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       metal_categories: {
         Row: {
@@ -666,6 +796,7 @@ export type Database = {
           published_at: string;
           regions: string[];
           retrieved_at: string;
+          scope: string;
           source_id: string;
           summary_ru: string | null;
           title_ru: string | null;
@@ -684,6 +815,7 @@ export type Database = {
           published_at: string;
           regions?: string[];
           retrieved_at?: string;
+          scope?: string;
           source_id: string;
           summary_ru?: string | null;
           title_ru?: string | null;
@@ -702,6 +834,7 @@ export type Database = {
           published_at?: string;
           regions?: string[];
           retrieved_at?: string;
+          scope?: string;
           source_id?: string;
           summary_ru?: string | null;
           title_ru?: string | null;
@@ -1052,6 +1185,108 @@ export type Database = {
           },
         ];
       };
+      reference_import_payloads: {
+        Row: {
+          content_sha256: string;
+          fetched_at: string;
+          id: string;
+          raw_base64: string;
+          source_id: string;
+          source_url: string;
+        };
+        Insert: {
+          content_sha256: string;
+          fetched_at?: string;
+          id?: string;
+          raw_base64: string;
+          source_id: string;
+          source_url: string;
+        };
+        Update: {
+          content_sha256?: string;
+          fetched_at?: string;
+          id?: string;
+          raw_base64?: string;
+          source_id?: string;
+          source_url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reference_import_payloads_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "data_sources";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      reference_price_observations: {
+        Row: {
+          currency: string;
+          id: string;
+          metal_id: string;
+          payload_id: string;
+          period_start: string;
+          price: number;
+          region: string;
+          retrieved_at: string;
+          source_id: string;
+          source_url: string;
+          specification: string;
+          unit: string;
+        };
+        Insert: {
+          currency: string;
+          id?: string;
+          metal_id: string;
+          payload_id: string;
+          period_start: string;
+          price: number;
+          region: string;
+          retrieved_at?: string;
+          source_id: string;
+          source_url: string;
+          specification: string;
+          unit: string;
+        };
+        Update: {
+          currency?: string;
+          id?: string;
+          metal_id?: string;
+          payload_id?: string;
+          period_start?: string;
+          price?: number;
+          region?: string;
+          retrieved_at?: string;
+          source_id?: string;
+          source_url?: string;
+          specification?: string;
+          unit?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reference_price_observations_metal_id_fkey";
+            columns: ["metal_id"];
+            isOneToOne: false;
+            referencedRelation: "active_metals";
+            referencedColumns: ["metal_id"];
+          },
+          {
+            foreignKeyName: "reference_price_observations_payload_id_fkey";
+            columns: ["payload_id"];
+            isOneToOne: false;
+            referencedRelation: "reference_import_payloads";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reference_price_observations_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "data_sources";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       regional_markets: {
         Row: {
           code: string;
@@ -1066,6 +1301,35 @@ export type Database = {
           name_ru?: string;
         };
         Relationships: [];
+      };
+      statistic_collection_state: {
+        Row: {
+          error_code: string | null;
+          last_attempt_at: string | null;
+          metal_id: string;
+          status: string;
+        };
+        Insert: {
+          error_code?: string | null;
+          last_attempt_at?: string | null;
+          metal_id: string;
+          status?: string;
+        };
+        Update: {
+          error_code?: string | null;
+          last_attempt_at?: string | null;
+          metal_id?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "statistic_collection_state_metal_id_fkey";
+            columns: ["metal_id"];
+            isOneToOne: true;
+            referencedRelation: "active_metals";
+            referencedColumns: ["metal_id"];
+          },
+        ];
       };
       update_logs: {
         Row: {
@@ -1124,6 +1388,7 @@ export type Database = {
       };
     };
     Functions: {
+      claim_ai_work: { Args: { p_key: string }; Returns: string };
       claim_automation_job: { Args: { p_job: string }; Returns: string };
       claim_news_source: { Args: { p_id: string }; Returns: boolean };
       consume_ai_quota: { Args: { p_user_id: string }; Returns: boolean };
@@ -1141,8 +1406,16 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      release_ai_work: {
+        Args: { p_key: string; p_token: string };
+        Returns: undefined;
+      };
       reserve_ai_tokens: {
         Args: { p_limit: number; p_tokens: number };
+        Returns: boolean;
+      };
+      reserve_free_ai_call: {
+        Args: { p_daily_limit: number; p_minute_limit: number };
         Returns: boolean;
       };
       verify_collector_token: { Args: { p_token: string }; Returns: boolean };

@@ -157,6 +157,7 @@ export async function handler(req: Request): Promise<Response> {
                 excerpt: item.excerpt,
                 summary_ru: summaryRu,
                 translation_status: translationStatus,
+                scope: classified.metalIds.length ? "metal" : "sector",
                 metal_ids: classified.metalIds,
                 regions: classified.regions,
                 categories: classified.categories,
@@ -170,16 +171,18 @@ export async function handler(req: Request): Promise<Response> {
               if (writeError.code === "23505") continue;
               throw new Error("database_write_failed");
             }
-            const { error: linkError } = await db
-              .from("news_metal_links")
-              .upsert(
-                classified.metalIds.map((metal) => ({
-                  article_id: article.id,
-                  metal_id: metal,
-                })),
-                { onConflict: "article_id,metal_id" },
-              );
-            if (linkError) throw new Error("link_write_failed");
+            if (classified.metalIds.length) {
+              const { error: linkError } = await db
+                .from("news_metal_links")
+                .upsert(
+                  classified.metalIds.map((metal) => ({
+                    article_id: article.id,
+                    metal_id: metal,
+                  })),
+                  { onConflict: "article_id,metal_id" },
+                );
+              if (linkError) throw new Error("link_write_failed");
+            }
             sourceAccepted++;
           }
         }
@@ -251,6 +254,8 @@ export async function handler(req: Request): Promise<Response> {
     const openai = Deno.env.get("OPENAI_API_KEY");
     if (
       openai &&
+      Deno.env.get("ALLOW_PAID_AI") === "true" &&
+      Deno.env.get("AI_PROVIDER") === "openai" &&
       Deno.env.get("NEWS_AI_TRANSLATION") === "true" &&
       Date.now() - started < 60000
     ) {

@@ -1,3 +1,5 @@
+import ReferenceMarkets from "@/components/market/ReferenceMarkets";
+import CurrencyModule from "@/components/currency/CurrencyModule";
 import { useMemo, useState } from "react";
 import { Download, FileSpreadsheet } from "lucide-react";
 import Delta from "@/components/common/Delta";
@@ -97,7 +99,7 @@ export default function MarketPage({
               <LastUpdated at={new Date(liveData.updatedAt)} />
             ) : (
               <span className="text-xs text-ink-400">
-                Нет обновлений источников
+                Нет региональных котировок
               </span>
             )}
           </>
@@ -141,6 +143,9 @@ export default function MarketPage({
         />
       </div>
 
+      <CurrencyModule />
+      <ReferenceMarkets compact />
+
       <div className="mt-4 grid gap-4 xl:grid-cols-3">
         <Panel className="p-5 md:p-6 xl:col-span-2">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -162,7 +167,7 @@ export default function MarketPage({
             period={period}
             positive={(indexChangePct ?? 0) >= 0}
             valueFormatter={formatIndex}
-            height={300}
+            height={index.length < 2 ? 140 : 300}
           />
         </Panel>
 

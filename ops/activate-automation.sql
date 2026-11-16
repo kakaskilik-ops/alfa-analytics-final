@@ -12,7 +12,7 @@ BEGIN
 END $$;
 -- These application-prefixed jobs do not alter unrelated schedules.
 SELECT cron.schedule('alfa-fx-hourly','7 * * * *',$job$
- SELECT net.http_post(url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='alfa_analytics_project_url')||'/functions/v1/collect-fx',headers:=jsonb_build_object('Content-Type','application/json','x-collector-token',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='collector_token')),body:='{"days":7}'::jsonb,timeout_milliseconds:=120000);
+ SELECT net.http_post(url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='alfa_analytics_project_url')||'/functions/v1/collect-fx',headers:=jsonb_build_object('Content-Type','application/json','x-collector-token',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='collector_token')),body:='{"days":31}'::jsonb,timeout_milliseconds:=120000);
 $job$);
 SELECT cron.schedule('alfa-quotes-30m','0,30 * * * *',$job$
  SELECT net.http_post(url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='alfa_analytics_project_url')||'/functions/v1/collect-quotes',headers:=jsonb_build_object('Content-Type','application/json','x-collector-token',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='collector_token')),body:='{}'::jsonb,timeout_milliseconds:=120000);
@@ -22,4 +22,15 @@ SELECT cron.schedule('alfa-news-30m','5,35 * * * *',$job$
 $job$);
 SELECT cron.schedule('alfa-orientations-30m','10,40 * * * *',$job$
  SELECT net.http_post(url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='alfa_analytics_project_url')||'/functions/v1/compute-orientations',headers:=jsonb_build_object('Content-Type','application/json','x-collector-token',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='collector_token')),body:='{}'::jsonb,timeout_milliseconds:=120000);
+$job$);
+SELECT cron.schedule('alfa-reference-daily','20 6 * * *',$job$
+ SELECT net.http_post(url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='alfa_analytics_project_url')||'/functions/v1/collect-reference-prices',headers:=jsonb_build_object('Content-Type','application/json','x-collector-token',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='collector_token')),body:='{}'::jsonb,timeout_milliseconds:=120000);
+$job$);
+
+SELECT cron.schedule('alfa-trade-hourly','45 * * * *',$job$
+ SELECT net.http_post(url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='alfa_analytics_project_url')||'/functions/v1/collect-trade',headers:=jsonb_build_object('Content-Type','application/json','x-collector-token',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='collector_token')),body:='{}'::jsonb,timeout_milliseconds:=120000);
+$job$);
+
+SELECT cron.schedule('alfa-ai-hourly','25 * * * *',$job$
+ SELECT net.http_post(url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='alfa_analytics_project_url')||'/functions/v1/generate-market-report',headers:=jsonb_build_object('Content-Type','application/json','x-collector-token',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='collector_token')),body:='{}'::jsonb,timeout_milliseconds:=120000);
 $job$);
