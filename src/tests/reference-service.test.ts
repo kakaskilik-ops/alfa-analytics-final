@@ -12,6 +12,15 @@ const row = {
   specification: "TEST",
   retrieved_at: "2026-11-13T10:00:00Z",
 };
+it("keeps specification boundaries and excludes conflicting simultaneous revisions", () => {
+  expect(
+    parseReferenceRows(
+      [row, { ...row, specification: "OTHER", price: 200 }],
+      now,
+    ),
+  ).toHaveLength(2);
+  expect(parseReferenceRows([row, { ...row, price: 999 }], now)).toEqual([]);
+});
 it("keeps the latest revision of a month without mixing specification, region or unit", () => {
   const rows = parseReferenceRows(
     [

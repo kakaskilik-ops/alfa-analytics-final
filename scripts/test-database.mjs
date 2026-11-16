@@ -304,5 +304,38 @@ await db.exec("RESET ROLE");
 results.push(
   "PASS guest cooldown and five/day atomic quota; guest cache and hashed network counters remain private",
 );
+// Isolated PGlite fixture only; production counters are never reset.
+await db.exec(
+  "TRUNCATE analytics_internal.ai_call_budget,analytics_internal.ai_call_windows; SET ROLE service_role",
+);
+assert.equal(
+  (await db.query("SELECT reserve_news_ai_translation() ok")).rows[0].ok,
+  true,
+);
+assert.equal(
+  (await db.query("SELECT reserve_news_ai_translation() ok")).rows[0].ok,
+  true,
+);
+assert.equal(
+  (await db.query("SELECT reserve_news_ai_translation() ok")).rows[0].ok,
+  false,
+);
+await db.exec("RESET ROLE; SET ROLE anon");
+for (const sql of [
+  "SELECT reserve_news_ai_translation()",
+  "SELECT * FROM analytics_internal.news_ai_daily_budget",
+]) {
+  let denied = false;
+  try {
+    await db.exec(sql);
+  } catch {
+    denied = true;
+  }
+  assert.ok(denied, sql);
+}
+await db.exec("RESET ROLE");
+results.push(
+  "PASS news translation two/day shared-budget cap; no browser access to counters or RPC",
+);
 console.log(results.join("\n"));
 await db.close();

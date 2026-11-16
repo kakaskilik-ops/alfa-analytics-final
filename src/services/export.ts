@@ -46,6 +46,33 @@ function escapeCell(value: string): string {
   return /[";\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 
+export function tableCsv(
+  headers: string[],
+  rows: (string | number | null)[][],
+): string {
+  return [headers, ...rows]
+    .map((row) =>
+      row.map((v) => escapeCell(v === null ? "" : String(v))).join(";"),
+    )
+    .join("\r\n");
+}
+
+export function printAnalyticalReport(text: string): void {
+  const popup = window.open("", "_blank");
+  if (!popup) return;
+  popup.opener = null;
+  popup.document.title = "ALFA ANALYTICS — аналитический отчёт";
+  const heading = popup.document.createElement("h1");
+  heading.textContent = popup.document.title;
+  popup.document.body.append(heading);
+  for (const line of text.split("\n")) {
+    const p = popup.document.createElement("p");
+    p.textContent = line;
+    popup.document.body.append(p);
+  }
+  popup.print();
+}
+
 function statusLabel(quote: MetalQuote): string {
   return {
     live: "Подтверждено",

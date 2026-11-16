@@ -116,7 +116,7 @@ export function parseWorldBankWorkbook(
   }
   const date = new Date(now),
     lastCompleteMonth = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1),
-    cutoff = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - 36, 1);
+    cutoff = Date.UTC(1960, 0, 1);
   const result: ReferenceObservation[] = [];
   const seen = new Set<string>();
   for (const row of matrix) {

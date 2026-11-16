@@ -14,7 +14,8 @@ export function parseReferenceRows(
   rows: Record<string, unknown>[],
   now = Date.now(),
 ): ReferencePrice[] {
-  const dates = new Map<string, ReferencePrice>();
+  const dates = new Map<string, ReferencePrice>(),
+    conflicts = new Set<string>();
   for (const r of rows) {
     const price = Number(r.price),
       retrievedAt = Date.parse(String(r.retrieved_at)),
@@ -41,9 +42,10 @@ export function parseReferenceRows(
       !r.specification.trim()
     )
       continue;
-    const key = series.id + period,
+    const key = JSON.stringify([series.id, r.specification, period]),
       old = dates.get(key);
-    if (!old || old.retrievedAt < retrievedAt)
+    if (!old || old.retrievedAt < retrievedAt) {
+      conflicts.delete(key);
       dates.set(key, {
         metal_id: series.id,
         period_start: period,
@@ -54,26 +56,37 @@ export function parseReferenceRows(
         specification: r.specification,
         retrievedAt,
       });
+    } else if (old.retrievedAt === retrievedAt && old.price !== price)
+      conflicts.add(key);
   }
-  return [...dates.values()].sort((a, b) =>
-    a.period_start.localeCompare(b.period_start),
-  );
+  return [...dates.entries()]
+    .filter(([k]) => !conflicts.has(k))
+    .map(([, v]) => v)
+    .sort((a, b) => a.period_start.localeCompare(b.period_start));
 }
 export async function fetchReferencePrices(): Promise<ReferencePrice[]> {
   if (cache && Date.now() - cachedAt < 300000) return cache;
   if (pending) return pending;
   pending = (async () => {
     if (!supabase) throw new Error("Подключение к базе данных не настроено.");
-    const { data, error } = await supabase
-      .from("reference_price_observations")
-      .select(
-        "metal_id,source_id,period_start,price,currency,unit,region,specification,retrieved_at",
-      )
-      .eq("source_id", WORLD_BANK_SOURCE)
-      .order("retrieved_at", { ascending: false })
-      .limit(600);
-    if (error) throw new Error("Не удалось загрузить месячные ориентиры.");
-    cache = parseReferenceRows(data ?? []);
+    const rows: Record<string, unknown>[] = [];
+    for (let offset = 0; ; offset += 500) {
+      if (offset >= 10000)
+        throw new Error("Слишком большой ряд: требуется уточнить диапазон.");
+      const { data, error } = await supabase
+        .from("reference_price_observations")
+        .select(
+          "metal_id,source_id,period_start,price,currency,unit,region,specification,retrieved_at",
+        )
+        .eq("source_id", WORLD_BANK_SOURCE)
+        .order("period_start", { ascending: true })
+        .order("id", { ascending: true })
+        .range(offset, offset + 499);
+      if (error) throw new Error("Не удалось загрузить месячные ориентиры.");
+      rows.push(...(data ?? []));
+      if (!data || data.length < 500) break;
+    }
+    cache = parseReferenceRows(rows);
     cachedAt = Date.now();
     return cache;
   })();

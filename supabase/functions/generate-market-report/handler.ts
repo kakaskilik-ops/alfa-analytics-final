@@ -19,12 +19,12 @@ export async function handler(req: Request) {
     try {
       const result = await analyseVerifiedFacts(db, {
         facts: evidence.facts,
+        analytics: evidence.analytics,
         question: input.question,
         scope: {
           period: input.period,
           start: evidence.start.slice(0, 10),
           end: evidence.end.slice(0, 10),
-          coverage: evidence.coverage,
         },
         automatic: true,
       });

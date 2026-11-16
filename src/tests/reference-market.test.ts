@@ -28,6 +28,11 @@ function workbook(unit = "($/mt)", date = "2026M10", extra = "") {
   });
 }
 const now = Date.parse("2026-11-13T12:00:00Z");
+it("retains publisher history older than three years for five-year and full-range analysis", () => {
+  expect(
+    parseWorldBankWorkbook(workbook("($/mt)", "2015M01"), now),
+  ).toHaveLength(4);
+});
 it("reads four separately specified monthly LME-based world reference series", () => {
   const rows = parseWorldBankWorkbook(workbook(), now);
   expect(rows).toHaveLength(4);

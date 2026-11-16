@@ -55,13 +55,20 @@ export const TRADE_COUNTRIES: Record<
   276: { code: "DEU", name: "Германия", region: "Европа" },
   842: { code: "USA", name: "США", region: "США" },
 };
-export function comtradeUrl(metalId: string, now = Date.now()): string {
+export function comtradeUrl(
+  metalId: string,
+  now = Date.now(),
+  requestedYear?: number,
+): string {
   const product = TRADE_PRODUCTS[metalId as keyof typeof TRADE_PRODUCTS];
   if (!product) throw new Error("unsupported_trade_product");
   const year = new Date(now).getUTCFullYear();
+  const period = requestedYear ?? year - 1;
+  if (!Number.isInteger(period) || period < year - 3 || period >= year)
+    throw new Error("invalid_trade_year");
   const url = new URL("https://comtradeapi.un.org/public/v1/preview/C/A/HS");
   for (const [k, v] of Object.entries({
-    period: String(year - 1),
+    period: String(period),
     reporterCode: "156,276,842",
     cmdCode: product.code,
     flowCode: "M,X",

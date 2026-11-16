@@ -1,6 +1,9 @@
 import { limitedText } from "./network.ts";
 export class ModelError extends Error {
-  constructor(readonly code: string) {
+  constructor(
+    readonly code: string,
+    readonly detail?: string,
+  ) {
     super(code);
   }
 }
@@ -36,7 +39,13 @@ export async function generateFreeReport(
   messages: { role: string; content: string }[],
   reserve: () => Promise<boolean>,
   fetcher: typeof fetch = fetch,
-): Promise<{ content: string; provider: string; model: string }> {
+): Promise<{
+  content: string;
+  provider: string;
+  model: string;
+  finishReason?: string;
+  outputTokens?: number;
+}> {
   const configs = modelConfigurations();
   if (!configs.length) throw new ModelError("ai_not_configured");
   let code = "provider_unavailable";
@@ -111,7 +120,13 @@ export async function generateFreeReport(
         parsed.usage.cost > 0
       )
         throw new ModelError("unexpected_provider_cost");
-      return { content, provider: c.provider, model: used };
+      return {
+        content,
+        provider: c.provider,
+        model: used,
+        finishReason: parsed?.choices?.[0]?.finish_reason,
+        outputTokens: parsed?.usage?.completion_tokens,
+      };
     } catch (e) {
       if (e instanceof ModelError) throw e;
       code = "provider_unavailable";

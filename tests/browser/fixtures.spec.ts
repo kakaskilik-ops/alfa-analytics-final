@@ -190,11 +190,25 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
     .getByRole("button", { name: "Месячная история: Медь", exact: true })
     .click();
   await expect(
-    page.getByRole("img", {
-      name: "Месячный график copper, 3 наблюдений",
+    page.getByRole("heading", {
+      name: "Месячная аналитика World Bank",
       exact: true,
     }),
   ).toBeVisible();
+  await page.getByLabel("Период месячных ориентиров").selectOption("1M");
+  await expect(
+    page.getByText("1 месячных точек", { exact: false }),
+  ).toBeVisible();
+  await page.getByLabel("Период месячных ориентиров").selectOption("all");
+  await expect(
+    page.getByText("3 месячных точек", { exact: false }),
+  ).toBeVisible();
+  await page.getByLabel("Показатель месячного графика").selectOption("percent");
+  const download = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Экспорт месячных данных CSV", exact: true })
+    .click();
+  expect((await download).suggestedFilename()).toBe("monthly-all.csv");
   await page.getByRole("button", { name: "Металлы", exact: true }).click();
   await page
     .getByRole("button", { name: "Открыть карточку: Вольфрам", exact: true })
@@ -235,6 +249,16 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
     .getByText("Рост производства вольфрама", { exact: false })
     .first()
     .waitFor();
+  await page.getByRole("button", { name: "Источники", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Региональное покрытие: 13 × 3",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Подтверждённых свежих позиций: 3 из 39.", { exact: false }),
+  ).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   for (const name of [
     "Главная",
