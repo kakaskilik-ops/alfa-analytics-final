@@ -541,7 +541,7 @@ Deno.test(
 );
 
 Deno.test(
-  "guest proof is bound to the body, network and expiry; missing proof makes no upstream call",
+  "guest proof binds body and expiry but permits network changes; missing proof makes no upstream call",
   () =>
     env(
       {
@@ -575,7 +575,8 @@ Deno.test(
           !(await verifyGuestChallenge(r, "TEST_SERVER", raw, now + 300001)),
         );
         r.headers.set("x-forwarded-for", "192.0.2.2");
-        assert(!(await verifyGuestChallenge(r, "TEST_SERVER", raw, now)));
+        assert(await verifyGuestChallenge(r, "TEST_SERVER", raw, now));
+        assert(await verifyGuestChallenge(r, "TEST_SERVER", raw, now - 10000));
         const old = globalThis.fetch;
         let network = 0;
         globalThis.fetch = async () => {
