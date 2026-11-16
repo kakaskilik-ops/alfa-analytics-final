@@ -269,7 +269,7 @@ Deno.test(
           assert(
             ok.status === 200 &&
               body.text.includes("111 USD/т") &&
-              body.report.model === "TEST:free" &&
+              body.report.model === "openai/gpt-oss-120b" &&
               stored === 1,
           );
           malformed = true;
