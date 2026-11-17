@@ -61,6 +61,7 @@ for (const name of [
   "collect-reference-prices",
   "collect-market-data",
   "collect-market-monitor",
+  "collect-price-evidence",
 ])
   run([
     "functions",

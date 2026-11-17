@@ -24,6 +24,8 @@ import { displayQuote, buildHybridQuote } from "@/services/liveData";
 import type { LiveMarketData } from "@/services/liveData";
 import { cn } from "@/lib/cn";
 import type { Metal, PeriodKey, UnitCode } from "@/types/market";
+import { fetchDisplayedPrices } from "@/services/displayedPrices";
+import VerifiedPrice from "./VerifiedPrice";
 
 interface MetalDetailDialogProps {
   metal: Metal;
@@ -45,6 +47,15 @@ export default function MetalDetailDialog({
   liveData,
 }: MetalDetailDialogProps) {
   const [period, setPeriod] = useState<PeriodKey>(initialPeriod);
+  const references = useAsyncData(
+    fetchDisplayedPrices,
+    "metal-price-evidence",
+    true,
+  );
+  const referencePrices =
+    references.state.status === "ready"
+      ? references.state.data.filter((r) => r.metalId === metal.id)
+      : [];
   const liveMetalData = liveData?.quotes.get(metal.id) ?? null;
   const quote = useMemo(
     () =>
@@ -212,31 +223,39 @@ export default function MetalDetailDialog({
         </div>
 
         <div className="space-y-6 p-5 md:p-6">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <span className="text-xs font-medium uppercase tracking-[0.12em] text-ink-400">
-                  Текущая цена
+          {quote.price === null && referencePrices.length > 0 ? (
+            <div className="space-y-4">
+              {referencePrices.map((r) => (
+                <VerifiedPrice key={r.sourceName + r.specification} price={r} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs font-medium uppercase tracking-[0.12em] text-ink-400">
+                    Текущая цена
+                  </span>
+                </div>
+                <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight text-ink-100">
+                  {formatPrice(quote.price, quote.metal.currency)}
+                </p>
+                <p className="mt-1 text-xs text-ink-400">
+                  за {unitLabel}, {quote.metal.currency}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <Delta
+                  value={quote.changePct}
+                  text={formatPercent(quote.changePct)}
+                  className="text-base"
+                />
+                <span className="tabular-nums text-ink-400">
+                  {formatPriceChange(quote.change, quote.metal.currency)}
                 </span>
               </div>
-              <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight text-ink-100">
-                {formatPrice(quote.price, quote.metal.currency)}
-              </p>
-              <p className="mt-1 text-xs text-ink-400">
-                за {unitLabel}, {quote.metal.currency}
-              </p>
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <Delta
-                value={quote.changePct}
-                text={formatPercent(quote.changePct)}
-                className="text-base"
-              />
-              <span className="tabular-nums text-ink-400">
-                {formatPriceChange(quote.change, quote.metal.currency)}
-              </span>
-            </div>
-          </div>
+          )}
 
           <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

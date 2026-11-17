@@ -1,0 +1,27 @@
+-- Only additive price evidence. Supplier bids/catalogue indications never enter regional spot indices.
+INSERT INTO public.data_sources(id,name,url,market_type,region,quality_score,status,attribution,license,free_tier_limit,independence_id) VALUES
+('rare-metals-bid','Rare Metals — открытые закупочные предложения','https://metal-supply.biz/','supplier_bid','Европа',0.5,'pending','Rare Metals; закупщик, Германия; USD/lb без НДС, пересчёт из EUR/kg выполнен самим источником','https://metal-supply.biz/impressum — отдельные факты открытых закупочных предложений с атрибуцией; не открытая лицензия на статьи/изображения/всю базу; robots.txt разрешает выбранную страницу','Не чаще одного запроса в сутки','rare-metals'),
+('metotechnics-floor','Metotechnics — справочный прайс ферросплавов','https://metotechnics.com/ferrosplavy-cena.htm','supplier_floor','Европа',0.3,'pending','Metotechnics; FeMo60 и FeW70; нижние границы недатированного прайса, не рыночные котировки','https://metotechnics.com/ferrosplavy-cena.htm — две числовые ссылки на публичный справочный прайс поставщика; без текстов, изображений и оформления сайта','Не чаще одного запроса в сутки','metotech'),
+('qs-catalogue','QS Advanced Materials — каталог 2023','https://www.qsrarematerials.com/','supplier_catalogue','США',0.4,'pending','QS Advanced Materials Inc; Troy, Michigan; архивный прайс каталога 2023, не актуальная оферта','https://www.qsrarematerials.com/term-of-use-a-25.html — использование для покупки/продвижения товаров поставщика, не в конкуренции с ним; только 3 числовых ссылки на предлагаемые товары, без перепубликации каталога','Проверка неизменности файла не чаще раза в сутки','qs-advanced-materials') ON CONFLICT(id) DO NOTHING;
+CREATE TABLE public.supplier_price_observations(
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),metal_id text NOT NULL REFERENCES public.active_metals(metal_id),source_id text NOT NULL REFERENCES public.data_sources(id),
+ observed_on date NOT NULL,date_precision text NOT NULL CHECK(date_precision IN('day','year')),date_basis text NOT NULL CHECK(date_basis IN('retrieval_snapshot','catalogue_year')),
+ original_price numeric NOT NULL CHECK(original_price>0 AND original_price<'Infinity'::numeric),original_currency text NOT NULL CHECK(original_currency='USD'),original_unit text NOT NULL CHECK(original_unit IN('lb','kg')),
+ specification text NOT NULL CHECK(length(specification)>10),region text NOT NULL CHECK(region IN('Европа','США')),country text NOT NULL,price_kind text NOT NULL CHECK(price_kind IN('supplier_bid','supplier_catalogue','supplier_floor')),
+ source_url text NOT NULL CHECK(source_url LIKE 'https://%'),notes text NOT NULL,retrieved_at timestamptz NOT NULL DEFAULT now(),payload_id uuid NOT NULL REFERENCES public.ingestion_payloads(id),
+ UNIQUE(source_id,metal_id,specification,observed_on,original_price),
+ CHECK((source_id='rare-metals-bid' AND price_kind='supplier_bid' AND region='Европа' AND date_basis='retrieval_snapshot' AND date_precision='day' AND source_url LIKE 'https://metal-supply.biz/product/%') OR (source_id='qs-catalogue' AND price_kind='supplier_catalogue' AND region='США' AND date_basis='catalogue_year' AND date_precision='year' AND extract(day from observed_on)=1 AND extract(month from observed_on)=1 AND source_url LIKE 'https://www.qsrarematerials.com/uploadfile/down/%') OR (source_id='metotechnics-floor' AND price_kind='supplier_floor' AND region='Европа' AND date_basis='retrieval_snapshot' AND date_precision='day' AND original_unit='kg' AND metal_id IN('ferromolybdenum','ferrotungsten') AND source_url='https://metotechnics.com/ferrosplavy-cena.htm'))
+);
+CREATE INDEX supplier_prices_material_date ON public.supplier_price_observations(metal_id,observed_on DESC,retrieved_at DESC);
+ALTER TABLE public.supplier_price_observations ADD COLUMN usd_per_kg numeric GENERATED ALWAYS AS (round(original_price/(CASE original_unit WHEN 'lb' THEN 0.45359237::numeric ELSE 1::numeric END),8)) STORED;
+ALTER TABLE public.supplier_price_observations ADD CONSTRAINT supplier_source_unit CHECK((source_id='metotechnics-floor' AND original_unit='kg') OR (source_id IN('rare-metals-bid','qs-catalogue') AND original_unit='lb'));
+CREATE INDEX supplier_prices_payload ON public.supplier_price_observations(payload_id);
+ALTER TABLE public.supplier_price_observations ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.supplier_price_observations FROM PUBLIC,anon,authenticated;
+GRANT SELECT(id,metal_id,source_id,observed_on,date_precision,date_basis,original_price,original_currency,original_unit,specification,region,country,price_kind,source_url,notes,retrieved_at,usd_per_kg) ON public.supplier_price_observations TO anon,authenticated;
+GRANT ALL ON public.supplier_price_observations TO service_role;
+CREATE POLICY supplier_public ON public.supplier_price_observations FOR SELECT TO anon,authenticated USING(observed_on<=current_date);
+CREATE POLICY supplier_server ON public.supplier_price_observations FOR ALL TO service_role USING(true) WITH CHECK(true);
+ALTER TABLE analytics_internal.automation_state DROP CONSTRAINT automation_state_job_check;
+ALTER TABLE analytics_internal.automation_state ADD CONSTRAINT automation_state_job_check CHECK(job IN('collect-fx','collect-quotes','compute-orientations','collect-reference-prices','collect-trade','generate-market-report','collect-price-evidence'));
+INSERT INTO analytics_internal.automation_state(job,min_interval_seconds,enabled) VALUES('collect-price-evidence',86400,false);

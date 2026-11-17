@@ -53,3 +53,7 @@ entrypoint = "./functions/ai-challenge/index.ts"
 [functions.collect-market-monitor]
 verify_jwt = false
 entrypoint = "./functions/collect-market-monitor/index.ts"
+
+[functions.collect-price-evidence]
+verify_jwt = false
+entrypoint = "./functions/collect-price-evidence/index.ts"

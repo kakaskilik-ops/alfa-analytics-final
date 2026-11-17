@@ -11,6 +11,8 @@ import { UNIT_TO_KG } from "@/services/quoteValidation";
 import { buildHybridQuotes } from "@/services/liveData";
 import type { LiveMarketData } from "@/services/liveData";
 import type { Metal, MetalCategoryId } from "@/types/market";
+import { useAsyncData } from "@/hooks/useAsyncData";
+import { fetchDisplayedPrices } from "@/services/displayedPrices";
 
 type CategoryFilter = MetalCategoryId | "all";
 
@@ -33,6 +35,13 @@ export default function MetalsPage({
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState<Metal | null>(null);
+  const priceData = useAsyncData(
+    fetchDisplayedPrices,
+    "displayed-metal-prices",
+    true,
+  );
+  const references =
+    priceData.state.status === "ready" ? priceData.state.data : [];
 
   const quotes = useMemo(
     () => buildHybridQuotes(METALS, "1M", updatedAt, liveData),
@@ -59,8 +68,14 @@ export default function MetalsPage({
     })
     .sort((a, b) =>
       sort === "price"
-        ? (b.price === null ? -Infinity : b.price / UNIT_TO_KG[b.metal.unit]) -
-          (a.price === null ? -Infinity : a.price / UNIT_TO_KG[a.metal.unit])
+        ? (b.price === null
+            ? (references.find((r) => r.metalId === b.metal.id)?.pricePerKg ??
+              -Infinity)
+            : b.price / UNIT_TO_KG[b.metal.unit]) -
+          (a.price === null
+            ? (references.find((r) => r.metalId === a.metal.id)?.pricePerKg ??
+              -Infinity)
+            : a.price / UNIT_TO_KG[a.metal.unit])
         : a.metal.nameRu.localeCompare(b.metal.nameRu, "ru"),
     );
 
@@ -75,20 +90,27 @@ export default function MetalsPage({
     <>
       <PageHeader
         title="Металлы"
-        description={`Каталог металлов, сплавов и лома. ${liveCount} материалов с подтверждёнными котировками; остальные ожидают подключения источников.`}
+        description={`13 металлов и сплавов. Региональных котировок: ${liveCount}; металлов с отдельными ценовыми наблюдениями: ${new Set(references.map((r) => r.metalId)).size}. Тип и спецификация указаны у каждой цены.`}
       />
 
+      {priceData.state.status === "error" && (
+        <p role="status" className="mb-4 text-sm text-ink-400">
+          {priceData.state.message}
+        </p>
+      )}
       <div className="mb-6 flex flex-col gap-4">
         <label className="text-sm text-ink-300">
           Сортировка{" "}
           <select
             aria-label="Сортировка"
-            className="ml-2 bg-ink-900 p-2 rounded"
+            className="mt-1 block w-full max-w-full rounded bg-ink-900 p-2 sm:ml-2 sm:mt-0 sm:inline-block sm:w-auto"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
           >
             <option value="name">По названию</option>
-            <option value="price">По цене в USD за кг</option>
+            <option value="price">
+              По показанной цене USD/кг (типы различаются)
+            </option>
           </select>
         </label>
         <SearchInput
@@ -157,6 +179,9 @@ export default function MetalsPage({
             <MetalCard
               key={quote.metal.id}
               quote={quote}
+              referencePrice={references.find(
+                (r) => r.metalId === quote.metal.id,
+              )}
               isFavorite={favorites.isFavorite(quote.metal.id)}
               onToggleFavorite={() => favorites.toggleFavorite(quote.metal.id)}
               onSelect={() => setSelectedMetal(quote.metal)}

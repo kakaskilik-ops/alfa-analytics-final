@@ -1,0 +1,13 @@
+{
+  "source": "https://metal-supply.biz/",
+  "capturedOn": "2026-11-17",
+  "originalSHA256": "6d24946fc6d7244a68bbb67838f1e0c87c013ce6bacafcbe9c60290cea30935d",
+  "projection": "Seven material/purity/price rows; no article prose, images or contact details",
+  "catalogueURL": "https://www.qsrarematerials.com/uploadfile/down/20230303/QS%20Product%20Cata.pdf",
+  "catalogueSHA256": "685c9f10554296ae0ab1bdde2f7b38a0002b6e25733fcc09439b15c1a4f6b7d6",
+  "catalogueExcerpt": "2023; Plate/Sheet >10mm: Tantalum $580/lb, Niobium $170/lb, Zirconium (702) $80/lb; listed prices for reference only.",
+  "ferroSource": "https://metotechnics.com/ferrosplavy-cena.htm",
+  "ferroOriginalSHA256": "de1f5497bf8b24d7ce0aebf0b4738b7b7773aa5cad24ab7596fe59629e098721",
+  "ferroProjection": "Two original table rows: FeMo60 Slugs from24 USD/kg; FeW70 Slugs from32 USD/kg. Undated, not a binding offer.",
+  "worldBank": "Eight actual public Supabase rows captured 17 November 2026, last two months for Cu, Al, Sn, Zn; existing World Bank workbook provenance retained in production."
+}

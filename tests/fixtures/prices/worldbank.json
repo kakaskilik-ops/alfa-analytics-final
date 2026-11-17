@@ -1,0 +1,90 @@
+[
+  {
+    "metal_id": "tin",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-10-01",
+    "price": 51696,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: рафинированное, standard high grade, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  },
+  {
+    "metal_id": "aluminum",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-10-01",
+    "price": 3061,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: первичные нелегированные слитки, standard high grade, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  },
+  {
+    "metal_id": "copper",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-10-01",
+    "price": 14508,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: standard grade A, катоды и wire bars, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  },
+  {
+    "metal_id": "zinc",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-10-01",
+    "price": 3818,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: рафинированный, special high grade, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  },
+  {
+    "metal_id": "copper",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-09-01",
+    "price": 14474,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: standard grade A, катоды и wire bars, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  },
+  {
+    "metal_id": "tin",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-09-01",
+    "price": 53712,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: рафинированное, standard high grade, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  },
+  {
+    "metal_id": "aluminum",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-09-01",
+    "price": 3283,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: первичные нелегированные слитки, standard high grade, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  },
+  {
+    "metal_id": "zinc",
+    "source_id": "world-bank-pink-sheet",
+    "period_start": "2026-09-01",
+    "price": 4021,
+    "currency": "USD",
+    "unit": "ton",
+    "region": "Мировой ориентир (LME)",
+    "specification": "LME: рафинированный, special high grade, physical settlement",
+    "retrieved_at": "2026-11-13T17:02:41.343+00:00"
+  }
+]
