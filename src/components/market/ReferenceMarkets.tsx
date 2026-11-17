@@ -37,7 +37,7 @@ export default function ReferenceMarkets({
     latest && previous ? (latest.price / previous.price - 1) * 100 : null;
   return (
     <Panel className="mt-6 p-5 md:p-6">
-      <h2 className="text-lg font-semibold">Месячные ориентиры металлов</h2>
+      <h2 className="text-lg font-semibold">Мировые ценовые ориентиры</h2>
       <p className="mt-1 text-xs text-ink-400">
         World Bank Pink Sheet · мировой ориентир на базе LME · USD за
         метрическую тонну. Месячные средние не являются текущими региональными
@@ -82,6 +82,11 @@ export default function ReferenceMarkets({
               </p>
               <p className="mt-1 text-lg font-semibold">
                 {last ? `${format(last.price)} USD/т` : "Нет данных"}
+              </p>
+              <p className="mt-1 text-xs text-ink-400">
+                {last
+                  ? `${format(last.price / 1000)} USD/кг · World Bank · Мировой месячный ориентир`
+                  : ""}
               </p>
               <p className="mt-1 text-xs text-ink-400">
                 {last

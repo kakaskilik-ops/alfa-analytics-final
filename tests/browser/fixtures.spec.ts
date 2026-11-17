@@ -184,7 +184,7 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
     page.getByRole("button", { name: "7 дней", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await page
-    .getByRole("heading", { name: "Месячные ориентиры металлов", exact: true })
+    .getByRole("heading", { name: "Мировые ценовые ориентиры", exact: true })
     .waitFor();
   await page
     .getByRole("button", { name: "Месячная история: Медь", exact: true })

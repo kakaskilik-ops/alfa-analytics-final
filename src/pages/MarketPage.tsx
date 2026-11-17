@@ -93,7 +93,7 @@ export default function MarketPage({
           <>
             <span className="inline-flex items-center gap-2 rounded-md border border-ink-700 bg-ink-900 px-2.5 py-1 text-xs text-ink-300">
               <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
-              {liveCount} с котировками / {quotes.length - liveCount} без данных
+              {liveCount} региональных котировок · мировые ориентиры отдельно
             </span>
             {liveData?.updatedAt ? (
               <LastUpdated at={new Date(liveData.updatedAt)} />
@@ -106,45 +106,49 @@ export default function MarketPage({
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MarketStatCard
-          label="Индекс рынка металлов"
-          value={formatIndex(indexLast)}
-          footer={
-            <Delta
-              value={indexChangePct}
-              text={`${formatPercent(indexChangePct)} за период`}
-            />
-          }
-        />
-        <MarketStatCard
-          label="Средняя динамика"
-          value={formatPercent(averageChangePct)}
-          footer={<span>по {dynamics.length} металлам</span>}
-        />
-        <MarketStatCard
-          label="Растут / падают"
-          value={
-            dynamics.length
-              ? `${risingCount} / ${dynamics.filter((q) => q.changePct! < 0).length}`
-              : "—"
-          }
-          footer={<span>металлов за период</span>}
-        />
-        <MarketStatCard
-          label="Лидер роста"
-          value={leader && leader.changePct! > 0 ? leader.metal.nameRu : "—"}
-          footer={
-            <Delta
-              value={leader?.changePct ?? null}
-              text={`${formatPercent(leader?.changePct ?? null)} за период`}
-            />
-          }
-        />
-      </div>
+      {liveCount === 0 ? (
+        <ReferenceMarkets compact />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MarketStatCard
+            label="Индекс рынка металлов"
+            value={formatIndex(indexLast)}
+            footer={
+              <Delta
+                value={indexChangePct}
+                text={`${formatPercent(indexChangePct)} за период`}
+              />
+            }
+          />
+          <MarketStatCard
+            label="Средняя динамика"
+            value={formatPercent(averageChangePct)}
+            footer={<span>по {dynamics.length} металлам</span>}
+          />
+          <MarketStatCard
+            label="Растут / падают"
+            value={
+              dynamics.length
+                ? `${risingCount} / ${dynamics.filter((q) => q.changePct! < 0).length}`
+                : "—"
+            }
+            footer={<span>металлов за период</span>}
+          />
+          <MarketStatCard
+            label="Лидер роста"
+            value={leader && leader.changePct! > 0 ? leader.metal.nameRu : "—"}
+            footer={
+              <Delta
+                value={leader?.changePct ?? null}
+                text={`${formatPercent(leader?.changePct ?? null)} за период`}
+              />
+            }
+          />
+        </div>
+      )}
 
       <CurrencyModule />
-      <ReferenceMarkets compact />
+      {liveCount > 0 && <ReferenceMarkets compact />}
 
       <div className="mt-4 grid gap-4 xl:grid-cols-3">
         <Panel className="p-5 md:p-6 xl:col-span-2">

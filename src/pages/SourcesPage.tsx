@@ -275,7 +275,15 @@ export default function SourcesPage({ liveData, updatedAt }: SourcesPageProps) {
                       )}
                     </td>
                     <td className="px-5 py-4 text-ink-300">
-                      {MARKET_TYPE_LABELS[source.marketType]}
+                      {MARKET_TYPE_LABELS[source.marketType] ??
+                        (
+                          {
+                            "rare-metals-bid": "Индикативные закупочные цены",
+                            "qs-catalogue": "Архивный прайс поставщика",
+                            "metotechnics-floor": "Недатированные цены «от»",
+                          } as Record<string, string>
+                        )[source.id] ??
+                        "Тип не указан"}
                     </td>
                     <td className="px-5 py-4 text-ink-300">{source.region}</td>
                     <td className="px-5 py-4 text-ink-300">

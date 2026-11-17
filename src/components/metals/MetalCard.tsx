@@ -5,12 +5,15 @@ import { CATEGORY_MAP } from "@/data/categories";
 import { cn } from "@/lib/cn";
 import { formatPercent, formatPrice } from "@/lib/format";
 import type { MetalQuote } from "@/types/market";
+import VerifiedPrice from "./VerifiedPrice";
+import type { DisplayedPrice } from "@/services/displayedPrices";
 
 interface MetalCardProps {
   quote: MetalQuote;
   isFavorite: boolean;
   onSelect: () => void;
   onToggleFavorite: () => void;
+  referencePrice?: DisplayedPrice;
 }
 
 export default function MetalCard({
@@ -18,6 +21,7 @@ export default function MetalCard({
   isFavorite,
   onSelect,
   onToggleFavorite,
+  referencePrice,
 }: MetalCardProps) {
   const { metal } = quote;
   const unitLabel =
@@ -73,27 +77,31 @@ export default function MetalCard({
         </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-2xl font-semibold tabular-nums text-ink-100">
-              {formatPrice(quote.price, quote.metal.currency)}
+      {quote.price === null && referencePrice ? (
+        <VerifiedPrice price={referencePrice} />
+      ) : (
+        <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-2xl font-semibold tabular-nums text-ink-100">
+                {formatPrice(quote.price, quote.metal.currency)}
+              </p>
+              <DataStatusBadge status={quote.dataStatus} />
+            </div>
+            <p className="mt-1 text-xs text-ink-400">
+              за {unitLabel}, {metal.currency}
             </p>
-            <DataStatusBadge status={quote.dataStatus} />
           </div>
-          <p className="mt-1 text-xs text-ink-400">
-            за {unitLabel}, {metal.currency}
-          </p>
+          <div className="text-right">
+            <Delta
+              value={quote.changePct}
+              text={formatPercent(quote.changePct)}
+              className="justify-end"
+            />
+            <p className="mt-1 text-xs text-ink-400">за 1М</p>
+          </div>
         </div>
-        <div className="text-right">
-          <Delta
-            value={quote.changePct}
-            text={formatPercent(quote.changePct)}
-            className="justify-end"
-          />
-          <p className="mt-1 text-xs text-ink-400">за 1М</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
