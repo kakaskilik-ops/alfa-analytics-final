@@ -5,12 +5,22 @@ import {
   parseFerroPrices,
   priceUsdKg,
   QS_CATALOGUE_PRICES,
+  QS_PRICE_SHA256,
+  qsCatalogueEvidence,
 } from "../../shared/supplierPrices";
 import { parseSupplierPriceRows } from "../services/displayedPrices";
 const rare = readFileSync("tests/fixtures/prices/rare.html", "utf8");
 const ferro = readFileSync("tests/fixtures/prices/metotechnics.html", "utf8");
 const date = new Date("2026-11-17T13:00:00Z");
 describe("published supplier evidence, not fabricated market quotes", () => {
+  it("accepts the actual 2.1MB catalogue but persists a small checksum-verified excerpt", () => {
+    const evidence = JSON.parse(qsCatalogueEvidence(QS_PRICE_SHA256, 2128330));
+    expect(evidence.rows).toHaveLength(3);
+    expect(evidence.original_byte_length).toBe(2128330);
+    expect(JSON.stringify(evidence).length).toBeLessThan(10000);
+    expect(() => qsCatalogueEvidence("changed", 2128330)).toThrow();
+    expect(() => qsCatalogueEvidence(QS_PRICE_SHA256, 3000000)).toThrow();
+  });
   it("reads seven exact metal/purity bid rows and excludes compounds", () => {
     const rows = parseRarePrices(rare, date);
     expect(rows).toHaveLength(7);

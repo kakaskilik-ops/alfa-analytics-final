@@ -7,6 +7,7 @@ import {
   QS_PRICE_URL,
   QS_PRICE_SHA256,
   QS_CATALOGUE_PRICES,
+  qsCatalogueEvidence,
   parseRarePrices,
 } from "../../../shared/supplierPrices.ts";
 export async function handler(req: Request) {
@@ -41,7 +42,7 @@ export async function handler(req: Request) {
               ? parseFerroPrices(payloadText)
               : parseRarePrices(payloadText);
         } else {
-          const bytes = await limitedBytes(response, 700000);
+          const bytes = await limitedBytes(response, 2500000);
           const hash = [
             ...new Uint8Array(
               await crypto.subtle.digest(
@@ -55,16 +56,7 @@ export async function handler(req: Request) {
           if (hash !== QS_PRICE_SHA256)
             throw new JobError("catalogue_changed_requires_review");
           prices = QS_CATALOGUE_PRICES;
-          let binary = "";
-          for (let i = 0; i < bytes.length; i += 8192)
-            binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
-          payloadText = JSON.stringify({
-            format: "pdf-base64",
-            sha256: hash,
-            base64: btoa(binary),
-            extraction:
-              "Last price table: Plate/Sheet >10mm, catalogue year 2023",
-          });
+          payloadText = qsCatalogueEvidence(hash, bytes.length);
         }
         const payloadId = await storePayload(db, source, url, payloadText);
         const saved = await db
@@ -104,6 +96,12 @@ export async function handler(req: Request) {
                   "supplier_duplicate_material",
                   "supplier_invalid_price",
                   "supplier_price_table_incomplete",
+                  "body_too_large",
+                  "empty_response",
+                  "feed_host_not_allowed",
+                  "invalid_redirect",
+                  "too_many_redirects",
+                  "catalogue_invalid_size",
                 ].includes(e.message)
               ? e.message
               : "supplier_collection_failed";
