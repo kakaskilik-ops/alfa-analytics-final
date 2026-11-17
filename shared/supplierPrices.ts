@@ -163,3 +163,17 @@ export function priceUsdKg(price: number, unit: "lb" | "kg" | "ton") {
   if (!(price > 0) || !Number.isFinite(price)) throw Error("invalid_price");
   return price / (unit === "lb" ? 0.45359237 : unit === "ton" ? 1000 : 1);
 }
+export function qsCatalogueEvidence(hash: string, byteLength: number) {
+  if (hash !== QS_PRICE_SHA256)
+    throw Error("catalogue_changed_requires_review");
+  if (!Number.isInteger(byteLength) || byteLength <= 0 || byteLength > 2500000)
+    throw Error("catalogue_invalid_size");
+  return JSON.stringify({
+    format: "verified_pdf_price_excerpt",
+    source_url: QS_PRICE_URL,
+    source_sha256: hash,
+    original_byte_length: byteLength,
+    extraction: "Last price table: Plate/Sheet >10mm, catalogue year 2023",
+    rows: QS_CATALOGUE_PRICES,
+  });
+}
