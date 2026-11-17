@@ -8,15 +8,22 @@ const MarketPage = lazy(() => import("@/pages/MarketPage"));
 const MetalsPage = lazy(() => import("@/pages/MetalsPage"));
 const NewsPage = lazy(() => import("@/pages/NewsPage"));
 const SourcesPage = lazy(() => import("@/pages/SourcesPage"));
+const MonitorPage = lazy(() => import("@/pages/MonitorPage"));
 import Sidebar, { type Section } from "@/components/layout/Sidebar";
 import { useFavorites } from "@/hooks/useFavorites";
 import { loadLiveMarketData, type LiveMarketData } from "@/services/liveData";
 
 export default function App() {
   const readSection = (): Section =>
-    ["market", "metals", "sources", "ai", "analytics", "news"].includes(
-      location.hash.slice(1),
-    )
+    [
+      "market",
+      "metals",
+      "sources",
+      "ai",
+      "analytics",
+      "news",
+      "monitor",
+    ].includes(location.hash.slice(1))
       ? (location.hash.slice(1) as Section)
       : "market";
   const [section, setSection] = useState<Section>(readSection);
@@ -115,6 +122,7 @@ export default function App() {
         >
           <div key={section} className="mx-auto max-w-7xl animate-fade-up">
             {section === "news" && <NewsPage />}
+            {section === "monitor" && <MonitorPage />}
             {section === "analytics" && (
               <AnalyticsPage updatedAt={updatedAt} liveData={scopedData} />
             )}

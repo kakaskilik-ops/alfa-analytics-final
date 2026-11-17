@@ -1,0 +1,292 @@
+{
+  "notices": [
+    {
+      "notice-type": "cn-standard",
+      "publication-number": "704782-2026",
+      "classification-cpv": [
+        "33693100",
+        "33693100"
+      ],
+      "publication-date": "2026-10-13+02:00",
+      "buyer-name": {
+        "eng": [
+          "Department of Contracts"
+        ]
+      },
+      "notice-title": {
+        "eng": "Malta – Toxins – CT2371/2026 - Framework Contract for the supply of Molybdenum-99/Technetium-99m Generators (Tc-99m generators)"
+      },
+      "buyer-country": [
+        "MLT"
+      ],
+      "form-type": "competition"
+    },
+    {
+      "notice-type": "can-standard",
+      "publication-number": "490697-2026",
+      "classification-cpv": [
+        "14740000",
+        "14740000"
+      ],
+      "publication-date": "2026-07-16+02:00",
+      "buyer-name": {
+        "ita": [
+          "Azienda Ospedaliera Papardo - Ufficio Provveditorato"
+        ]
+      },
+      "notice-title": {
+        "eng": "Italy – Molybdenum, technetium, ruthenium and rhodium – Fornitura di \"Kits di marcatura con 99mTc\" e del radiofarmaco \"Generatori di Molibdeno/99m Tecnezio\" per l'U.O.S.D. di Medicina Nucleare dell'A.O. Papardo."
+      },
+      "buyer-country": [
+        "ITA"
+      ],
+      "form-type": "result"
+    },
+    {
+      "notice-type": "can-standard",
+      "publication-number": "484526-2026",
+      "classification-cpv": [
+        "14740000",
+        "14740000",
+        "14740000",
+        "14740000"
+      ],
+      "publication-date": "2026-07-14+02:00",
+      "buyer-name": {
+        "ita": [
+          "Azienda Ospedaliera Papardo - Ufficio Provveditorato"
+        ]
+      },
+      "notice-title": {
+        "eng": "Italy – Molybdenum, technetium, ruthenium and rhodium – Fornitura di \"Kits di marcatura con 99mTc\" e del radiofarmaco \"Generatori di Molibdeno/99m Tecnezio\" per l'U.O.S.D. di Medicina Nucleare dell'A.O. Papardo."
+      },
+      "buyer-country": [
+        "ITA"
+      ],
+      "form-type": "result"
+    },
+    {
+      "notice-type": "cn-standard",
+      "publication-number": "481774-2025",
+      "classification-cpv": [
+        "14740000",
+        "14740000",
+        "14740000",
+        "14740000",
+        "14740000"
+      ],
+      "publication-date": "2025-07-23+02:00",
+      "buyer-name": {
+        "ita": [
+          "Azienda Ospedaliera Papardo - Ufficio Provveditorato"
+        ]
+      },
+      "notice-title": {
+        "eng": "Italy – Molybdenum, technetium, ruthenium and rhodium – Fornitura di \"Kits di marcatura con 99mTc\" e del radiofarmaco \"Generatori di Molibdeno/99m Tecnezio\" per l'U.O.S.D. di Medicina Nucleare dell'A.O. Papardo."
+      },
+      "buyer-country": [
+        "ITA"
+      ],
+      "form-type": "competition"
+    },
+    {
+      "notice-type": "cn-standard",
+      "publication-number": "402816-2025",
+      "classification-cpv": [
+        "14740000",
+        "14740000",
+        "14740000",
+        "14740000",
+        "14740000"
+      ],
+      "publication-date": "2025-06-24+02:00",
+      "buyer-name": {
+        "ita": [
+          "Azienda Ospedaliera Papardo - Ufficio Provveditorato"
+        ]
+      },
+      "notice-title": {
+        "eng": "Italy – Molybdenum, technetium, ruthenium and rhodium – Fornitura di \"Kits di marcatura con 99mTc\" e del radiofarmaco \"Generatori di Molibdeno/99m Tecnezio\" per l'U.O.S.D. di Medicina Nucleare dell'A.O. Papardo."
+      },
+      "buyer-country": [
+        "ITA"
+      ],
+      "form-type": "competition"
+    },
+    {
+      "notice-type": "cn-standard",
+      "publication-number": "708090-2023",
+      "classification-cpv": [
+        "14741000"
+      ],
+      "publication-date": "2023-11-22+01:00",
+      "buyer-name": {
+        "fra": [
+          "Centre National de la Recherche Scientifique"
+        ]
+      },
+      "notice-title": {
+        "eng": "France-Gif-sur-Yvette: Molybdenum"
+      },
+      "buyer-country": [
+        "FRA"
+      ],
+      "form-type": "competition"
+    },
+    {
+      "notice-type": "can-standard",
+      "publication-number": "547724-2022",
+      "classification-cpv": [
+        "09340000",
+        "09344000",
+        "14740000",
+        "14741000"
+      ],
+      "publication-date": "2022-10-07+02:00",
+      "buyer-name": {
+        "fra": [
+          "Institut National des Radioéléments"
+        ]
+      },
+      "notice-title": {
+        "eng": "Belgium-Fleurus: Molybdenum"
+      },
+      "buyer-country": [
+        "BEL"
+      ],
+      "form-type": "result"
+    },
+    {
+      "notice-type": "can-standard",
+      "publication-number": "196984-2021",
+      "classification-cpv": [
+        "14740000"
+      ],
+      "publication-date": "2021-04-21+02:00",
+      "buyer-name": {
+        "deu": [
+          "Fraunhofer Gesellschaft zur Förderung der angewandten Forschung e. V. über Vergabeportal deutsche eVergabe"
+        ]
+      },
+      "notice-title": {
+        "eng": "Germany-Munich: Molybdenum, technetium, ruthenium and rhodium"
+      },
+      "buyer-country": [
+        "DEU"
+      ],
+      "form-type": "result"
+    },
+    {
+      "notice-type": "can-standard",
+      "publication-number": "59182-2021",
+      "classification-cpv": [
+        "14741000"
+      ],
+      "publication-date": "2021-02-05+01:00",
+      "buyer-name": {
+        "fra": [
+          "Centre national de la recherche scientifique"
+        ]
+      },
+      "notice-title": {
+        "eng": "France-Gif-sur-Yvette: Molybdenum"
+      },
+      "buyer-country": [
+        "FRA"
+      ],
+      "form-type": "result"
+    },
+    {
+      "notice-type": "cn-standard",
+      "publication-number": "534616-2020",
+      "classification-cpv": [
+        "14741000"
+      ],
+      "publication-date": "2020-11-09+01:00",
+      "buyer-name": {
+        "fra": [
+          "Centre national de la recherche scientifique"
+        ]
+      },
+      "notice-title": {
+        "eng": "France-Gif-sur-Yvette: Molybdenum"
+      },
+      "buyer-country": [
+        "FRA"
+      ],
+      "form-type": "competition"
+    },
+    {
+      "notice-type": "corr",
+      "publication-number": "178089-2019",
+      "classification-cpv": [
+        "09340000",
+        "09344000",
+        "14740000",
+        "14741000"
+      ],
+      "publication-date": "2019-04-16+02:00",
+      "buyer-name": {
+        "fra": [
+          "Institut national des radioéléments"
+        ]
+      },
+      "notice-title": {
+        "eng": "Belgium-Fleurus: Molybdenum"
+      },
+      "buyer-country": [
+        "BEL"
+      ],
+      "form-type": "change"
+    },
+    {
+      "notice-type": "cn-standard",
+      "publication-number": "146043-2019",
+      "classification-cpv": [
+        "09340000",
+        "09344000",
+        "14740000",
+        "14741000"
+      ],
+      "publication-date": "2019-03-29+01:00",
+      "buyer-name": {
+        "fra": [
+          "Institut national des radioéléments"
+        ]
+      },
+      "notice-title": {
+        "eng": "Belgium-Fleurus: Molybdenum"
+      },
+      "buyer-country": [
+        "BEL"
+      ],
+      "form-type": "competition"
+    },
+    {
+      "notice-type": "cn-standard",
+      "publication-number": "146103-2019",
+      "classification-cpv": [
+        "09340000",
+        "09344000",
+        "14740000",
+        "14741000"
+      ],
+      "publication-date": "2019-03-29+01:00",
+      "buyer-name": {
+        "fra": [
+          "Institut national des radioéléments"
+        ]
+      },
+      "notice-title": {
+        "eng": "Belgium-Fleurus: Molybdenum"
+      },
+      "buyer-country": [
+        "BEL"
+      ],
+      "form-type": "competition"
+    }
+  ],
+  "totalNoticeCount": 13,
+  "iterationNextToken": null,
+  "timedOut": false
+}

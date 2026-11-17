@@ -60,6 +60,7 @@ for (const name of [
   "compute-orientations",
   "collect-reference-prices",
   "collect-market-data",
+  "collect-market-monitor",
 ])
   run([
     "functions",

@@ -4,6 +4,7 @@ import {
   TrendingUp,
   Activity,
   Database,
+  Radar,
   type LucideIcon,
 } from "lucide-react";
 import Logo from "@/components/brand/Logo";
@@ -11,13 +12,14 @@ import Logo from "@/components/brand/Logo";
 import { cn } from "@/lib/cn";
 
 export type Section =
-  "market" | "metals" | "sources" | "ai" | "analytics" | "news";
+  "market" | "metals" | "sources" | "ai" | "analytics" | "news" | "monitor";
 
 const NAV_ITEMS: { id: Section; label: string; icon: LucideIcon }[] = [
   { id: "market", label: "Главная", icon: TrendingUp },
   { id: "metals", label: "Металлы", icon: Gem },
   { id: "analytics", label: "Аналитика", icon: TrendingUp },
   { id: "news", label: "Новости", icon: Activity },
+  { id: "monitor", label: "Монитор рынка", icon: Radar },
   { id: "sources", label: "Источники", icon: Database },
   { id: "ai", label: "ИИ-аналитик", icon: Bot },
 ];
