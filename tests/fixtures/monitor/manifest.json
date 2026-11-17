@@ -1,0 +1,20 @@
+{
+  "capturedOn": "2026-11-17",
+  "fixtures": [
+    {
+      "file": "ted.json",
+      "sha256": "c9ada39f4b0342f92ea6c87e073f93e54cbf51fc27925c6ca26e4b79f4c4cb30",
+      "records": 13
+    },
+    {
+      "file": "usaspending.json",
+      "sha256": "39103973c6f6f62b28a7e8003981a7c37e4bb05f77dbe59f9c149128c846e557",
+      "records": 20
+    },
+    {
+      "file": "contracts-finder.json",
+      "sha256": "e0bdcb289b1a2ea19031f505af129eecf82193e46d00305082a3497982036d73",
+      "records": 2
+    }
+  ]
+}

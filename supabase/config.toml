@@ -49,3 +49,7 @@ entrypoint = "./functions/collect-trade/index.ts"
 [functions.ai-challenge]
 verify_jwt = false
 entrypoint = "./functions/ai-challenge/index.ts"
+
+[functions.collect-market-monitor]
+verify_jwt = false
+entrypoint = "./functions/collect-market-monitor/index.ts"
