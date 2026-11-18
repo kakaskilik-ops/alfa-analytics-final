@@ -1,164 +1,185 @@
-import { installOwnerSession, ownerPermissionFixture } from "./auth-fixture";
 import { test, expect } from "@playwright/test";
+import { installOwnerSession, ownerPermissionFixture } from "./auth-fixture";
 import { readFile } from "node:fs/promises";
-test("all 13 cards show sourced numeric observations, with ferro floors kept distinct", async ({
+import { METAL_IDS } from "../../supabase/functions/_shared/universe";
+// Synthetic private fixture ONLY. Owner's actual historical prices are not committed or seeded by tests.
+const snapshots = METAL_IDS.map((id, i) => ({
+  metal_id: id,
+  minimum_usd_kg: id === "tungsten" ? 100 : null,
+  maximum_usd_kg: id === "tungsten" ? 120 : null,
+  point_usd_kg: id === "tungsten" ? null : i + 10,
+  mass_basis:
+    id === "ferromolybdenum"
+      ? "contained_mo"
+      : id === "ferrotungsten"
+        ? "alloy"
+        : "metal",
+  specification: "TEST_ONLY " + id,
+  market_region: id === "ferromolybdenum" ? "Europe" : "Asia",
+  region_verified: id === "ferromolybdenum",
+  basis_description: "TEST_ONLY market basis",
+  observed_on: null,
+  source_published_on: null,
+  claimed_publisher: "TEST_ONLY",
+  evidence_url: null,
+  tax_status: "unknown",
+  verification_status: "unverified",
+  verification_note: "Synthetic fixture, not real market data",
+  recorded_at: "2026-11-18T00:00:00Z",
+}));
+test("13 owner historical references match lower quotations and catalogue; buyer prices absent; regional and unit isolation", async ({
   page,
 }) => {
   await installOwnerSession(page);
-  const suppliers = JSON.parse(
-    await readFile("work/prices/test-public.json", "utf8"),
-  );
-  const reference = JSON.parse(
+  const suppliers = [
+    {
+      metal_id: "tungsten",
+      source_id: "rare-metals-bid",
+      original_price: 1,
+      original_currency: "USD",
+      original_unit: "kg",
+      price_kind: "supplier_bid",
+      observed_on: "2026-01-01",
+      retrieved_at: "2026-01-01T12:00:00Z",
+      specification: "TEST_ONLY",
+      source_url: "https://metal-supply.biz/product/1",
+      region: "США",
+      country: "USA",
+    },
+  ];
+  const wb = JSON.parse(
     await readFile("tests/fixtures/prices/worldbank.json", "utf8"),
   );
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("http://127.0.0.1:54321/**", async (route) => {
-    const table = new URL(route.request().url()).pathname.split("/").pop();
-    if (
-      route.request().method() !== "OPTIONS" &&
-      (await ownerPermissionFixture(route))
-    )
-      return;
+    const headers = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Methods": "*",
+    };
     if (route.request().method() === "OPTIONS")
-      return route.fulfill({
-        status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "*",
-          "Access-Control-Allow-Methods": "*",
-        },
-      });
+      return route.fulfill({ status: 204, headers });
+    if (await ownerPermissionFixture(route)) return;
+    const table = new URL(route.request().url()).pathname.split("/").pop();
     return route.fulfill({
       json:
-        table === "reference_price_observations"
-          ? reference
+        table === "private_market_references"
+          ? snapshots
           : table === "supplier_price_observations"
             ? suppliers
-            : [],
-      headers: { "Access-Control-Allow-Origin": "*" },
+            : table === "reference_price_observations"
+              ? wb
+              : [],
+      headers,
     });
   });
   await page.goto("http://127.0.0.1:5183/#metals");
-  for (const id of [
-    "copper",
-    "aluminum",
-    "tin",
-    "zinc",
-    "tungsten",
-    "molybdenum",
-    "chromium",
-    "cobalt",
-    "zirconium",
-    "niobium",
-    "tantalum",
-    "ferromolybdenum",
-    "ferrotungsten",
-  ])
-    await expect(
-      page.getByLabel("Подтверждённая цена: " + id, { exact: true }),
-    ).toBeVisible();
-  const copper = page.getByLabel("Подтверждённая цена: copper", {
-    exact: true,
-  });
-  await expect(copper).toContainText("14,508");
-  await expect(copper).toContainText("14 508 USD/т");
-  await expect(copper).toContainText("World Bank");
-  await expect(copper).toContainText("2026-10");
-  const femo = page.getByLabel("Подтверждённая цена: ferromolybdenum", {
-    exact: true,
-  });
-  await expect(femo).toContainText("от 24");
-  await expect(femo).toContainText("FeMo60");
-  await expect(femo).toContainText("Давность цены неизвестна");
-  await page.getByRole("button", { name: "Ферросплавы", exact: true }).click();
+  const texts = new Map<string, string>();
+  for (const id of METAL_IDS) {
+    const p = page.getByLabel("Ценовой ориентир: " + id, { exact: true });
+    await expect(p).toBeVisible();
+    texts.set(id, (await p.textContent())!);
+  }
+  await expect(page.locator("main")).not.toContainText("Rare Metals");
+  await expect(page.locator("main")).not.toContainText("Metotechnics");
   await expect(
-    page.getByRole("button", { name: /Открыть карточку:/ }),
-  ).toHaveCount(2);
+    page.getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toContainText("100–120");
+  await expect(
+    page.getByLabel("Ценовой ориентир: ferromolybdenum", { exact: true }),
+  ).toContainText("USD/кг содержащегося Mo");
+  await expect(
+    page.getByLabel("Ценовой ориентир: ferrotungsten", { exact: true }),
+  ).toContainText("USD/кг сплава");
   await page
-    .getByRole("button", { name: "Все категории", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Открыть карточку: Медь", exact: true })
+    .getByRole("button", { name: "Открыть карточку: Вольфрам", exact: true })
     .click();
   await expect(
     page
       .getByRole("dialog")
-      .getByLabel("Подтверждённая цена: copper", { exact: true }),
-  ).toContainText("14,508");
+      .getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toContainText("100–120");
   await page.keyboard.press("Escape");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(copper).toContainText("USD/кг");
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBe(true);
   await page.goto("http://127.0.0.1:5183/#market");
-  for (const id of [
-    "copper",
-    "aluminum",
-    "tin",
-    "zinc",
-    "tungsten",
-    "molybdenum",
-    "chromium",
-    "cobalt",
-    "zirconium",
-    "niobium",
-    "tantalum",
-    "ferromolybdenum",
-    "ferrotungsten",
-  ])
-    await expect(
-      page.getByLabel("Обзор цены: " + id, { exact: true }),
-    ).toBeVisible();
-  const overview = page.getByRole("region", {
-    name: "Цены на металлы",
-    exact: true,
-  });
   await expect(
-    overview.getByLabel("Обзор цены: copper", { exact: true }),
-  ).toContainText("14,508");
-  await overview
-    .getByLabel("Единица цены", { exact: true })
+    page.getByRole("heading", { name: "Цены на металлы", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("region", { name: "Цены на металлы", exact: true }),
+  ).toHaveCount(0);
+  for (const id of METAL_IDS)
+    await expect(
+      page.getByLabel("Ценовой ориентир: " + id, { exact: true }),
+    ).toHaveText(texts.get(id)!);
+  const currency = await page
+    .getByRole("heading", { name: "Курсы валют", exact: true })
+    .boundingBox();
+  const quotes = await page
+    .getByRole("heading", { name: "Котировки металлов", exact: true })
+    .boundingBox();
+  expect(currency!.y).toBeLessThan(quotes!.y);
+  await page
+    .getByLabel("Единица ориентира", { exact: true })
     .selectOption("ton");
   await expect(
-    overview.getByLabel("Обзор цены: copper", { exact: true }),
-  ).toContainText("14 508");
-  await overview.getByRole("button", { name: "Азия", exact: true }).click();
-  await expect(overview).not.toContainText("14 508");
-  await expect(overview).toContainText(
-    "Подтверждённых рыночных котировок для этого региона нет",
-  );
-  await overview
-    .getByRole("button", { name: "Показать мировые ориентиры", exact: true })
-    .click();
+    page.getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toContainText("100 000–120 000");
   await expect(
-    overview.getByLabel("Обзор цены: copper", { exact: true }),
+    page.getByLabel("Ценовой ориентир: ferromolybdenum", { exact: true }),
+  ).toContainText("USD/т содержащегося Mo");
+  await page
+    .getByLabel("Регион ориентиров", { exact: true })
+    .selectOption("Europe");
+  await expect(
+    page.getByLabel("Ценовой ориентир: ferromolybdenum", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByLabel("Регион ориентиров", { exact: true })
+    .selectOption("USA");
+  await expect(page.getByLabel(/^Ценовой ориентир:/)).toHaveCount(0);
+  await page
+    .getByLabel("Регион ориентиров", { exact: true })
+    .selectOption("global");
+  await expect(
+    page.getByLabel("Ценовой ориентир: copper", { exact: true }),
   ).toContainText("World Bank");
-  await expect(overview).not.toContainText("Rare Metals");
-  await overview
-    .getByRole("button", { name: "Все металлы", exact: true })
-    .click();
   await expect(
-    overview.getByLabel("Обзор цены: ferromolybdenum", { exact: true }),
-  ).toContainText("не рыночная оценка");
+    page.getByLabel("Ценовой ориентир: copper", { exact: true }),
+  ).toContainText("14 508");
+  await page.getByRole("button", { name: "Медь", exact: true }).click();
+  await expect(
+    page
+      .getByRole("dialog")
+      .getByLabel("Ценовой ориентир: copper", { exact: true }),
+  ).toContainText("14 508");
+  await page.keyboard.press("Escape");
+  await page
+    .getByLabel("Регион ориентиров", { exact: true })
+    .selectOption("all");
+  await expect(
+    page.getByRole("button", { name: "CSV", exact: true }),
+  ).toBeDisabled();
+  await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await page.goto("http://127.0.0.1:5183/#metals");
+  await page
+    .getByLabel("Единица ориентира", { exact: true })
+    .selectOption("ton");
   await expect(
-    page.getByRole("heading", {
-      name: "Мировые ценовые ориентиры",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await expect(
-    page
-      .getByRole("button", { name: "Месячная история: Медь" })
-      .getByText("14 508 USD/т", { exact: true }),
-  ).toBeVisible();
+    page.getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toContainText("100 000–120 000");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
   expect(errors).toEqual([]);
 });

@@ -1,3 +1,4 @@
+import type { LiveMarketData } from "./liveData";
 import { fetchReferencePrices } from "./referenceMarkets";
 import { WORLD_BANK_URL } from "../../shared/referenceMarkets";
 import { supabase } from "@/lib/supabase";
@@ -20,8 +21,14 @@ export interface DisplayedPrice {
   notes?: string;
   lowerBound?: boolean;
   taxStatus?: "included" | "excluded" | "unknown";
-  category?: "reference" | "supplier" | "market";
+  category?: "reference" | "supplier" | "market" | "owner_reference";
   marketRegion?: "Europe" | "USA" | "Asia" | "global";
+  regionVerified?: boolean;
+  minimumPerKg?: number;
+  maximumPerKg?: number;
+  massBasis?: "metal" | "alloy" | "contained_mo";
+  verificationStatus?: "unverified" | "source_matched" | "verified";
+  sourcePublishedOn?: string;
 }
 let lastSupplierPrices: DisplayedPrice[] = [];
 export function parseSupplierPriceRows(
@@ -175,6 +182,7 @@ export async function fetchDisplayedPrices(): Promise<DisplayedPrice[]> {
       category: "reference" as const,
       taxStatus: "unknown" as const,
       marketRegion: "global" as const,
+      regionVerified: true,
       pricePerKg: r.price / 1000,
       pricePerTon: r.price,
       observedOn: r.period_start,
@@ -188,4 +196,151 @@ export async function fetchDisplayedPrices(): Promise<DisplayedPrice[]> {
     })),
     ...lastSupplierPrices,
   ];
+}
+export type ReferenceScope = "all" | "Europe" | "USA" | "Asia" | "global";
+/** Already validated public USD/kg quotations; supplier addresses never determine region. */
+export function regionalPriceReferences(
+  data: LiveMarketData | null | undefined,
+): DisplayedPrice[] {
+  return (data?.regionalQuotes ?? []).flatMap((q) => {
+    const region =
+      q.region === "Европа"
+        ? "Europe"
+        : q.region === "США"
+          ? "USA"
+          : q.region === "Азия"
+            ? "Asia"
+            : null;
+    if (
+      !region ||
+      q.originalCurrency !== "USD" ||
+      q.originalUnit !== "kg" ||
+      !q.livePrice ||
+      !Number.isFinite(q.livePrice)
+    )
+      return [];
+    return [
+      {
+        metalId: q.metalId,
+        pricePerKg: q.livePrice,
+        pricePerTon: q.livePrice * 1000,
+        observedOn: new Date(q.timestamp).toISOString().slice(0, 10),
+        sourceName: q.sourceName,
+        sourceUrl: q.sourceUrl,
+        kind: "Региональная рыночная котировка",
+        specification: q.marketLabel,
+        region: q.marketLabel,
+        checkedAt: q.timestamp,
+        stale: q.dataStatus !== "live",
+        category: "market" as const,
+        marketRegion: region as "Europe" | "USA" | "Asia",
+        regionVerified: true,
+        taxStatus: "unknown" as const,
+        massBasis: q.metalId.startsWith("ferro")
+          ? ("alloy" as const)
+          : ("metal" as const),
+      },
+    ];
+  });
+}
+export function selectPrimaryPrices(
+  rows: DisplayedPrice[],
+  scope: ReferenceScope = "all",
+) {
+  const selected = new Map<string, DisplayedPrice>();
+  const priority = (p: DisplayedPrice) =>
+    p.category === "owner_reference" ? 3 : p.category === "market" ? 2 : 1;
+  for (const r of rows) {
+    if (r.category === "supplier") continue;
+    if (scope !== "all" && !(r.regionVerified && r.marketRegion === scope))
+      continue;
+    const old = selected.get(r.metalId);
+    if (
+      !old ||
+      priority(r) > priority(old) ||
+      (r.category === old.category && r.checkedAt > old.checkedAt)
+    )
+      selected.set(r.metalId, r);
+  }
+  return [...selected.values()];
+}
+export function parseOwnerReferences(
+  rows: Record<string, unknown>[],
+): DisplayedPrice[] {
+  return rows.flatMap((r) => {
+    const low = r.minimum_usd_kg === null ? null : Number(r.minimum_usd_kg),
+      high = r.maximum_usd_kg === null ? null : Number(r.maximum_usd_kg),
+      point = r.point_usd_kg === null ? null : Number(r.point_usd_kg);
+    if (
+      ![low, high, point].every(
+        (v) => v === null || (Number.isFinite(v) && v > 0),
+      ) ||
+      !(
+        (low === null && high === null && point !== null) ||
+        (low !== null && high !== null && low <= high && point === null)
+      )
+    )
+      return [];
+    if (
+      !["metal", "alloy", "contained_mo"].includes(String(r.mass_basis)) ||
+      !["unverified", "source_matched", "verified"].includes(
+        String(r.verification_status),
+      )
+    )
+      return [];
+    const base = point ?? low!;
+    return [
+      {
+        metalId: String(r.metal_id),
+        specification: String(r.specification),
+        pricePerKg: base,
+        pricePerTon: base * 1000,
+        minimumPerKg: low ?? undefined,
+        maximumPerKg: high ?? undefined,
+        massBasis: r.mass_basis as DisplayedPrice["massBasis"],
+        observedOn: String(r.observed_on ?? ""),
+        dateLabel: r.observed_on
+          ? String(r.observed_on)
+          : "Дата исходного наблюдения не указана",
+        sourcePublishedOn: r.source_published_on
+          ? String(r.source_published_on)
+          : undefined,
+        sourceName: "Данные владельца · " + String(r.claimed_publisher),
+        sourceUrl: String(r.evidence_url ?? ""),
+        kind: "Исторический рыночный ориентир",
+        category: "owner_reference" as const,
+        region: String(r.basis_description),
+        marketRegion: r.market_region as DisplayedPrice["marketRegion"],
+        regionVerified: r.region_verified === true,
+        taxStatus: r.tax_status as DisplayedPrice["taxStatus"],
+        checkedAt: Date.parse(String(r.recorded_at)),
+        stale: true,
+        verificationStatus:
+          r.verification_status as DisplayedPrice["verificationStatus"],
+        notes: String(r.verification_note),
+      },
+    ];
+  });
+}
+/** Private UI model only: never passed to quote calculations, model context or exports. */
+export async function fetchPrimaryPrices(): Promise<DisplayedPrice[]> {
+  const [rows, privatePrices] = await Promise.all([
+    fetchDisplayedPrices(),
+    supabase
+      ? supabase
+          .from("private_market_references")
+          .select(
+            "metal_id,minimum_usd_kg,maximum_usd_kg,point_usd_kg,mass_basis,specification,market_region,region_verified,basis_description,observed_on,source_published_on,claimed_publisher,evidence_url,tax_status,verification_status,verification_note,recorded_at",
+          )
+          .order("recorded_at", { ascending: false })
+          .limit(500)
+      : Promise.resolve(null),
+  ]);
+  if (privatePrices?.error)
+    throw Error(
+      "Не удалось загрузить частные исторические ориентиры. Повторите попытку.",
+    );
+  const owner = parseOwnerReferences(privatePrices?.data ?? []);
+  // Preserve public monthly references as a separate source; choose per region before precedence.
+  return [...owner, ...rows.filter((r) => r.category !== "supplier")];
 }

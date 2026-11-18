@@ -25,6 +25,7 @@ export async function handler(req: Request): Promise<Response> {
   let access: string | null = null,
     passed = false,
     revoked = false;
+  let referenceRows = 0;
   try {
     const key = Deno.env.get("OWNER_ACCESS_KEY");
     if (!key) throw Error("not_configured");
@@ -51,11 +52,12 @@ export async function handler(req: Request): Promise<Response> {
     });
     const saved = await client.auth.setSession(data.session);
     if (saved.error) throw Error("session_invalid");
-    const [user, owner, allowed, rows] = await Promise.all([
+    const [user, owner, allowed, rows, references] = await Promise.all([
       client.auth.getUser(),
       db.rpc("site_owner_id"),
       client.rpc("has_smm_owner_access"),
       client.from("private_smm_observations").select("id").limit(1),
+      client.from("private_market_references").select("metal_id").limit(500),
     ]);
     passed =
       !user.error &&
@@ -64,7 +66,9 @@ export async function handler(req: Request): Promise<Response> {
       user.data.user?.id === owner.data &&
       !allowed.error &&
       allowed.data === true &&
-      !rows.error;
+      !rows.error &&
+      !references.error;
+    referenceRows = references.data?.length ?? 0;
   } catch {
     passed = false;
   } finally {
@@ -83,6 +87,7 @@ export async function handler(req: Request): Promise<Response> {
       realAuthSession: passed,
       ownerRlsAccess: passed,
       testSessionRevoked: revoked,
+      privateReferenceRows: referenceRows,
     },
     passed && revoked ? 200 : 503,
   );

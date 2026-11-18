@@ -4,6 +4,8 @@ import Delta from "@/components/common/Delta";
 import { cn } from "@/lib/cn";
 import { formatPercent, formatPrice, formatPriceChange } from "@/lib/format";
 import type { Metal, MetalQuote } from "@/types/market";
+import type { DisplayedPrice } from "@/services/displayedPrices";
+import VerifiedPrice from "@/components/metals/VerifiedPrice";
 
 interface QuotesTableProps {
   quotes: MetalQuote[];
@@ -11,6 +13,8 @@ interface QuotesTableProps {
   isFavorite: (metalId: string) => boolean;
   onToggleFavorite: (metalId: string) => void;
   onSelect: (metal: Metal) => void;
+  references?: DisplayedPrice[];
+  referenceUnit?: "kg" | "ton";
 }
 
 export default function QuotesTable({
@@ -19,6 +23,8 @@ export default function QuotesTable({
   isFavorite,
   onToggleFavorite,
   onSelect,
+  references,
+  referenceUnit = "kg",
 }: QuotesTableProps) {
   return (
     <div className="overflow-x-auto">
@@ -55,6 +61,9 @@ export default function QuotesTable({
           )}
           {quotes.map((quote) => {
             const favorite = isFavorite(quote.metal.id);
+            const reference = references?.find(
+              (r) => r.metalId === quote.metal.id,
+            );
             return (
               <tr
                 key={quote.metal.id}
@@ -102,32 +111,63 @@ export default function QuotesTable({
                   </div>
                 </td>
                 <td className="px-5 py-4">
-                  <DataStatusBadge status={quote.dataStatus} />
+                  {references ? (
+                    <span className="text-xs text-ink-400">
+                      {reference ? reference.kind : "Нет ориентира для региона"}
+                    </span>
+                  ) : (
+                    <DataStatusBadge status={quote.dataStatus} />
+                  )}
                 </td>
                 <td className="px-5 py-4 text-right font-medium tabular-nums text-ink-100">
-                  {formatPrice(quote.price, quote.metal.currency)}{" "}
-                  <span className="text-xs text-ink-400">
-                    /{" "}
-                    {quote.metal.unit === "ozt"
-                      ? "тр. унц."
-                      : quote.metal.unit === "ton"
-                        ? "т"
-                        : "кг"}
-                  </span>
+                  {references ? (
+                    reference ? (
+                      <VerifiedPrice price={reference} unit={referenceUnit} />
+                    ) : (
+                      <span className="text-xs text-ink-400">
+                        Нет данных для выбранного региона
+                      </span>
+                    )
+                  ) : (
+                    <>
+                      {formatPrice(quote.price, quote.metal.currency)}{" "}
+                      <span className="text-xs text-ink-400">
+                        /{" "}
+                        {quote.metal.unit === "ozt"
+                          ? "тр. унц."
+                          : quote.metal.unit === "ton"
+                            ? "т"
+                            : "кг"}
+                      </span>
+                    </>
+                  )}
                 </td>
                 <td className="px-5 py-4 text-right">
-                  <Delta
-                    value={quote.change}
-                    text={formatPriceChange(quote.change, quote.metal.currency)}
-                    className="justify-end"
-                  />
+                  {references ? (
+                    <span title="Исторические снимки не используются для расчёта динамики">
+                      —
+                    </span>
+                  ) : (
+                    <Delta
+                      value={quote.change}
+                      text={formatPriceChange(
+                        quote.change,
+                        quote.metal.currency,
+                      )}
+                      className="justify-end"
+                    />
+                  )}
                 </td>
                 <td className="px-5 py-4 text-right">
-                  <Delta
-                    value={quote.changePct}
-                    text={formatPercent(quote.changePct)}
-                    className="justify-end"
-                  />
+                  {references ? (
+                    <span>—</span>
+                  ) : (
+                    <Delta
+                      value={quote.changePct}
+                      text={formatPercent(quote.changePct)}
+                      className="justify-end"
+                    />
+                  )}
                 </td>
               </tr>
             );

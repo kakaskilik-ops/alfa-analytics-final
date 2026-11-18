@@ -60,6 +60,7 @@ async function setup(
       else if (url.pathname.endsWith("/has_smm_owner_access"))
         data = mode !== "rls-denied";
       else if (url.pathname.endsWith("/private_smm_observations")) data = [];
+      else if (url.pathname.endsWith("/private_market_references")) data = [];
       else if (url.pathname.endsWith("/user")) data = { user };
       else if (url.pathname.endsWith("/logout")) {
         assert(url.searchParams.get("scope") === "local");

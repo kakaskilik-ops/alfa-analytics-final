@@ -24,10 +24,17 @@ import { displayQuote, buildHybridQuote } from "@/services/liveData";
 import type { LiveMarketData } from "@/services/liveData";
 import { cn } from "@/lib/cn";
 import type { Metal, PeriodKey, UnitCode } from "@/types/market";
-import { fetchDisplayedPrices } from "@/services/displayedPrices";
+import {
+  fetchPrimaryPrices,
+  selectPrimaryPrices,
+  regionalPriceReferences,
+  type ReferenceScope,
+} from "@/services/displayedPrices";
 import VerifiedPrice from "./VerifiedPrice";
 
 interface MetalDetailDialogProps {
+  referenceScope?: ReferenceScope;
+  referenceUnit?: "kg" | "ton";
   metal: Metal;
   initialPeriod: PeriodKey;
   updatedAt: Date;
@@ -43,18 +50,23 @@ export default function MetalDetailDialog({
   updatedAt,
   isFavorite,
   onToggleFavorite,
+  referenceScope = "all",
+  referenceUnit = "kg",
   onClose,
   liveData,
 }: MetalDetailDialogProps) {
   const [period, setPeriod] = useState<PeriodKey>(initialPeriod);
   const references = useAsyncData(
-    fetchDisplayedPrices,
+    fetchPrimaryPrices,
     "metal-price-evidence",
     true,
   );
   const referencePrices =
     references.state.status === "ready"
-      ? references.state.data.filter((r) => r.metalId === metal.id)
+      ? selectPrimaryPrices(
+          [...references.state.data, ...regionalPriceReferences(liveData)],
+          referenceScope,
+        ).filter((r) => r.metalId === metal.id)
       : [];
   const liveMetalData = liveData?.quotes.get(metal.id) ?? null;
   const quote = useMemo(
@@ -223,7 +235,7 @@ export default function MetalDetailDialog({
         </div>
 
         <div className="space-y-6 p-5 md:p-6">
-          {quote.price === null && referencePrices.length > 0 ? (
+          {referencePrices.length > 0 ? (
             <div className="space-y-4">
               {referencePrices.every((r) => r.category === "supplier") && (
                 <p className="text-sm text-ink-400">
@@ -232,35 +244,18 @@ export default function MetalDetailDialog({
                 </p>
               )}
               {referencePrices.map((r) => (
-                <VerifiedPrice key={r.sourceName + r.specification} price={r} />
+                <VerifiedPrice
+                  key={r.sourceName + r.specification}
+                  price={r}
+                  unit={referenceUnit}
+                />
               ))}
             </div>
           ) : (
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xs font-medium uppercase tracking-[0.12em] text-ink-400">
-                    Текущая цена
-                  </span>
-                </div>
-                <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight text-ink-100">
-                  {formatPrice(quote.price, quote.metal.currency)}
-                </p>
-                <p className="mt-1 text-xs text-ink-400">
-                  за {unitLabel}, {quote.metal.currency}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Delta
-                  value={quote.changePct}
-                  text={formatPercent(quote.changePct)}
-                  className="text-base"
-                />
-                <span className="tabular-nums text-ink-400">
-                  {formatPriceChange(quote.change, quote.metal.currency)}
-                </span>
-              </div>
-            </div>
+            <p className="text-sm text-ink-400">
+              Нет ценового ориентира для выбранного региона. Данные другого
+              рынка не подставляются.
+            </p>
           )}
 
           <div>

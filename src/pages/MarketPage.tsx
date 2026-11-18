@@ -1,6 +1,12 @@
+import ReferencePriceControls from "@/components/market/ReferencePriceControls";
+import { useAsyncData } from "@/hooks/useAsyncData";
+import {
+  fetchPrimaryPrices,
+  selectPrimaryPrices,
+  regionalPriceReferences,
+  type ReferenceScope,
+} from "@/services/displayedPrices";
 import ReferenceMarkets from "@/components/market/ReferenceMarkets";
-import MetalPriceOverview from "@/components/market/MetalPriceOverview";
-import PrivateSmmData from "@/components/market/PrivateSmmData";
 import CurrencyModule from "@/components/currency/CurrencyModule";
 import { useMemo, useState } from "react";
 import { Download, FileSpreadsheet } from "lucide-react";
@@ -40,6 +46,20 @@ export default function MarketPage({
   favorites,
   liveData,
 }: MarketPageProps) {
+  const [referenceScope, setReferenceScope] = useState<ReferenceScope>("all");
+  const [referenceUnit, setReferenceUnit] = useState<"kg" | "ton">("kg");
+  const primary = useAsyncData(
+    fetchPrimaryPrices,
+    "primary-market-prices",
+    true,
+  );
+  const references = selectPrimaryPrices(
+    [
+      ...(primary.state.status === "ready" ? primary.state.data : []),
+      ...regionalPriceReferences(liveData),
+    ],
+    referenceScope,
+  );
   const [period, setPeriod] = useState<PeriodKey>("1M");
   const [query, setQuery] = useState("");
   const [selectedMetal, setSelectedMetal] = useState<Metal | null>(null);
@@ -108,8 +128,6 @@ export default function MarketPage({
         }
       />
 
-      <MetalPriceOverview onSelect={setSelectedMetal} />
-      <PrivateSmmData compact />
       {liveCount > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MarketStatCard
@@ -150,7 +168,6 @@ export default function MarketPage({
       )}
 
       <CurrencyModule />
-      <ReferenceMarkets compact />
 
       <div className="mt-4 grid gap-4 xl:grid-cols-3">
         <Panel className="p-5 md:p-6 xl:col-span-2">
@@ -215,7 +232,8 @@ export default function MarketPage({
                   buildQuotesCsv(visibleQuotes, period, updatedAt),
                 )
               }
-              disabled={visibleQuotes.length === 0}
+              disabled={!visibleQuotes.some((q) => q.price !== null)}
+              title="Экспорт только публичных региональных котировок; частные ориентиры не экспортируются"
               className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-ink-700 bg-ink-950 px-4 text-sm text-ink-200 transition-colors duration-200 hover:border-brand-500/40 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-4 w-4" aria-hidden="true" />
@@ -229,7 +247,8 @@ export default function MarketPage({
                   buildExcelXml(visibleQuotes, period, updatedAt),
                 )
               }
-              disabled={visibleQuotes.length === 0}
+              disabled={!visibleQuotes.some((q) => q.price !== null)}
+              title="Экспорт только публичных региональных котировок; частные ориентиры не экспортируются"
               className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-ink-700 bg-ink-950 px-4 text-sm text-ink-200 transition-colors duration-200 hover:border-brand-500/40 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
@@ -237,18 +256,49 @@ export default function MarketPage({
             </button>
           </div>
         </div>
+        <div className="space-y-3 border-b border-ink-800 p-5">
+          <ReferencePriceControls
+            scope={referenceScope}
+            onScope={setReferenceScope}
+            unit={referenceUnit}
+            onUnit={setReferenceUnit}
+          />
+          <p className="text-xs text-ink-400">
+            Частный исторический снимок владельца. Это не текущий поток SMM.
+            Неполные даты и статус проверки указаны у каждого значения. Снимок
+            не используется в графиках, ИИ и экспорте.
+          </p>
+          {primary.state.status === "error" && (
+            <p role="alert" className="text-sm text-amber-300">
+              {primary.state.message}{" "}
+              <button type="button" onClick={primary.reload}>
+                Повторить
+              </button>
+            </p>
+          )}
+        </div>
         <QuotesTable
+          references={references}
+          referenceUnit={referenceUnit}
           quotes={visibleQuotes}
           emptyText={`Ничего не найдено по запросу «${query.trim()}»`}
           isFavorite={favorites.isFavorite}
           onToggleFavorite={favorites.toggleFavorite}
           onSelect={setSelectedMetal}
         />
+        <details className="border-t border-ink-800 p-5">
+          <summary className="cursor-pointer text-sm text-ink-400">
+            Отдельные месячные ориентиры World Bank
+          </summary>
+          <ReferenceMarkets compact />
+        </details>
       </Panel>
 
       {selectedMetal && (
         <MetalDetailDialog
           metal={selectedMetal}
+          referenceScope={referenceScope}
+          referenceUnit={referenceUnit}
           initialPeriod={period}
           updatedAt={updatedAt}
           isFavorite={favorites.isFavorite(selectedMetal.id)}

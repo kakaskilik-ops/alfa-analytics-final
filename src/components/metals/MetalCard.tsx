@@ -14,6 +14,8 @@ interface MetalCardProps {
   onSelect: () => void;
   onToggleFavorite: () => void;
   referencePrice?: DisplayedPrice;
+  referenceUnit?: "kg" | "ton";
+  referencesOnly?: boolean;
 }
 
 export default function MetalCard({
@@ -22,6 +24,8 @@ export default function MetalCard({
   onSelect,
   onToggleFavorite,
   referencePrice,
+  referenceUnit = "kg",
+  referencesOnly = false,
 }: MetalCardProps) {
   const { metal } = quote;
   const unitLabel =
@@ -77,15 +81,19 @@ export default function MetalCard({
         </div>
       </div>
 
-      {quote.price === null && referencePrice ? (
+      {referencePrice ? (
         <>
           {referencePrice.category === "supplier" && (
             <p className="mt-5 text-sm text-ink-400">
               Нет подтверждённой рыночной котировки
             </p>
           )}
-          <VerifiedPrice price={referencePrice} />
+          <VerifiedPrice price={referencePrice} unit={referenceUnit} />
         </>
+      ) : referencesOnly ? (
+        <p className="mt-6 text-sm text-ink-400">
+          Нет ориентира для выбранного региона
+        </p>
       ) : (
         <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
           <div>
