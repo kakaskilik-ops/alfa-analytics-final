@@ -1,11 +1,35 @@
+import { useState } from "react";
 import type { DisplayedPrice } from "@/services/displayedPrices";
 export default function VerifiedPrice({
-  price,
+  price: basePrice,
+  secondary = false,
   unit = "kg",
 }: {
   price: DisplayedPrice;
+  secondary?: boolean;
   unit?: "kg" | "ton";
 }) {
+  const [taxSelection, setTaxSelection] = useState(
+    basePrice.taxStatus !== "excluded" &&
+      basePrice.taxViews?.some((v) => v.taxStatus === "excluded")
+      ? "excluded"
+      : "primary",
+  );
+  const view = basePrice.taxViews?.find((v) => v.taxStatus === taxSelection);
+  const price: DisplayedPrice = view
+    ? {
+        ...basePrice,
+        taxStatus: view.taxStatus,
+        vatRate: view.vatRate,
+        taxStatusVerified: true,
+        pricePerKg: view.point ?? view.minimum!,
+        pricePerTon: (view.point ?? view.minimum!) * 1000,
+        minimumPerKg: view.minimum,
+        maximumPerKg: view.maximum,
+        sourceUrl: view.sourceUrl,
+        sourcePublishedOn: view.sourcePublishedOn,
+      }
+    : basePrice;
   const fmt = (v: number) =>
     new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 4 }).format(v);
   const factor = unit === "kg" ? 1 : 1000;
@@ -21,9 +45,11 @@ export default function VerifiedPrice({
   return (
     <div
       aria-label={
-        (price.category === "supplier"
-          ? "Закупочное предложение: "
-          : "Ценовой ориентир: ") + price.metalId
+        (secondary
+          ? "Дополнительное наблюдение: "
+          : price.category === "supplier"
+            ? "Закупочное предложение: "
+            : "Ценовой ориентир: ") + price.metalId
       }
       className="mt-5 min-w-0 space-y-2"
     >
@@ -31,6 +57,30 @@ export default function VerifiedPrice({
         <div className="border-t border-ink-700 pt-3 text-xs text-amber-300">
           Предложение поставщика · не рыночная оценка
         </div>
+      )}
+      {!!price.taxViews?.length && (
+        <label
+          className="relative z-20 block text-xs"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Налоговое представление{" "}
+          <select
+            aria-label={"Налоговое представление: " + price.metalId}
+            value={taxSelection}
+            onChange={(e) => setTaxSelection(e.target.value)}
+            className="max-w-full rounded border border-ink-700 bg-ink-950 p-1"
+          >
+            <option value="primary">Исходная запись</option>
+            {price.taxViews
+              .filter((v) => v.taxStatus !== basePrice.taxStatus)
+              .map((v) => (
+                <option key={v.taxStatus} value={v.taxStatus}>
+                  {v.taxStatus === "included" ? "С НДС" : "Без НДС"} ·
+                  публикация источника
+                </option>
+              ))}
+          </select>
+        </label>
       )}
       <p className="text-2xl font-semibold tabular-nums">
         {price.lowerBound ? "от " : ""}
@@ -57,11 +107,45 @@ export default function VerifiedPrice({
       )}
       <p className="text-xs text-ink-400">
         {price.taxStatus === "excluded"
-          ? "НДС исключён"
+          ? "Без НДС"
           : price.taxStatus === "included"
-            ? "НДС включён"
+            ? "С НДС"
             : "НДС не указан"}
       </p>
+      {price.vatRate !== undefined && (
+        <p className="text-xs text-ink-400">
+          Ставка НДС: {fmt(price.vatRate * 100)}%
+        </p>
+      )}
+      {price.category === "owner_reference" && (
+        <p className="text-xs text-ink-400">
+          {price.taxStatusVerified
+            ? "Налоговый статус подтверждён для наблюдения"
+            : "Налоговый статус исходного снимка независимо не подтверждён"}
+        </p>
+      )}
+      {price.category === "owner_reference" && (
+        <p className="text-xs text-ink-400">
+          Исходная запись владельца: {price.originalUnit}
+        </p>
+      )}
+      {price.publisherCurrency && price.publisherUnit && (
+        <p className="text-xs text-ink-400">
+          Единица сопоставимого ряда издателя: {price.publisherCurrency}/
+          {price.publisherUnit}. Пересчёт НДС и курса не предполагается.
+        </p>
+      )}
+      {price.seriesContext && (
+        <details
+          className="relative z-20 text-xs text-ink-400"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <summary className="cursor-pointer">
+            Проверка сопоставимого ряда
+          </summary>
+          <p className="mt-2 break-words">{price.seriesContext}</p>
+        </details>
+      )}
       <p className="text-xs text-ink-300">
         Период:{" "}
         {price.dateLabel ??
@@ -118,6 +202,24 @@ export default function VerifiedPrice({
             : "Источник"}
           : {price.sourceName} ↗
         </a>
+      )}
+      {!!price.alternatives?.length && !secondary && (
+        <details
+          className="relative z-20 text-left text-xs"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <summary className="cursor-pointer text-brand-400">
+            Другие независимые наблюдения ({price.alternatives.length})
+          </summary>
+          {price.alternatives.map((p) => (
+            <VerifiedPrice
+              key={p.observationId}
+              price={p}
+              unit={unit}
+              secondary
+            />
+          ))}
+        </details>
       )}
     </div>
   );

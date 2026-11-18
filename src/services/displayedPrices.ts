@@ -3,7 +3,25 @@ import { fetchReferencePrices } from "./referenceMarkets";
 import { WORLD_BANK_URL } from "../../shared/referenceMarkets";
 import { supabase } from "@/lib/supabase";
 import { priceUsdKg } from "../../shared/supplierPrices";
+export interface TaxView {
+  taxStatus: "included" | "excluded";
+  vatRate?: number;
+  minimum?: number;
+  maximum?: number;
+  point?: number;
+  sourceUrl: string;
+  sourcePublishedOn: string;
+}
 export interface DisplayedPrice {
+  observationId?: string;
+  alternatives?: DisplayedPrice[];
+  assessmentKind?: "unknown" | "assessment" | "single_trade";
+  vatRate?: number;
+  taxStatusVerified?: boolean;
+  publisherCurrency?: string;
+  publisherUnit?: string;
+  seriesContext?: string;
+  taxViews?: TaxView[];
   metalId: string;
   pricePerKg: number;
   pricePerTon: number;
@@ -262,7 +280,65 @@ export function selectPrimaryPrices(
     )
       selected.set(r.metalId, r);
   }
-  return [...selected.values()];
+  return [...selected.values()].map((primary) => {
+    const alternatives = rows.filter(
+      (r) =>
+        r !== primary &&
+        r.category === "owner_reference" &&
+        primary.category === "owner_reference" &&
+        r.metalId === primary.metalId &&
+        (scope === "all" || (r.regionVerified && r.marketRegion === scope)),
+    );
+    return alternatives.length ? { ...primary, alternatives } : primary;
+  });
+}
+export function parseTaxViews(input: unknown, observedOn?: unknown): TaxView[] {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  return input.flatMap((r) => {
+    if (
+      !r ||
+      typeof observedOn !== "string" ||
+      r.assessed_on !== observedOn ||
+      r.usage_permission_confirmed !== true ||
+      !["included", "excluded"].includes(r.tax_status) ||
+      seen.has(r.tax_status) ||
+      !/^https:\/\//.test(r.evidence_url ?? "") ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(r.source_published_on ?? "")
+    )
+      return [];
+    const lo = r.minimum_usd_kg == null ? undefined : Number(r.minimum_usd_kg),
+      hi = r.maximum_usd_kg == null ? undefined : Number(r.maximum_usd_kg),
+      point = r.point_usd_kg == null ? undefined : Number(r.point_usd_kg);
+    if (
+      ![lo, hi, point].every(
+        (v) => v === undefined || (Number.isFinite(v) && v > 0),
+      ) ||
+      !(
+        (lo === undefined && hi === undefined && point !== undefined) ||
+        (lo !== undefined &&
+          hi !== undefined &&
+          lo <= hi &&
+          point === undefined)
+      )
+    )
+      return [];
+    const vat = r.vat_rate == null ? undefined : Number(r.vat_rate);
+    if (vat !== undefined && (!Number.isFinite(vat) || vat < 0 || vat > 1))
+      return [];
+    seen.add(r.tax_status);
+    return [
+      {
+        taxStatus: r.tax_status as "included" | "excluded",
+        vatRate: vat,
+        minimum: lo,
+        maximum: hi,
+        point,
+        sourceUrl: String(r.evidence_url),
+        sourcePublishedOn: String(r.source_published_on),
+      },
+    ];
+  });
 }
 export function parseOwnerReferences(
   rows: Record<string, unknown>[],
@@ -291,6 +367,35 @@ export function parseOwnerReferences(
     const base = point ?? low!;
     return [
       {
+        observationId: String(r.id ?? r.series_key ?? r.metal_id),
+        assessmentKind:
+          r.assessment_kind === "single_trade"
+            ? "single_trade"
+            : r.assessment_kind === "assessment"
+              ? "assessment"
+              : "unknown",
+        vatRate:
+          r.tax_status !== "unknown" &&
+          r.vat_rate != null &&
+          Number.isFinite(Number(r.vat_rate)) &&
+          Number(r.vat_rate) >= 0 &&
+          Number(r.vat_rate) <= 1
+            ? Number(r.vat_rate)
+            : undefined,
+        taxStatusVerified: r.tax_status_verified === true,
+        originalUnit:
+          "USD/кг" +
+          (r.mass_basis === "contained_mo"
+            ? " содержащегося Mo"
+            : r.mass_basis === "alloy"
+              ? " сплава"
+              : ""),
+        publisherCurrency: r.publisher_currency
+          ? String(r.publisher_currency)
+          : undefined,
+        publisherUnit: r.publisher_unit ? String(r.publisher_unit) : undefined,
+        seriesContext: r.series_context ? String(r.series_context) : undefined,
+        taxViews: parseTaxViews(r.private_reference_tax_views, r.observed_on),
         metalId: String(r.metal_id),
         specification: String(r.specification),
         pricePerKg: base,
@@ -301,13 +406,16 @@ export function parseOwnerReferences(
         observedOn: String(r.observed_on ?? ""),
         dateLabel: r.observed_on
           ? String(r.observed_on)
-          : "Дата исходного наблюдения не указана",
+          : "Дата исходного наблюдения не установлена",
         sourcePublishedOn: r.source_published_on
           ? String(r.source_published_on)
           : undefined,
         sourceName: "Данные владельца · " + String(r.claimed_publisher),
         sourceUrl: String(r.evidence_url ?? ""),
-        kind: "Исторический рыночный ориентир",
+        kind:
+          r.assessment_kind === "single_trade"
+            ? "Историческое наблюдение отдельной сделки · не средняя рынка"
+            : "Исторический рыночный ориентир",
         category: "owner_reference" as const,
         region: String(r.basis_description),
         marketRegion: r.market_region as DisplayedPrice["marketRegion"],
@@ -330,9 +438,10 @@ export async function fetchPrimaryPrices(): Promise<DisplayedPrice[]> {
       ? supabase
           .from("private_market_references")
           .select(
-            "metal_id,minimum_usd_kg,maximum_usd_kg,point_usd_kg,mass_basis,specification,market_region,region_verified,basis_description,observed_on,source_published_on,claimed_publisher,evidence_url,tax_status,verification_status,verification_note,recorded_at",
+            "id,series_key,assessment_kind,vat_rate,tax_status_verified,original_currency,original_unit,publisher_currency,publisher_unit,series_context,private_reference_tax_views(assessed_on,tax_status,vat_rate,minimum_usd_kg,maximum_usd_kg,point_usd_kg,evidence_url,source_published_on,usage_permission_confirmed),metal_id,minimum_usd_kg,maximum_usd_kg,point_usd_kg,mass_basis,specification,market_region,region_verified,basis_description,observed_on,source_published_on,claimed_publisher,evidence_url,tax_status,verification_status,verification_note,recorded_at",
           )
           .order("recorded_at", { ascending: false })
+          .order("id", { ascending: false })
           .limit(500)
       : Promise.resolve(null),
   ]);

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   parseOwnerReferences,
+  parseTaxViews,
   selectPrimaryPrices,
   type DisplayedPrice,
 } from "../services/displayedPrices";
@@ -31,7 +32,7 @@ describe("private historical reference selection", () => {
     expect(p.minimumPerKg).toBeUndefined();
     expect(p.massBasis).toBe("contained_mo");
     expect(p.observedOn).toBe("");
-    expect(p.dateLabel).toContain("не указана");
+    expect(p.dateLabel).toContain("не установлена");
   });
   it("preserves reported endpoints without manufacturing a mean", () => {
     const p = parseOwnerReferences([
@@ -74,4 +75,57 @@ describe("private historical reference selection", () => {
     ])
       expect(parseOwnerReferences([r])).toEqual([]);
   });
+});
+
+it("keeps multiple regional observations without merging specifications", () => {
+  const a = parseOwnerReferences([{ ...row, id: 1 }])[0],
+    b = {
+      ...a,
+      observationId: "2",
+      marketRegion: "Asia" as const,
+      regionVerified: true,
+    };
+  expect(selectPrimaryPrices([a, b])[0].alternatives).toEqual([b]);
+  expect(selectPrimaryPrices([a, b], "Europe")).toEqual([a]);
+  expect(selectPrimaryPrices([a, b], "Asia")).toEqual([b]);
+  expect(selectPrimaryPrices([a, b], "USA")).toEqual([]);
+});
+it("never infers a VAT rate for unknown or missing tax evidence", () => {
+  expect(
+    parseOwnerReferences([{ ...row, vat_rate: 0.13 }])[0].vatRate,
+  ).toBeUndefined();
+  expect(
+    parseOwnerReferences([
+      { ...row, tax_status: "excluded", vat_rate: 0.13 },
+    ])[0].vatRate,
+  ).toBe(0.13);
+  expect(
+    parseOwnerReferences([{ ...row, assessment_kind: "single_trade" }])[0].kind,
+  ).toContain("не средняя");
+});
+it("tax representations require permission and valid published values; no inferred tax arithmetic", () => {
+  const v = {
+    tax_status: "included",
+    assessed_on: "2026-01-01",
+    vat_rate: 0.13,
+    minimum_usd_kg: 100,
+    maximum_usd_kg: 120,
+    point_usd_kg: null,
+    evidence_url: "https://example.test/price",
+    source_published_on: "2026-01-01",
+    usage_permission_confirmed: true,
+  };
+  expect(parseTaxViews([v])).toEqual([]);
+  expect(parseTaxViews([v], "2026-01-02")).toEqual([]);
+  expect(parseTaxViews([v, v], "2026-01-01")).toHaveLength(1);
+  expect(
+    parseTaxViews([{ ...v, usage_permission_confirmed: false }], "2026-01-01"),
+  ).toEqual([]);
+  expect(parseTaxViews([{ ...v, vat_rate: NaN }], "2026-01-01")).toEqual([]);
+  expect(parseTaxViews([{ ...v, minimum_usd_kg: 130 }], "2026-01-01")).toEqual(
+    [],
+  );
+  expect(parseTaxViews([{ ...v, point_usd_kg: 110 }], "2026-01-01")).toEqual(
+    [],
+  );
 });

@@ -21,12 +21,49 @@ try {
     ),
   );
   await db.exec(
+    insert
+      .replace("snapshot_id,", "snapshot_id,series_key,")
+      .replace("'TEST_ONLY',10,", "'TEST_ONLY','TEST_SECOND_SERIES',10,"),
+  );
+  const parent = (
+    await db.query(
+      "SELECT id FROM private_market_references ORDER BY id LIMIT 1",
+    )
+  ).rows[0].id;
+  await db.exec(
+    `UPDATE private_market_references SET observed_on='2026-01-01' WHERE id=${parent}`,
+  );
+  const view = `INSERT INTO private_reference_tax_views(reference_id,assessed_on,tax_status,vat_rate,point_usd_kg,evidence_url,source_published_on,usage_permission_confirmed) VALUES(${parent},'2026-01-01','included',0.13,10,'https://example.test/evidence','2026-01-01',true)`;
+  await assert.rejects(db.exec(view.replace("2026-01-01", "2026-01-02")));
+  await db.exec(view);
+  await assert.rejects(
+    db.exec(
+      `UPDATE private_market_references SET observed_on=null WHERE id=${parent}`,
+    ),
+  );
+  await assert.rejects(db.exec(view));
+  await assert.rejects(
+    db.exec(
+      view.replace("'included'", "'excluded'").replace(",true)", ",false)"),
+    ),
+  );
+  await assert.rejects(
+    db.exec(
+      "UPDATE private_market_references SET vat_rate=0.13 WHERE tax_status='unknown'",
+    ),
+  );
+  await db.exec(
     `SELECT set_config('test.auth_uid','${owner}',false); SET ROLE authenticated`,
   );
   assert.equal(
     (await db.query("SELECT * FROM private_market_references")).rows.length,
+    2,
+  );
+  assert.equal(
+    (await db.query("SELECT * FROM private_reference_tax_views")).rows.length,
     1,
   );
+  await assert.rejects(db.exec(view));
   for (const sql of [
     insert,
     "UPDATE private_market_references SET point_usd_kg=999",
@@ -40,7 +77,12 @@ try {
     (await db.query("SELECT * FROM private_market_references")).rows.length,
     0,
   );
+  assert.equal(
+    (await db.query("SELECT * FROM private_reference_tax_views")).rows.length,
+    0,
+  );
   await db.exec("RESET ROLE; SET ROLE anon");
+  await assert.rejects(db.exec("SELECT * FROM private_reference_tax_views"));
   await assert.rejects(db.exec("SELECT * FROM private_market_references"));
   console.log(
     "PASS private references: owner-only reads, no client writes, no anonymous data, correct alloy basis, duplicate and verification guards",
