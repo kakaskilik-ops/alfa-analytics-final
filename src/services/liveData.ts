@@ -201,8 +201,8 @@ export function displayQuote(
   const currency = data?.displayCurrency ?? "USD",
     unit = data?.displayUnit ?? "kg";
   const conv = (v: number | null) =>
-    v === null ? null : convertPrice(v, "USD", currency, "kg", unit);
-  const factor = convertPrice(1, "USD", currency, "kg", unit);
+    v === null ? null : convertPrice(v, "USD", currency, q.metal.unit, unit);
+  const factor = convertPrice(1, "USD", currency, q.metal.unit, unit);
   if (factor === null)
     return {
       ...q,
@@ -216,7 +216,7 @@ export function displayQuote(
       series: [],
       dataStatus: "unavailable",
     };
-  const mass = UNIT_TO_KG[unit];
+  const mass = UNIT_TO_KG[unit] / UNIT_TO_KG[q.metal.unit];
   const series = q.series.flatMap((p) => {
     const rate = getHistoricalRate("USD", currency, p.date);
     return rate === null
