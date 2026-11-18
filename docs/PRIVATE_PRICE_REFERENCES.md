@@ -12,10 +12,10 @@ Regional selection requires an explicitly verified market basis. Supplier addres
 
 1. Run lint, typecheck/build, unit, PGlite/RLS, Deno and browser tests; require green PR CI and a fresh mergeable base.
 2. Record previous production SHA in a remote rollback tag and save database preflight metadata privately. This additive migration does not modify existing price rows or Auth records.
-3. Pause the frontend deployment workflow during the backend transition. Merge the reviewed PR, apply only the new migration to the ALFA project, load the owner's notes privately and deploy the protected `verify-owner-login` smoke function.
+3. Before merging frontend changes, apply only the new additive migration to the ALFA project, load the owner's notes privately and deploy the protected `verify-owner-login` smoke function. The previous frontend remains compatible throughout.
 4. Run the protected smoke: real owner-key login, genuine Auth session, owner RLS reads, expected row count, local test-session revocation. No key, token, identity or price leaves that function. Confirm anonymous direct access is denied and existing data counts unchanged.
-5. Align the local filename to the actual migration version through a small reviewed PR, without rewriting applied migration history. Resume and dispatch the existing Pages deployment, then check domain asset version and desktop/mobile gate.
-6. If backend verification fails, keep the frontend workflow paused and restore the previous smoke-function source. The additive table can remain closed behind RLS. If frontend verification fails, redeploy the rollback tag through the same workflow. Do not delete historical data or rewrite migrations.
+5. Align the local filename to the actual migration version in this PR, without rewriting applied migration history. After backend verification and green CI, merge the exact checked head and await the existing automatic Pages deployment. Check domain asset version and desktop/mobile gate.
+6. If backend verification fails, keep the frontend PR unmerged and restore the previous smoke-function source. The additive table can remain closed behind RLS. If frontend verification fails, redeploy the rollback tag through the same workflow. Do not delete historical data or rewrite migrations.
 
 ## Validation
 
