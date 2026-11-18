@@ -78,7 +78,14 @@ export default function MetalCard({
       </div>
 
       {quote.price === null && referencePrice ? (
-        <VerifiedPrice price={referencePrice} />
+        <>
+          {referencePrice.category === "supplier" && (
+            <p className="mt-5 text-sm text-ink-400">
+              Нет подтверждённой рыночной котировки
+            </p>
+          )}
+          <VerifiedPrice price={referencePrice} />
+        </>
       ) : (
         <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
           <div>

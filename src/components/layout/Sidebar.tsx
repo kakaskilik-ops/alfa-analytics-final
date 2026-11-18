@@ -12,7 +12,14 @@ import Logo from "@/components/brand/Logo";
 import { cn } from "@/lib/cn";
 
 export type Section =
-  "market" | "metals" | "sources" | "ai" | "analytics" | "news" | "monitor";
+  | "market"
+  | "metals"
+  | "sources"
+  | "ai"
+  | "analytics"
+  | "news"
+  | "monitor"
+  | "smm";
 
 const NAV_ITEMS: { id: Section; label: string; icon: LucideIcon }[] = [
   { id: "market", label: "Главная", icon: TrendingUp },
@@ -22,6 +29,7 @@ const NAV_ITEMS: { id: Section; label: string; icon: LucideIcon }[] = [
   { id: "monitor", label: "Монитор рынка", icon: Radar },
   { id: "sources", label: "Источники", icon: Database },
   { id: "ai", label: "ИИ-аналитик", icon: Bot },
+  { id: "smm", label: "SMM · личный кабинет", icon: Database },
 ];
 
 interface SidebarProps {

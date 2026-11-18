@@ -225,6 +225,12 @@ export default function MetalDetailDialog({
         <div className="space-y-6 p-5 md:p-6">
           {quote.price === null && referencePrices.length > 0 ? (
             <div className="space-y-4">
+              {referencePrices.every((r) => r.category === "supplier") && (
+                <p className="text-sm text-ink-400">
+                  Нет подтверждённой рыночной котировки. Ниже — отдельные
+                  предложения поставщиков.
+                </p>
+              )}
               {referencePrices.map((r) => (
                 <VerifiedPrice key={r.sourceName + r.specification} price={r} />
               ))}

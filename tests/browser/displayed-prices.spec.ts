@@ -88,12 +88,70 @@ test("all 13 cards show sourced numeric observations, with ferro floors kept dis
     ),
   ).toBe(true);
   await page.goto("http://127.0.0.1:5183/#market");
+  for (const id of [
+    "copper",
+    "aluminum",
+    "tin",
+    "zinc",
+    "tungsten",
+    "molybdenum",
+    "chromium",
+    "cobalt",
+    "zirconium",
+    "niobium",
+    "tantalum",
+    "ferromolybdenum",
+    "ferrotungsten",
+  ])
+    await expect(
+      page.getByLabel("Обзор цены: " + id, { exact: true }),
+    ).toBeVisible();
+  const overview = page.getByRole("region", {
+    name: "Цены на металлы",
+    exact: true,
+  });
+  await expect(
+    overview.getByLabel("Обзор цены: copper", { exact: true }),
+  ).toContainText("14,508");
+  await overview
+    .getByLabel("Единица цены", { exact: true })
+    .selectOption("ton");
+  await expect(
+    overview.getByLabel("Обзор цены: copper", { exact: true }),
+  ).toContainText("14 508");
+  await overview.getByRole("button", { name: "Азия", exact: true }).click();
+  await expect(overview).not.toContainText("14 508");
+  await expect(overview).toContainText(
+    "Подтверждённых рыночных котировок для этого региона нет",
+  );
+  await overview
+    .getByRole("button", { name: "Показать мировые ориентиры", exact: true })
+    .click();
+  await expect(
+    overview.getByLabel("Обзор цены: copper", { exact: true }),
+  ).toContainText("World Bank");
+  await expect(overview).not.toContainText("Rare Metals");
+  await overview
+    .getByRole("button", { name: "Все металлы", exact: true })
+    .click();
+  await expect(
+    overview.getByLabel("Обзор цены: ferromolybdenum", { exact: true }),
+  ).toContainText("не рыночная оценка");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
   await expect(
     page.getByRole("heading", {
       name: "Мировые ценовые ориентиры",
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByText("14 508 USD/т", { exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByRole("button", { name: "Месячная история: Медь" })
+      .getByText("14 508 USD/т", { exact: true }),
+  ).toBeVisible();
   expect(errors).toEqual([]);
 });

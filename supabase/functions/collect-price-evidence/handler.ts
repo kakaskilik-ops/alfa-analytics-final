@@ -62,7 +62,13 @@ export async function handler(req: Request) {
         const saved = await db
           .from("supplier_price_observations")
           .upsert(
-            prices.map((p) => ({ ...p, payload_id: payloadId })),
+            prices.map((p) => ({
+              ...p,
+              payload_id: payloadId,
+              tax_status:
+                p.source_id === "rare-metals-bid" ? "excluded" : "unknown",
+              vat_rate: null,
+            })),
             {
               onConflict:
                 "source_id,metal_id,specification,observed_on,original_price",

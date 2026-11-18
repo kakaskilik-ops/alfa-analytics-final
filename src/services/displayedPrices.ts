@@ -19,6 +19,9 @@ export interface DisplayedPrice {
   dateLabel?: string;
   notes?: string;
   lowerBound?: boolean;
+  taxStatus?: "included" | "excluded" | "unknown";
+  category?: "reference" | "supplier" | "market";
+  marketRegion?: "Europe" | "USA" | "Asia" | "global";
 }
 let lastSupplierPrices: DisplayedPrice[] = [];
 export function parseSupplierPriceRows(
@@ -89,6 +92,9 @@ export function parseSupplierPriceRows(
     const perKg = priceUsdKg(value, r.original_unit as "kg" | "lb");
     result.set(key, {
       metalId: metal,
+      category: "supplier",
+      taxStatus: r.source_id === "rare-metals-bid" ? "excluded" : "unknown",
+      marketRegion: r.region === "США" ? "USA" : "Europe",
       pricePerKg: perKg,
       pricePerTon: perKg * 1000,
       observedOn: day,
@@ -166,6 +172,9 @@ export async function fetchDisplayedPrices(): Promise<DisplayedPrice[]> {
   return [
     ...[...latest.values()].map((r) => ({
       metalId: r.metal_id,
+      category: "reference" as const,
+      taxStatus: "unknown" as const,
+      marketRegion: "global" as const,
       pricePerKg: r.price / 1000,
       pricePerTon: r.price,
       observedOn: r.period_start,

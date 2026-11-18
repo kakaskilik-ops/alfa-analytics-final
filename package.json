@@ -17,7 +17,7 @@
     "deploy:plan": "node scripts/prepare-deployment.mjs",
     "deploy:supabase": "node scripts/deploy-supabase.mjs",
     "test:monitor": "node --experimental-strip-types scripts/test-market-monitor.mjs",
-    "test:prices": "node --experimental-strip-types scripts/test-price-evidence.mjs"
+    "test:prices": "node --experimental-strip-types scripts/test-price-evidence.mjs && node scripts/test-tax-prices.mjs && node scripts/test-private-smm.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
