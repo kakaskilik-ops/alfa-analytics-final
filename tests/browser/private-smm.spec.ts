@@ -22,7 +22,7 @@ test("SMM private owner UI imports only after rights confirmation, groups tax vi
         token_type: "bearer",
         user,
       };
-      localStorage.setItem("sb-127-auth-token", JSON.stringify(token));
+      sessionStorage.setItem("alfa-owner-auth-v1", JSON.stringify(token));
       void owner;
     },
     { owner, user },
@@ -133,7 +133,7 @@ test("anonymous SMM route exposes login only and never requests private prices",
     });
   });
   await page.goto("http://127.0.0.1:5183/#smm");
-  await expect(page.getByLabel("Почта владельца")).toBeVisible();
+  await expect(page.getByLabel("Ключ доступа", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Импорт SMM JSON")).toHaveCount(0);
   expect(privateRequests).toEqual([]);
 });

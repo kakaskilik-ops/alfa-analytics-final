@@ -1,3 +1,4 @@
+import { installOwnerSession, ownerPermissionFixture } from "./auth-fixture";
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 // Real official API records → parser → isolated test Postgres → anon SELECT snapshot.
@@ -5,6 +6,7 @@ import { readFile } from "node:fs/promises";
 test("real monitor publications, filters, 39-cell coverage, news and mobile", async ({
   page,
 }) => {
+  await installOwnerSession(page);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const snapshot = JSON.parse(
@@ -14,6 +16,11 @@ test("real monitor publications, filters, 39-cell coverage, news and mobile", as
   await page.route("http://127.0.0.1:54321/**", async (route) => {
     const u = new URL(route.request().url());
     const table = u.pathname.split("/").pop() ?? "";
+    if (
+      route.request().method() !== "OPTIONS" &&
+      (await ownerPermissionFixture(route))
+    )
+      return;
     if (route.request().method() === "OPTIONS")
       return route.fulfill({
         status: 204,

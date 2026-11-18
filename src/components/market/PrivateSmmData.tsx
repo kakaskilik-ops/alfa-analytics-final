@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, signOutOwner } from "@/lib/supabase";
 import { METALS } from "@/data/metals";
 import {
   parsePrivateSmmImport,
@@ -14,8 +14,6 @@ export default function PrivateSmmData({
   const [userId, setUserId] = useState<string | null>(null);
   const [allowed, setAllowed] = useState(false);
   const [rows, setRows] = useState<SmmImportRow[]>([]);
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const [rights, setRights] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -82,36 +80,6 @@ export default function PrivateSmmData({
       alive = false;
     };
   }, [userId, revision]);
-  async function login(verify = false) {
-    if (!supabase || busy) return;
-    setBusy(true);
-    try {
-      const result = verify
-        ? await supabase.auth.verifyOtp({
-            email: email.trim(),
-            token: code.trim(),
-            type: "email",
-          })
-        : await supabase.auth.signInWithOtp({
-            email: email.trim(),
-            options: {
-              shouldCreateUser: false,
-              emailRedirectTo: location.origin + "/#smm",
-            },
-          });
-      setMessage(
-        result.error
-          ? "Не удалось выполнить вход. Проверьте почту/код и разрешённый адрес возврата Supabase Auth."
-          : verify
-            ? "Вход выполнен."
-            : "Письмо отправлено. Откройте ссылку входа или введите код, если он указан в письме. Адрес возврата должен быть alfammetal.ru.",
-      );
-    } catch {
-      setMessage("Сервис входа недоступен.");
-    } finally {
-      setBusy(false);
-    }
-  }
   async function upload(file: File | undefined) {
     if (!file || !supabase || !allowed || !rights || busy) return;
     setBusy(true);
@@ -178,7 +146,7 @@ export default function PrivateSmmData({
             onClick={() => {
               setRows([]);
               setAllowed(false);
-              void supabase?.auth.signOut();
+              void signOutOwner();
             }}
             className="text-sm text-ink-400"
           >
@@ -192,41 +160,9 @@ export default function PrivateSmmData({
         требуется официальный API и соответствующие права.
       </p>
       {!userId ? (
-        !compact && (
-          <div className="flex flex-wrap gap-3">
-            <input
-              aria-label="Почта владельца"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Электронная почта"
-              className="max-w-full rounded border border-ink-700 bg-ink-950 p-2"
-            />
-            <button
-              type="button"
-              disabled={busy || !email}
-              onClick={() => void login()}
-              className="text-brand-400"
-            >
-              Получить письмо входа
-            </button>
-            <input
-              aria-label="Код из письма"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Код, если указан в письме"
-              className="max-w-full rounded border border-ink-700 bg-ink-950 p-2"
-            />
-            <button
-              type="button"
-              disabled={busy || !code || !email}
-              onClick={() => void login(true)}
-              className="text-brand-400"
-            >
-              Войти по коду
-            </button>
-          </div>
-        )
+        <p className="text-sm text-ink-400">
+          Войдите в личный кабинет по ключу доступа.
+        </p>
       ) : allowed ? (
         <>
           {!compact && (

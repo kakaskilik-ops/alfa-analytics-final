@@ -1,3 +1,4 @@
+import { installOwnerSession, ownerPermissionFixture } from "./auth-fixture";
 import { test, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 // Synthetic fixtures used only by this test; no production database or paid API is contacted.
@@ -57,11 +58,17 @@ const news = [
 ];
 
 test("regional histories, FX, news and mobile rendering", async ({ page }) => {
+  await installOwnerSession(page);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("http://127.0.0.1:54321/**", async (route) => {
     const u = new URL(route.request().url()),
       table = u.pathname.split("/").at(-1);
+    if (
+      route.request().method() !== "OPTIONS" &&
+      (await ownerPermissionFixture(route))
+    )
+      return;
     if (route.request().method() === "OPTIONS")
       return route.fulfill({
         status: 204,

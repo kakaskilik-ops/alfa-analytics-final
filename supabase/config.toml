@@ -57,3 +57,11 @@ entrypoint = "./functions/collect-market-monitor/index.ts"
 [functions.collect-price-evidence]
 verify_jwt = false
 entrypoint = "./functions/collect-price-evidence/index.ts"
+
+[functions.owner-key-login]
+verify_jwt = false
+entrypoint = "./functions/owner-key-login/index.ts"
+
+[functions.verify-owner-login]
+verify_jwt = false
+entrypoint = "./functions/verify-owner-login/index.ts"

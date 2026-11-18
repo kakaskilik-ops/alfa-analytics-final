@@ -12,12 +12,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "node scripts/test-database.mjs",
-    "test:server": "deno test --config supabase/deno.json --allow-env supabase/functions/_shared/providers_test.ts supabase/functions/_shared/stage2_test.ts supabase/functions/_shared/automation_test.ts supabase/functions/_shared/free_ai_test.ts supabase/functions/collect-market-monitor/handler_test.ts",
+    "test:server": "deno test --config supabase/deno.json --allow-env supabase/functions/_shared/providers_test.ts supabase/functions/_shared/stage2_test.ts supabase/functions/_shared/automation_test.ts supabase/functions/_shared/free_ai_test.ts supabase/functions/collect-market-monitor/handler_test.ts supabase/functions/owner-key-login/handler_test.ts",
     "test:browser": "npm run test:monitor && npm run test:prices && playwright test",
     "deploy:plan": "node scripts/prepare-deployment.mjs",
     "deploy:supabase": "node scripts/deploy-supabase.mjs",
     "test:monitor": "node --experimental-strip-types scripts/test-market-monitor.mjs",
-    "test:prices": "node --experimental-strip-types scripts/test-price-evidence.mjs && node scripts/test-tax-prices.mjs && node scripts/test-private-smm.mjs"
+    "test:prices": "node --experimental-strip-types scripts/test-price-evidence.mjs && node scripts/test-tax-prices.mjs && node scripts/test-private-smm.mjs && node scripts/test-owner-login.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
