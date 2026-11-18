@@ -5,19 +5,13 @@ import { createPortal } from "react-dom";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Star, X } from "lucide-react";
 import DataStatusBadge from "@/components/common/DataStatusBadge";
-import Delta from "@/components/common/Delta";
 import PeriodSwitcher from "@/components/common/PeriodSwitcher";
 import PriceChart from "@/components/charts/PriceChart";
 import PriceConverter from "@/components/metals/PriceConverter";
 import PriceSummaryPanel from "@/components/metals/PriceSummaryPanel";
 import { CATEGORY_MAP } from "@/data/categories";
 import { SUPABASE_CONFIGURED } from "@/lib/supabase";
-import {
-  formatDateTime,
-  formatPercent,
-  formatPrice,
-  formatPriceChange,
-} from "@/lib/format";
+import { formatDateTime, formatPrice, formatPriceChange } from "@/lib/format";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { fetchQuotationRecords } from "@/services/database";
 import { displayQuote, buildHybridQuote } from "@/services/liveData";
