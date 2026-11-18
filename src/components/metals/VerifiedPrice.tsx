@@ -7,6 +7,11 @@ export default function VerifiedPrice({ price }: { price: DisplayedPrice }) {
       aria-label={"Подтверждённая цена: " + price.metalId}
       className="mt-5 min-w-0 space-y-2"
     >
+      {price.category === "supplier" && (
+        <div className="border-t border-ink-700 pt-3 text-xs text-amber-300">
+          Предложение поставщика · не рыночная оценка
+        </div>
+      )}
       <p className="text-2xl font-semibold tabular-nums">
         {price.lowerBound ? "от " : ""}
         {fmt(price.pricePerKg)} <span className="text-sm">USD/кг</span>
@@ -16,6 +21,13 @@ export default function VerifiedPrice({ price }: { price: DisplayedPrice }) {
         {fmt(price.pricePerTon)} USD/т
       </p>
       <p className="text-xs text-brand-400">{price.kind}</p>
+      <p className="text-xs text-ink-400">
+        {price.taxStatus === "excluded"
+          ? "НДС исключён"
+          : price.taxStatus === "included"
+            ? "НДС включён"
+            : "НДС не указан"}
+      </p>
       <p className="text-xs text-ink-300">
         Период: {price.dateLabel ?? price.observedOn.slice(0, 7)} ·{" "}
         {price.sourceName}

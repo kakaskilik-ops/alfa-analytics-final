@@ -1,4 +1,6 @@
 import ReferenceMarkets from "@/components/market/ReferenceMarkets";
+import MetalPriceOverview from "@/components/market/MetalPriceOverview";
+import PrivateSmmData from "@/components/market/PrivateSmmData";
 import CurrencyModule from "@/components/currency/CurrencyModule";
 import { useMemo, useState } from "react";
 import { Download, FileSpreadsheet } from "lucide-react";
@@ -106,9 +108,9 @@ export default function MarketPage({
         }
       />
 
-      {liveCount === 0 ? (
-        <ReferenceMarkets compact />
-      ) : (
+      <MetalPriceOverview onSelect={setSelectedMetal} />
+      <PrivateSmmData compact />
+      {liveCount > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MarketStatCard
             label="Индекс рынка металлов"
@@ -148,7 +150,7 @@ export default function MarketPage({
       )}
 
       <CurrencyModule />
-      {liveCount > 0 && <ReferenceMarkets compact />}
+      <ReferenceMarkets compact />
 
       <div className="mt-4 grid gap-4 xl:grid-cols-3">
         <Panel className="p-5 md:p-6 xl:col-span-2">

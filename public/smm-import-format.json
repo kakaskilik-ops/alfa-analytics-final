@@ -1,0 +1,22 @@
+{
+  "instructions": "Upload a JSON array. This describes fields only and contains no sample prices. Use observations you are entitled to store privately.",
+  "required_fields": {
+    "series_id": "SMM series identifier; unique product/grade/form/region/type",
+    "metal_id": "tungsten|molybdenum|ferromolybdenum|ferrotungsten|tin|zinc|copper|aluminum|chromium|cobalt|zirconium|niobium|tantalum",
+    "specification": "exact source specification",
+    "purity": "exact source purity, or explicitly 'not stated'",
+    "delivery_form": "exact physical form",
+    "region": "exact source region",
+    "price_type": "physical_spot|assessment|futures|premium|concentrate",
+    "assessed_at": "YYYY-MM-DD or ISO timestamp with timezone",
+    "date_precision": "day|timestamp|month",
+    "currency": "ISO code, e.g. USD or CNY",
+    "unit": "kg|ton|lb|mtu",
+    "tax_status": "included|excluded|unknown",
+    "vat_rate": "confirmed fraction, or null",
+    "minimum": "source number, or null",
+    "maximum": "source number, or null",
+    "mean": "source number, or null; do not fabricate midpoint",
+    "source_url": "original HTTPS URL on metal.com"
+  }
+}
