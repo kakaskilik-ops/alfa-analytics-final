@@ -83,6 +83,8 @@ export const supabase: SupabaseClient | null = SUPABASE_CONFIGURED
 export async function signOutOwner() {
   try {
     await supabase?.auth.signOut({ scope: "local" });
+  } catch {
+    // A failed server logout must not retain a browser session or reject an ignored UI promise.
   } finally {
     for (const name of [
       OWNER_SESSION_STORAGE_KEY,
