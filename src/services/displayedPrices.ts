@@ -324,7 +324,7 @@ export function parseOwnerReferences(
 }
 /** Private UI model only: never passed to quote calculations, model context or exports. */
 export async function fetchPrimaryPrices(): Promise<DisplayedPrice[]> {
-  const [rows, privatePrices] = await Promise.all([
+  const [publicResult, privateResult] = await Promise.allSettled([
     fetchDisplayedPrices(),
     supabase
       ? supabase
@@ -336,11 +336,19 @@ export async function fetchPrimaryPrices(): Promise<DisplayedPrice[]> {
           .limit(500)
       : Promise.resolve(null),
   ]);
+  if (privateResult.status === "rejected")
+    throw Error(
+      "Не удалось загрузить частные исторические ориентиры. Повторите попытку.",
+    );
+  const privatePrices = privateResult.value;
   if (privatePrices?.error)
     throw Error(
       "Не удалось загрузить частные исторические ориентиры. Повторите попытку.",
     );
   const owner = parseOwnerReferences(privatePrices?.data ?? []);
+  if (publicResult.status === "rejected" && !owner.length)
+    throw publicResult.reason;
+  const rows = publicResult.status === "fulfilled" ? publicResult.value : [];
   // Preserve public monthly references as a separate source; choose per region before precedence.
   return [...owner, ...rows.filter((r) => r.category !== "supplier")];
 }
