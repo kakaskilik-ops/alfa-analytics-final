@@ -1,8 +1,10 @@
+import { installOwnerSession, ownerPermissionFixture } from "./auth-fixture";
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 test("all 13 cards show sourced numeric observations, with ferro floors kept distinct", async ({
   page,
 }) => {
+  await installOwnerSession(page);
   const suppliers = JSON.parse(
     await readFile("work/prices/test-public.json", "utf8"),
   );
@@ -13,6 +15,11 @@ test("all 13 cards show sourced numeric observations, with ferro floors kept dis
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("http://127.0.0.1:54321/**", async (route) => {
     const table = new URL(route.request().url()).pathname.split("/").pop();
+    if (
+      route.request().method() !== "OPTIONS" &&
+      (await ownerPermissionFixture(route))
+    )
+      return;
     if (route.request().method() === "OPTIONS")
       return route.fulfill({
         status: 204,

@@ -29,8 +29,48 @@ function validConfig(): boolean {
   }
 }
 export const SUPABASE_CONFIGURED = validConfig();
+export const OWNER_SESSION_STORAGE_KEY = "alfa-owner-auth-v1";
+const memorySession = new Map<string, string>();
+const ownerSessionStorage = {
+  getItem(name: string) {
+    try {
+      return sessionStorage.getItem(name) ?? memorySession.get(name) ?? null;
+    } catch {
+      return memorySession.get(name) ?? null;
+    }
+  },
+  setItem(name: string, value: string) {
+    try {
+      sessionStorage.setItem(name, value);
+    } catch {
+      memorySession.set(name, value);
+    }
+  },
+  removeItem(name: string) {
+    try {
+      sessionStorage.removeItem(name);
+    } catch {
+      /* memory fallback */
+    }
+    memorySession.delete(name);
+  },
+};
+// Retire only this project's old persistent browser session; private data is not stored here.
+if (SUPABASE_CONFIGURED) {
+  try {
+    localStorage.removeItem(
+      "sb-" + new URL(url!).hostname.split(".")[0] + "-auth-token",
+    );
+  } catch {
+    /* storage may be unavailable */
+  }
+}
 export const supabase: SupabaseClient | null = SUPABASE_CONFIGURED
   ? createClient(url!, key!, {
+      auth: {
+        storage: ownerSessionStorage,
+        storageKey: OWNER_SESSION_STORAGE_KEY,
+      },
       global: {
         fetch: (input, init) =>
           fetch(input, {
@@ -40,6 +80,20 @@ export const supabase: SupabaseClient | null = SUPABASE_CONFIGURED
       },
     })
   : null;
+export async function signOutOwner() {
+  try {
+    await supabase?.auth.signOut({ scope: "local" });
+  } catch {
+    // A failed server logout must not retain a browser session or reject an ignored UI promise.
+  } finally {
+    for (const name of [
+      OWNER_SESSION_STORAGE_KEY,
+      OWNER_SESSION_STORAGE_KEY + "-user",
+      OWNER_SESSION_STORAGE_KEY + "-code-verifier",
+    ])
+      ownerSessionStorage.removeItem(name);
+  }
+}
 /** Edge analysis needs a longer deadline than small database reads. Credentials stay scoped to the configured Supabase URL. */
 export async function invokeAnalysis(
   body: unknown,

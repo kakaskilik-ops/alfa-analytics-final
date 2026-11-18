@@ -1,12 +1,14 @@
+import { installOwnerSession, ownerPermissionFixture } from "./auth-fixture";
 import { test, expect } from "@playwright/test";
 import {
   issueGuestChallenge,
   verifyGuestChallenge,
 } from "../../supabase/functions/_shared/guestAccess";
 // Only test fixtures. No production DB or Groq requests.
-test("guest chat solves proof without login and shows a Russian quota message", async ({
+test("AI guest proof and Russian quota handling remain intact behind the owner site gate", async ({
   page,
 }) => {
+  await installOwnerSession(page);
   let calls = 0;
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -19,6 +21,11 @@ test("guest chat solves proof without login and shows a Russian quota message", 
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Methods": "POST,GET,OPTIONS",
       };
+    if (
+      route.request().method() !== "OPTIONS" &&
+      (await ownerPermissionFixture(route))
+    )
+      return;
     if (r.method() === "OPTIONS")
       return route.fulfill({ status: 204, headers: cors });
     if (table === "ai-status")
