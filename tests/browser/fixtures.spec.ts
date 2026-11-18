@@ -191,6 +191,9 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
     page.getByRole("button", { name: "7 дней", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await page
+    .getByText("Отдельные месячные ориентиры World Bank", { exact: true })
+    .click();
+  await page
     .getByRole("heading", { name: "Мировые ценовые ориентиры", exact: true })
     .waitFor();
   await page
@@ -231,12 +234,25 @@ test("regional histories, FX, news and mobile rendering", async ({ page }) => {
   await page
     .getByRole("combobox", { name: "Валюта и единица" })
     .selectOption("USD/ton");
-  await page.getByText("12 000,00 USD", { exact: false }).first().waitFor();
   await page
-    .getByRole("combobox", { name: "Валюта и единица" })
-    .selectOption("EUR/kg");
-  await page.getByText("10,80 EUR", { exact: false }).first().waitFor();
-  await page.getByText("Тестовый курс EUR", { exact: false }).first().waitFor();
+    .getByLabel("Регион ориентиров", { exact: true })
+    .selectOption("USA");
+  await page
+    .getByLabel("Единица ориентира", { exact: true })
+    .selectOption("ton");
+  await expect(
+    page.getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toContainText("12 000");
+  await page
+    .getByRole("button", { name: "Открыть карточку: Вольфрам", exact: true })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("combobox", { name: "Валюта", exact: true })
+    .selectOption("EUR");
+  await expect(page.getByRole("dialog")).toContainText("10,80");
+  await expect(page.getByRole("dialog")).toContainText("Тестовый курс EUR");
+  await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Новости", exact: true }).click();
   await page
     .getByRole("heading", { name: "Рост производства вольфрама", exact: true })

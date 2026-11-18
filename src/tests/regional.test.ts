@@ -124,3 +124,30 @@ it("does not present highly dispersed regional samples as a market estimate", ()
   }));
   expect(compareRegionalPrices(rows).estimates).toEqual([]);
 });
+
+it("does not double-convert a metal catalogued in tonnes", () => {
+  const metal = { ...METALS[0], unit: "ton" as const };
+  const quote = {
+    ...live("США", 12),
+    history: [
+      { date: now - 86400000, price: 10 },
+      { date: now - 1000, price: 12 },
+    ],
+  };
+  const raw = buildHybridQuote(metal, "1M", new Date(now), quote);
+  expect(raw.price).toBe(12000);
+  const kg = displayQuote(raw, {
+    ...market([]),
+    displayUnit: "kg",
+    displayCurrency: "USD",
+  });
+  expect(kg.price).toBe(12);
+  expect(kg.series.map((p) => p.price)).toEqual([10, 12]);
+  const tonnes = displayQuote(raw, {
+    ...market([]),
+    displayUnit: "ton",
+    displayCurrency: "USD",
+  });
+  expect(tonnes.price).toBe(12000);
+  expect(tonnes.series.map((p) => p.price)).toEqual([10000, 12000]);
+});

@@ -1,3 +1,4 @@
+import ReferencePriceControls from "@/components/market/ReferencePriceControls";
 import { useMemo, useState } from "react";
 import SearchInput from "@/components/common/SearchInput";
 import PageHeader from "@/components/layout/PageHeader";
@@ -7,12 +8,16 @@ import { CATEGORIES } from "@/data/categories";
 import { METALS } from "@/data/metals";
 import { cn } from "@/lib/cn";
 import type { FavoritesState } from "@/hooks/useFavorites";
-import { UNIT_TO_KG } from "@/services/quoteValidation";
 import { buildHybridQuotes } from "@/services/liveData";
 import type { LiveMarketData } from "@/services/liveData";
 import type { Metal, MetalCategoryId } from "@/types/market";
 import { useAsyncData } from "@/hooks/useAsyncData";
-import { fetchDisplayedPrices } from "@/services/displayedPrices";
+import {
+  fetchPrimaryPrices,
+  selectPrimaryPrices,
+  regionalPriceReferences,
+  type ReferenceScope,
+} from "@/services/displayedPrices";
 
 type CategoryFilter = MetalCategoryId | "all";
 
@@ -30,18 +35,25 @@ export default function MetalsPage({
   favorites,
   liveData,
 }: MetalsPageProps) {
+  const [referenceScope, setReferenceScope] = useState<ReferenceScope>("all");
+  const [referenceUnit, setReferenceUnit] = useState<"kg" | "ton">("kg");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("name");
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState<Metal | null>(null);
   const priceData = useAsyncData(
-    fetchDisplayedPrices,
+    fetchPrimaryPrices,
     "displayed-metal-prices",
     true,
   );
-  const references =
-    priceData.state.status === "ready" ? priceData.state.data : [];
+  const references = selectPrimaryPrices(
+    [
+      ...(priceData.state.status === "ready" ? priceData.state.data : []),
+      ...regionalPriceReferences(liveData),
+    ],
+    referenceScope,
+  );
 
   const quotes = useMemo(
     () => buildHybridQuotes(METALS, "1M", updatedAt, liveData),
@@ -68,14 +80,10 @@ export default function MetalsPage({
     })
     .sort((a, b) =>
       sort === "price"
-        ? (b.price === null
-            ? (references.find((r) => r.metalId === b.metal.id)?.pricePerKg ??
-              -Infinity)
-            : b.price / UNIT_TO_KG[b.metal.unit]) -
-          (a.price === null
-            ? (references.find((r) => r.metalId === a.metal.id)?.pricePerKg ??
-              -Infinity)
-            : a.price / UNIT_TO_KG[a.metal.unit])
+        ? (references.find((r) => r.metalId === b.metal.id)?.pricePerKg ??
+            -Infinity) -
+          (references.find((r) => r.metalId === a.metal.id)?.pricePerKg ??
+            -Infinity)
         : a.metal.nameRu.localeCompare(b.metal.nameRu, "ru"),
     );
 
@@ -169,6 +177,19 @@ export default function MetalsPage({
         </div>
       </div>
 
+      <div className="mb-4">
+        <ReferencePriceControls
+          scope={referenceScope}
+          onScope={setReferenceScope}
+          unit={referenceUnit}
+          onUnit={setReferenceUnit}
+        />
+        {priceData.state.status === "error" && (
+          <p role="alert" className="mt-2 text-sm text-amber-300">
+            {priceData.state.message}
+          </p>
+        )}
+      </div>
       {visibleQuotes.length === 0 ? (
         <p className="rounded-2xl border border-ink-800 bg-ink-900/70 px-5 py-12 text-center text-sm text-ink-400">
           {emptyText}
@@ -179,6 +200,8 @@ export default function MetalsPage({
             <MetalCard
               key={quote.metal.id}
               quote={quote}
+              referencesOnly
+              referenceUnit={referenceUnit}
               referencePrice={references.find(
                 (r) => r.metalId === quote.metal.id,
               )}
@@ -193,6 +216,8 @@ export default function MetalsPage({
       {selectedMetal && (
         <MetalDetailDialog
           metal={selectedMetal}
+          referenceScope={referenceScope}
+          referenceUnit={referenceUnit}
           initialPeriod="1M"
           updatedAt={updatedAt}
           isFavorite={favorites.isFavorite(selectedMetal.id)}

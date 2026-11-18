@@ -1,7 +1,13 @@
 import { isRegion } from "../../supabase/functions/_shared/universe";
 import { METALS, METAL_MAP } from "@/data/metals";
 import { buildQuote } from "@/services/market";
-import type { Metal, MetalQuote, PeriodKey, DataStatus } from "@/types/market";
+import type {
+  Metal,
+  MetalQuote,
+  PeriodKey,
+  DataStatus,
+  UnitCode,
+} from "@/types/market";
 import { fetchAllLiveQuotations, fetchPriceHistory } from "@/services/database";
 import { loadLiveRates } from "@/services/currency";
 import {
@@ -201,8 +207,16 @@ export function displayQuote(
   const currency = data?.displayCurrency ?? "USD",
     unit = data?.displayUnit ?? "kg";
   const conv = (v: number | null) =>
-    v === null ? null : convertPrice(v, "USD", currency, "kg", unit);
-  const factor = convertPrice(1, "USD", currency, "kg", unit);
+    v === null
+      ? null
+      : convertPrice(v, "USD", currency, q.metal.unit as UnitCode, unit);
+  const factor = convertPrice(
+    1,
+    "USD",
+    currency,
+    q.metal.unit as UnitCode,
+    unit,
+  );
   if (factor === null)
     return {
       ...q,
@@ -216,7 +230,7 @@ export function displayQuote(
       series: [],
       dataStatus: "unavailable",
     };
-  const mass = UNIT_TO_KG[unit];
+  const mass = UNIT_TO_KG[unit] / UNIT_TO_KG[q.metal.unit];
   const series = q.series.flatMap((p) => {
     const rate = getHistoricalRate("USD", currency, p.date);
     return rate === null

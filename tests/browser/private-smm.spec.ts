@@ -108,7 +108,7 @@ test("SMM private owner UI imports only after rights confirmation, groups tax vi
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.goto("http://127.0.0.1:5183/#market");
+  await page.reload();
   await expect(
     page.getByRole("region", { name: "SMM Market Data — приватно" }),
   ).toContainText("16 236,53");
