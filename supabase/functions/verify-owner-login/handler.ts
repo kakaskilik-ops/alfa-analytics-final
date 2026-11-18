@@ -57,7 +57,12 @@ export async function handler(req: Request): Promise<Response> {
       db.rpc("site_owner_id"),
       client.rpc("has_smm_owner_access"),
       client.from("private_smm_observations").select("id").limit(1),
-      client.from("private_market_references").select("metal_id").limit(500),
+      client
+        .from("private_market_references")
+        .select(
+          "metal_id,assessment_kind,original_currency,original_unit,private_reference_tax_views(assessed_on,tax_status)",
+        )
+        .limit(500),
     ]);
     passed =
       !user.error &&

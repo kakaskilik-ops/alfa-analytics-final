@@ -5,6 +5,31 @@ import { METAL_IDS } from "../../supabase/functions/_shared/universe";
 // Synthetic private fixture ONLY. Owner's actual historical prices are not committed or seeded by tests.
 const snapshots = METAL_IDS.map((id, i) => ({
   metal_id: id,
+  assessment_kind: id === "ferromolybdenum" ? "single_trade" : "unknown",
+  vat_rate: null,
+  tax_status_verified: false,
+  original_currency: "USD",
+  original_unit: "kg",
+  publisher_currency: "CNY",
+  publisher_unit: "ton",
+  series_context:
+    "TEST_ONLY publisher metadata; original snapshot date unknown",
+  private_reference_tax_views:
+    id === "tungsten"
+      ? [
+          {
+            tax_status: "included",
+            assessed_on: "2026-01-01",
+            vat_rate: 0.13,
+            minimum_usd_kg: 113,
+            maximum_usd_kg: 135.6,
+            point_usd_kg: null,
+            evidence_url: "https://example.test/published",
+            source_published_on: "2026-01-01",
+            usage_permission_confirmed: true,
+          },
+        ]
+      : [],
   minimum_usd_kg: id === "tungsten" ? 100 : null,
   maximum_usd_kg: id === "tungsten" ? 120 : null,
   point_usd_kg: id === "tungsten" ? null : i + 10,
@@ -18,7 +43,7 @@ const snapshots = METAL_IDS.map((id, i) => ({
   market_region: id === "ferromolybdenum" ? "Europe" : "Asia",
   region_verified: id === "ferromolybdenum",
   basis_description: "TEST_ONLY market basis",
-  observed_on: null,
+  observed_on: id === "tungsten" ? "2026-01-01" : null,
   source_published_on: null,
   claimed_publisher: "TEST_ONLY",
   evidence_url: null,
@@ -160,6 +185,18 @@ test("13 owner historical references match lower quotations and catalogue; buyer
   await page
     .getByLabel("Регион ориентиров", { exact: true })
     .selectOption("all");
+  await page
+    .getByLabel("Налоговое представление: tungsten", { exact: true })
+    .selectOption("included");
+  await expect(
+    page.getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toContainText("113 000–135 600");
+  await expect(
+    page.getByLabel("Ценовой ориентир: tungsten", { exact: true }),
+  ).toContainText("Ставка НДС: 13%");
+  await page
+    .getByLabel("Налоговое представление: tungsten", { exact: true })
+    .selectOption("primary");
   await expect(
     page.getByRole("button", { name: "CSV", exact: true }),
   ).toBeDisabled();
